@@ -3,6 +3,7 @@ package com.urbanclean.service;
 import com.urbanclean.entity.Report;
 import com.urbanclean.entity.Task;
 import com.urbanclean.entity.TaskState;
+import com.urbanclean.exception.custom.InvalidStateTransitionException;
 import com.urbanclean.exception.custom.ResourceNotFoundException;
 import com.urbanclean.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -97,7 +98,7 @@ public class TaskService {
      */
     private void validateStateTransition(TaskState currentState, TaskState newState) {
         if (currentState == newState) {
-            throw new IllegalArgumentException(
+            throw new InvalidStateTransitionException(
                 String.format("Task is already in state: %s", currentState)
             );
         }
@@ -121,7 +122,7 @@ public class TaskService {
         }
 
         if (!isValidTransition) {
-            throw new IllegalArgumentException(
+            throw new InvalidStateTransitionException(
                 String.format("Invalid state transition: %s -> %s", currentState, newState)
             );
         }
