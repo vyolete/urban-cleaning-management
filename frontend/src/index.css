@@ -8,14 +8,36 @@
 :root {
   /* Color palette */
   --primary-color: #3498db;
+  --primary-hover: #2980b9;
   --secondary-color: #2c3e50;
+  --secondary-hover: #1a252f;
   --success-color: #27ae60;
+  --success-bg: #d4edda;
   --warning-color: #f39c12;
   --danger-color: #e74c3c;
+  --error-color: #e74c3c;
+  --error-bg: #f8d7da;
+  --error-hover: #c0392b;
+  --info-color: #0c5460;
+  --info-bg: #d1ecf1;
   --light-gray: #ecf0f1;
   --dark-gray: #7f8c8d;
   --white: #ffffff;
   --black: #2c3e50;
+  
+  /* Text colors */
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  
+  /* Background colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #ecf0f1;
+  
+  /* Border colors */
+  --border-color: #dcdcdc;
+  
+  /* Disabled state */
+  --disabled-color: #95a5a6;
 
   /* Spacing */
   --spacing-xs: 0.25rem;

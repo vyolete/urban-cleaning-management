@@ -459,7 +459,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - _Requirements: 1.1_
 
 - [ ] 18. Implement citizen interface
-  - [ ] 18.1 Create geolocation hook
+  - [x] 18.1 Create geolocation hook
     - Create useGeolocation hook using navigator.geolocation API
     - Return location, error, and loading states
     - _Requirements: 3.1_
