@@ -230,6 +230,12 @@ function ReportForm({ onSuccess, onError }) {
             </div>
           ) : (
             <div className="manual-location">
+              <div className="help-box">
+                <p><strong>📍 Coordenadas de prueba para Madrid:</strong></p>
+                <p>Latitud: <code>40.4168</code> | Longitud: <code>-3.7038</code></p>
+                <p className="small-text">Área válida: Lat 40.3-40.6, Lon -3.9 a -3.5</p>
+              </div>
+              
               <div className="form-group">
                 <label htmlFor="latitude">Latitud *</label>
                 <input
@@ -241,7 +247,7 @@ function ReportForm({ onSuccess, onError }) {
                   step="0.000001"
                   min="-90"
                   max="90"
-                  placeholder="Ej: 40.416775"
+                  placeholder="40.4168"
                   required
                 />
               </div>
@@ -257,7 +263,7 @@ function ReportForm({ onSuccess, onError }) {
                   step="0.000001"
                   min="-180"
                   max="180"
-                  placeholder="Ej: -3.703790"
+                  placeholder="-3.7038"
                   required
                 />
               </div>

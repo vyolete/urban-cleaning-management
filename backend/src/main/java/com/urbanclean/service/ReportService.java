@@ -69,7 +69,8 @@ public class ReportService {
                 .build();
 
         Report savedReport = reportRepository.save(report);
-        log.info("Report created: {} by user: {}", savedReport.getId(), submitter.getUsername());
+        log.info("Report created: {} by user: {}", savedReport.getId(), 
+                submitter != null ? submitter.getUsername() : "Anonymous");
 
         // Check for duplicates
         Optional<Task> parentTask = deduplicationService.checkForDuplicates(savedReport);

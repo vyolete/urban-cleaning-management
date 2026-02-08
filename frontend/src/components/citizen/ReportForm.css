@@ -96,9 +96,43 @@
 
 /* Manual Location */
 .manual-location {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
+}
+
+.manual-location .help-box {
+  background-color: #e3f2fd;
+  border-left: 4px solid var(--primary-color);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.manual-location .help-box p {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.manual-location .help-box code {
+  background-color: #fff;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.manual-location .help-box .small-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+.manual-location .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 @media (max-width: 640px) {
