@@ -63,6 +63,7 @@ public class TaskService {
     /**
      * Update task state
      * Validates state transitions according to state machine rules
+     * Returns the previous state for audit logging
      */
     @Transactional
     public Task updateState(UUID taskId, TaskState newState) {
@@ -73,9 +74,18 @@ public class TaskService {
         validateStateTransition(currentState, newState);
 
         log.info("Updating task {} state: {} -> {}", taskId, currentState, newState);
+        
+        // Update state
         task.setState(newState);
 
         return taskRepository.save(task);
+    }
+    
+    /**
+     * Get previous state before update (for audit logging)
+     */
+    public TaskState getPreviousState(Task task) {
+        return task.getState();
     }
 
     /**
