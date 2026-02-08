@@ -1,5 +1,33 @@
 # Guía de Solución de Problemas
 
+## Estado del Sistema
+
+### ✅ Despliegue Exitoso (Última actualización: 2026-02-08)
+
+El sistema está completamente funcional con las siguientes características:
+
+- **Backend**: Spring Boot corriendo en puerto 8080 (healthy)
+- **Frontend**: React + Nginx corriendo en puerto 3000 (healthy)
+- **Base de datos**: PostgreSQL con PostGIS en puerto 5432 (healthy)
+- **Reportes anónimos**: Habilitados sin necesidad de autenticación
+- **Usuarios de prueba**: Creados y listos para usar
+
+### Acceso al Sistema
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080/api
+- **Health Check**: http://localhost:8080/actuator/health
+
+### Usuarios de Prueba
+
+| Usuario | Contraseña | Rol |
+|---------|-----------|-----|
+| ciudadano | admin123 | ROLE_CIUDADANO |
+| tecnico | admin123 | ROLE_TECNICO |
+| admin | admin123 | ROLE_ADMIN |
+
+---
+
 ## Problema: Geolocalización no funciona
 
 ### Causa
@@ -47,6 +75,15 @@ Para producción, necesitarás:
    - Encuentra el sitio y selecciona "Permitir"
 
 ## Problema: Error al enviar reporte
+
+### ✅ Solución Implementada
+
+El sistema ahora permite reportes anónimos sin necesidad de autenticación. Los cambios realizados incluyen:
+
+1. **SecurityConfig**: Endpoint `/api/reports` marcado como público
+2. **ReportController**: Eliminada anotación `@PreAuthorize` del método POST
+3. **Report Entity**: Campo `submitter` ahora es nullable
+4. **ReportService**: Manejo de usuarios anónimos (muestra "Anónimo" cuando no hay usuario)
 
 ### Verificar que el backend esté funcionando
 
@@ -96,6 +133,29 @@ El directorio de uploads debe existir y tener permisos de escritura:
 ```bash
 # En el contenedor backend
 docker exec -it urbanclean-backend ls -la /uploads
+```
+
+## Problema: Frontend muestra estado "unhealthy"
+
+### ✅ Solución Implementada
+
+El health check del frontend fue corregido para usar `127.0.0.1` en lugar de `localhost` para evitar problemas con IPv6.
+
+**Cambio en docker-compose.yml**:
+```yaml
+healthcheck:
+  test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:80/health || exit 1"]
+  interval: 30s
+  timeout: 3s
+  retries: 3
+  start_period: 10s
+```
+
+### Verificar estado de contenedores
+
+```bash
+docker ps
+# Todos los contenedores deben mostrar (healthy)
 ```
 
 ## Problema: No puedo iniciar sesión
@@ -178,6 +238,11 @@ Si los problemas persisten:
 Puedes probar los endpoints directamente con curl:
 
 ```bash
+# Crear reporte anónimo (sin autenticación)
+curl -X POST http://localhost:8080/api/reports \
+  -F "data={\"latitude\":40.4168,\"longitude\":-3.7038,\"category\":\"BASURA_ACUMULADA\",\"description\":\"Reporte de prueba\"};type=application/json" \
+  -F "photo=@/path/to/image.jpg"
+
 # Registrar usuario
 curl -X POST http://localhost:8080/api/auth/register \
   -H "Content-Type: application/json" \
@@ -197,9 +262,19 @@ curl -X POST http://localhost:8080/api/auth/login \
     "password": "admin123"
   }'
 
-# Crear reporte (necesitas el token del login)
+# Crear reporte autenticado (necesitas el token del login)
 curl -X POST http://localhost:8080/api/reports \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -F "data={\"latitude\":40.4168,\"longitude\":-3.7038,\"category\":\"BASURA_ACUMULADA\",\"description\":\"Test report\"}" \
+  -F "data={\"latitude\":40.4168,\"longitude\":-3.7038,\"category\":\"BASURA_ACUMULADA\",\"description\":\"Test report\"};type=application/json" \
   -F "photo=@/path/to/image.jpg"
 ```
+
+## Historial de Cambios
+
+### 2026-02-08: Despliegue Exitoso
+- ✅ Corregidos 13+ errores de compilación del backend
+- ✅ Implementados reportes anónimos sin autenticación
+- ✅ Corregido health check del frontend (IPv6 → IPv4)
+- ✅ Todos los contenedores funcionando correctamente (healthy)
+- ✅ Usuarios de prueba creados
+- ✅ Sistema completamente funcional y desplegado
