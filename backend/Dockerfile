@@ -17,8 +17,8 @@ RUN mvn clean package -DskipTests -B
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-# Create non-root user for security
-RUN addgroup -S spring && adduser -S spring -G spring
+# Create non-root user for security (Debian/Ubuntu commands)
+RUN groupadd -r spring && useradd -r -g spring spring
 
 # Create uploads directory with proper permissions
 RUN mkdir -p /uploads && chown -R spring:spring /uploads
