@@ -38,7 +38,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
      * @param report the report associated with the task
      * @return optional containing the task
      */
-    @Query("SELECT t FROM Task t WHERE t.primaryReport.id = :reportId")
+    @Query("SELECT DISTINCT t FROM Task t WHERE t.primaryReport.id = :reportId")
     Optional<Task> findByReportId(@Param("reportId") UUID reportId);
     
     /**
