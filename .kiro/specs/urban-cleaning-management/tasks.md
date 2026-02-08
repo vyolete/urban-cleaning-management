@@ -40,7 +40,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 40: Referential integrity enforcement**
     - **Validates: Requirements 10.7**
 
-- [-] 3. Implement authentication and authorization
+- [x] 3. Implement authentication and authorization
   - [x] 3.1 Create security configuration
     - Configure BCryptPasswordEncoder bean
     - Configure Spring Security filter chain with JWT authentication
@@ -90,7 +90,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - Test registration creates user with hashed password
     - _Requirements: 1.1, 1.2_
 
-- [ ] 4. Implement role-based access control
+- [x] 4. Implement role-based access control
   - [x] 4.1 Create JWT authentication filter
     - Create `JwtAuthenticationFilter` extending OncePerRequestFilter
     - Extract JWT from Authorization header
@@ -114,11 +114,11 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 7: Token role validation on all protected endpoints**
     - **Validates: Requirements 2.3**
 
-- [ ] 5. Checkpoint - Ensure authentication and authorization tests pass
+- [x] 5. Checkpoint - Ensure authentication and authorization tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Implement report submission module
-  - [ ] 6.1 Create file storage service
+- [-] 6. Implement report submission module
+  - [x] 6.1 Create file storage service
     - Create `FileStorageService` to handle photo uploads
     - Implement file type validation (JPEG, PNG only)
     - Implement file size validation (max 5MB)
@@ -129,7 +129,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 13: Photo file validation**
     - **Validates: Requirements 3.6**
 
-  - [ ] 6.3 Create geofencing service
+  - [x] 6.3 Create geofencing service
     - Create `GeofencingService` to validate coordinates
     - Load geofencing boundaries from configuration
     - Use PostGIS ST_Contains to check if point is within boundaries
@@ -139,7 +139,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 10: Geofencing validation**
     - **Validates: Requirements 3.2, 3.3**
 
-  - [ ] 6.5 Create report service
+  - [x] 6.5 Create report service
     - Create `ReportService` with createReport method
     - Validate required fields (latitude, longitude, category, description)
     - Validate coordinates using GeofencingService
@@ -155,7 +155,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 9: Multipart report acceptance**
     - **Validates: Requirements 3.1**
 
-  - [ ] 6.8 Create report controller
+  - [x] 6.8 Create report controller
     - Create `ReportController` with POST /api/reports endpoint
     - Accept multipart request with @RequestPart for JSON and photo
     - Secure endpoint with @PreAuthorize for authenticated users
