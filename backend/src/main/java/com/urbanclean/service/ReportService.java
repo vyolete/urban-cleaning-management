@@ -66,6 +66,7 @@ public class ReportService {
                 .description(request.getDescription())
                 .photoUrl(photoUrl)
                 .isDuplicate(false)
+                .createdAt(LocalDateTime.now())  // Set explicitly for deduplication logic
                 .build();
 
         Report savedReport = reportRepository.save(report);
