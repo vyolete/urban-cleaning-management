@@ -157,7 +157,7 @@ public class DeduplicationService {
         
         // No existing parent task found, try to find task from the first nearby report
         Report firstReport = nearbyReports.get(0);
-        Optional<Task> existingTask = taskRepository.findByReport(firstReport);
+        Optional<Task> existingTask = taskRepository.findByReportId(firstReport.getId());
         
         if (existingTask.isPresent()) {
             Task parentTask = existingTask.get();
@@ -187,7 +187,7 @@ public class DeduplicationService {
         
         // No existing parent task found, try to find task from the first nearby report
         Report firstReport = nearbyReports.get(0);
-        Optional<Task> existingTask = taskRepository.findByReport(firstReport);
+        Optional<Task> existingTask = taskRepository.findByReportId(firstReport.getId());
         
         if (existingTask.isPresent()) {
             Task parentTask = existingTask.get();

@@ -34,10 +34,19 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
     List<Task> findByState(TaskState state);
 
     /**
-     * Find task by report
+     * Find task by primary report
      * @param report the report associated with the task
      * @return optional containing the task
      */
+    @Query("SELECT t FROM Task t WHERE t.primaryReport.id = :reportId")
+    Optional<Task> findByReportId(@Param("reportId") UUID reportId);
+    
+    /**
+     * Find task by report (deprecated - use findByReportId instead)
+     * @param report the report associated with the task
+     * @return optional containing the task
+     */
+    @Deprecated
     @Query("SELECT t FROM Task t WHERE t.primaryReport = :report")
     Optional<Task> findByReport(@Param("report") com.urbanclean.entity.Report report);
 
