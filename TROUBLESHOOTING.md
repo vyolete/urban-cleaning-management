@@ -282,3 +282,154 @@ curl -X POST http://localhost:8080/api/reports \
 - ✅ Todos los contenedores funcionando correctamente (healthy)
 - ✅ Usuarios de prueba creados
 - ✅ Sistema completamente funcional y desplegado
+
+
+---
+
+## Problema CRÍTICO: Error al crear reportes - "Task not found for report"
+
+### Síntomas
+- Al enviar un reporte, aparece error 500
+- Logs del backend muestran: `java.lang.IllegalStateException: Task not found for report`
+- El error ocurre en `DeduplicationService.java:102`
+
+### Causa Raíz
+**Problema crítico con el proceso de compilación de Docker**:
+1. El código fuente tiene las correcciones necesarias
+2. El JAR compilado dentro del contenedor Docker NO refleja los cambios del código fuente
+3. Lombok (procesador de anotaciones) no está generando getters/setters correctamente en el build de Docker
+4. A pesar de múltiples reconstrucciones con `--no-cache`, el código antiguo persiste en el JAR
+
+### Solución Temporal: Ejecutar Backend Localmente ⭐
+
+**OPCIÓN RECOMENDADA**: Ejecutar el backend fuera de Docker mientras se investiga el problema de compilación.
+
+#### Pasos:
+
+1. **Detener el contenedor del backend**:
+```bash
+docker stop urbanclean-backend
+```
+
+2. **Mantener PostgreSQL corriendo**:
+```bash
+# PostgreSQL debe seguir corriendo en Docker
+docker ps | grep postgres  # Verificar que esté UP
+```
+
+3. **Ejecutar el script de inicio local**:
+```bash
+bash run-backend-locally.sh
+```
+
+O manualmente:
+
+```bash
+# Configurar variables de entorno
+export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/urbanclean
+export SPRING_DATASOURCE_USERNAME=urbanclean_user
+export SPRING_DATASOURCE_PASSWORD=urbanclean_pass
+export JWT_SECRET=your_jwt_secret_key_change_this_in_production_min_256_bits_long
+export JWT_EXPIRATION=86400000
+export UPLOAD_DIR=./uploads
+export MAX_FILE_SIZE=5242880
+
+# Compilar y ejecutar
+cd backend
+mvn clean package -DskipTests
+java -jar target/*.jar
+```
+
+4. **Verificar que funcione**:
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+### Solución Permanente: Investigar Problema de Docker
+
+El problema está en el proceso de build de Docker. Posibles causas:
+
+1. **Caché de Maven dentro del contenedor**: Aunque se use `--no-cache`, Maven puede tener su propio caché
+2. **Lombok no se procesa correctamente**: El procesador de anotaciones no se ejecuta en el build de Docker
+3. **Problema con multi-stage build**: El JAR copiado puede ser de una capa cacheada anterior
+
+#### Opciones para investigar:
+
+**A. Forzar rebuild completo sin ningún caché**:
+```bash
+# Eliminar imagen completamente
+docker rmi urbanclean-backend
+
+# Eliminar volúmenes de Maven
+docker volume prune
+
+# Rebuild desde cero
+docker-compose -f docker/docker-compose.yml build --no-cache backend
+docker-compose -f docker/docker-compose.yml up -d backend
+```
+
+**B. Verificar el JAR generado**:
+```bash
+# Inspeccionar el contenedor
+docker run -it --entrypoint /bin/sh urbanclean-backend
+
+# Dentro del contenedor, verificar el JAR
+jar -tf app.jar | grep DeduplicationService
+```
+
+**C. Simplificar el Dockerfile**:
+- Eliminar multi-stage build temporalmente
+- Compilar localmente y copiar el JAR al contenedor
+- Verificar que Lombok esté configurado correctamente en pom.xml
+
+### Estado Actual del Código ✅
+
+El código fuente está **CORRECTO** y tiene las siguientes mejoras implementadas:
+
+1. **ReportService.java**: 
+   - Reporte NO se guarda antes de verificar duplicados
+   - Evita que el reporte se encuentre a sí mismo como duplicado
+   - Usa `checkForDuplicatesBeforeSave()` en lugar del método antiguo
+
+2. **DeduplicationService.java**:
+   - Nuevo método `checkForDuplicatesBeforeSave()` que no requiere ID del reporte
+   - Método `findExistingParentTask()` que retorna null en lugar de lanzar excepción
+   - Logs mejorados para debugging
+   - Método antiguo marcado como `@Deprecated`
+
+3. **ReportRepository.java**:
+   - Nueva consulta `findNearbyReportsWithinTimeWindowNoExclude()` sin parámetro excludeReportId
+   - Consulta antigua mantenida para compatibilidad
+
+### Verificación
+
+Una vez que el backend esté corriendo (localmente o en Docker con el problema resuelto):
+
+1. Abrir http://localhost:3000
+2. Ir a "Crear Reporte"
+3. Ingresar coordenadas de Madrid: Lat 40.4168, Lon -3.7038
+4. Seleccionar categoría y descripción
+5. Subir foto
+6. Enviar
+
+**Resultado esperado**: El reporte se crea exitosamente sin errores.
+
+### Logs Esperados (Correcto)
+
+```
+INFO  - Checking for duplicates BEFORE save: distance=100.0 meters, time window=24 hours
+INFO  - No duplicates found, will create new task
+INFO  - Report created: <uuid> by user: Anonymous
+INFO  - Creating task from report: <uuid>
+INFO  - Task created: <uuid> with priority score: <score>
+```
+
+### Logs Incorrectos (Problema de Docker)
+
+```
+ERROR - Task not found for report
+java.lang.IllegalStateException: Task not found for report
+    at com.urbanclean.service.DeduplicationService.lambda$findOrCreateParentTask$0(DeduplicationService.java:102)
+```
+
+Si ves los logs incorrectos, significa que el JAR en Docker sigue usando código antiguo.

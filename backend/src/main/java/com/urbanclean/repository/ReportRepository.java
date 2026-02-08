@@ -54,6 +54,29 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
 
     /**
      * Find nearby reports within time window and same category
+     * Used for deduplication BEFORE saving the report (no ID to exclude)
+     * @param location the reference point
+     * @param distanceMeters the distance threshold in meters
+     * @param since the time threshold
+     * @param category the report category
+     * @return list of nearby reports
+     */
+    @Query(value = "SELECT r.* FROM reportes r WHERE " +
+           "ST_DWithin(r.location, :location, :distanceMeters, true) " +
+           "AND r.created_at >= :since " +
+           "AND r.category = :category " +
+           "AND r.is_duplicate = false " +
+           "ORDER BY r.created_at DESC",
+           nativeQuery = true)
+    List<Report> findNearbyReportsWithinTimeWindowNoExclude(
+        @Param("location") Point location,
+        @Param("distanceMeters") double distanceMeters,
+        @Param("since") LocalDateTime since,
+        @Param("category") String category
+    );
+
+    /**
+     * Find nearby reports within time window and same category
      * Used for deduplication
      * @param location the reference point
      * @param distanceMeters the distance threshold in meters

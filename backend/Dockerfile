@@ -11,7 +11,7 @@ RUN mvn dependency:go-offline -B
 
 # Copy source code and build application
 COPY src ./src
-RUN mvn clean package -DskipTests -B
+RUN mvn clean package -DskipTests -B -U
 
 # Runtime stage - Use slim JRE for smaller image
 FROM eclipse-temurin:17-jre

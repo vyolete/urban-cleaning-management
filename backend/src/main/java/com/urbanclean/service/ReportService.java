@@ -8,6 +8,7 @@ import com.urbanclean.entity.User;
 import com.urbanclean.exception.custom.ResourceNotFoundException;
 import com.urbanclean.exception.custom.ValidationException;
 import com.urbanclean.repository.ReportRepository;
+import com.urbanclean.repository.TaskRepository;
 import com.urbanclean.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class ReportService {
     private final FileStorageService fileStorageService;
     private final GeofencingService geofencingService;
     private final TaskService taskService;
+    private final TaskRepository taskRepository;
     private final DeduplicationService deduplicationService;
 
     /**
@@ -59,7 +61,7 @@ public class ReportService {
         // Create point geometry
         Point location = geofencingService.createPoint(request.getLatitude(), request.getLongitude());
 
-        // Create report entity
+        // Create report entity (NOT saved yet to avoid self-detection in deduplication)
         Report report = Report.builder()
                 .submitter(submitter)
                 .location(location)
@@ -70,22 +72,38 @@ public class ReportService {
                 .createdAt(LocalDateTime.now())  // Set explicitly for deduplication logic
                 .build();
 
-        Report savedReport = reportRepository.save(report);
-        log.info("Report created: {} by user: {}", savedReport.getId(), 
+        log.info("Checking for duplicates before saving report by user: {}", 
                 submitter != null ? submitter.getUsername() : "Anonymous");
 
-        // Check for duplicates
-        Optional<Task> parentTask = deduplicationService.checkForDuplicates(savedReport);
+        // Check for duplicates BEFORE saving (pass unsaved report)
+        Optional<Task> parentTask = deduplicationService.checkForDuplicatesBeforeSave(report);
         
-        if (parentTask.isEmpty()) {
-            // No duplicates found, create new task with priority calculation
-            taskService.createTask(savedReport);
+        if (parentTask.isPresent()) {
+            // Duplicate found, link to parent task
+            report.setIsDuplicate(true);
+            report.setParentTask(parentTask.get());
+            
+            // Save report with parent task reference
+            Report savedReport = reportRepository.save(report);
+            
+            // Update parent task duplicate count
+            Task task = parentTask.get();
+            task.setDuplicateCount(task.getDuplicateCount() + 1);
+            taskRepository.save(task);
+            
+            log.info("Report {} marked as duplicate of task {}", 
+                    savedReport.getId(), task.getId());
+            
+            return savedReport;
         } else {
-            // Duplicate found, save the updated report with parent task reference
-            reportRepository.save(savedReport);
+            // No duplicates found, save report and create new task
+            Report savedReport = reportRepository.save(report);
+            log.info("Report created: {} by user: {}", savedReport.getId(), 
+                    submitter != null ? submitter.getUsername() : "Anonymous");
+            
+            taskService.createTask(savedReport);
+            return savedReport;
         }
-
-        return savedReport;
     }
 
     /**

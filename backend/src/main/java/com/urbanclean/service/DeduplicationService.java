@@ -29,9 +29,58 @@ public class DeduplicationService {
     private final ConfigService configService;
 
     /**
+     * Check for duplicate reports BEFORE saving the new report
+     * Returns the parent task if duplicates are found
+     * This method is called before the report is persisted to avoid self-detection
+     */
+    @Transactional(readOnly = true)
+    public Optional<Task> checkForDuplicatesBeforeSave(Report newReport) {
+        AlgorithmConfig config = configService.getCurrentConfig();
+        
+        // Get deduplication parameters
+        Double distanceThreshold = config.getDistanceThresholdMeters();
+        Integer timeWindowHours = config.getTimeWindowHours();
+        
+        // Calculate time window
+        LocalDateTime timeThreshold = newReport.getCreatedAt().minusHours(timeWindowHours);
+        
+        log.info("Checking for duplicates BEFORE save: distance={} meters, time window={} hours",
+                distanceThreshold, timeWindowHours);
+        
+        // Find nearby reports within time window (no need to exclude ID since report isn't saved yet)
+        List<Report> nearbyReports = reportRepository.findNearbyReportsWithinTimeWindowNoExclude(
+                newReport.getLocation(),
+                distanceThreshold,
+                timeThreshold,
+                newReport.getCategory()
+        );
+        
+        if (nearbyReports.isEmpty()) {
+            log.info("No duplicates found, will create new task");
+            return Optional.empty();
+        }
+        
+        log.info("Found {} potential duplicate(s), searching for parent task", 
+                nearbyReports.size());
+        
+        // Find the parent task from nearby reports
+        Task parentTask = findExistingParentTask(nearbyReports);
+        
+        if (parentTask == null) {
+            log.info("No parent task found among nearby reports, will create new task");
+            return Optional.empty();
+        }
+        
+        log.info("Found parent task {} for duplicate report", parentTask.getId());
+        return Optional.of(parentTask);
+    }
+
+    /**
      * Check for duplicate reports and link them to parent task
      * Returns the parent task if duplicates are found, or creates a new task
+     * @deprecated Use checkForDuplicatesBeforeSave instead
      */
+    @Deprecated
     @Transactional
     public Optional<Task> checkForDuplicates(Report newReport) {
         AlgorithmConfig config = configService.getCurrentConfig();
@@ -88,6 +137,38 @@ public class DeduplicationService {
                 newReport.getId(), parentTask.getId());
         
         return Optional.of(parentTask);
+    }
+
+    /**
+     * Find existing parent task from nearby reports
+     * Returns null if no task is found
+     */
+    private Task findExistingParentTask(List<Report> nearbyReports) {
+        log.info("Searching for parent task among {} nearby reports", nearbyReports.size());
+        
+        // Check if any nearby report already has a parent task
+        for (Report report : nearbyReports) {
+            if (report.getParentTask() != null) {
+                log.info("Found existing parent task {} from report {}", 
+                        report.getParentTask().getId(), report.getId());
+                return report.getParentTask();
+            }
+        }
+        
+        // No existing parent task found, try to find task from the first nearby report
+        Report firstReport = nearbyReports.get(0);
+        Optional<Task> existingTask = taskRepository.findByReport(firstReport);
+        
+        if (existingTask.isPresent()) {
+            Task parentTask = existingTask.get();
+            log.info("Found existing task {} for first nearby report {}", 
+                    parentTask.getId(), firstReport.getId());
+            return parentTask;
+        }
+        
+        // No task found for nearby reports
+        log.info("No existing task found among nearby reports");
+        return null;
     }
 
     /**
