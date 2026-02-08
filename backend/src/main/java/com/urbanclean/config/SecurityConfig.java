@@ -99,6 +99,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/reports").permitAll()  // Allow anonymous report submission
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/error").permitAll()
                 // All other endpoints require authentication

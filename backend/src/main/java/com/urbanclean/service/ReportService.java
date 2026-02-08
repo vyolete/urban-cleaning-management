@@ -134,13 +134,21 @@ public class ReportService {
     }
 
     /**
-     * Get current authenticated user
+     * Get current authenticated user (or null for anonymous reports)
      */
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        // Check if user is authenticated (not anonymous)
+        if (authentication == null || 
+            !authentication.isAuthenticated() || 
+            "anonymousUser".equals(authentication.getPrincipal())) {
+            return null;  // Anonymous report
+        }
+        
         String username = authentication.getName();
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+                .orElse(null);  // Return null if user not found
     }
 
     /**
@@ -154,7 +162,7 @@ public class ReportService {
                 .category(report.getCategory())
                 .description(report.getDescription())
                 .photoUrl(report.getPhotoUrl())
-                .submitterUsername(report.getSubmitter().getUsername())
+                .submitterUsername(report.getSubmitter() != null ? report.getSubmitter().getUsername() : "Anónimo")
                 .createdAt(report.getCreatedAt())
                 .isDuplicate(report.getIsDuplicate())
                 .build();
