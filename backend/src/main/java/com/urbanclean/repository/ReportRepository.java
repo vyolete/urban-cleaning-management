@@ -40,11 +40,12 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
      * @param since the time threshold
      * @return list of spatially and temporally proximate reports
      */
-    @Query(value = "SELECT r FROM Report r WHERE " +
-           "ST_DWithin(r.location, :location, :distanceMeters, true) = true " +
-           "AND r.createdAt >= :since " +
-           "AND r.isDuplicate IS FALSE " +
-           "ORDER BY r.createdAt DESC")
+    @Query(value = "SELECT r.* FROM reportes r WHERE " +
+           "ST_DWithin(r.location, :location, :distanceMeters, true) " +
+           "AND r.created_at >= :since " +
+           "AND r.is_duplicate = false " +
+           "ORDER BY r.created_at DESC",
+           nativeQuery = true)
     List<Report> findProximateReports(
         @Param("location") Point location,
         @Param("distanceMeters") double distanceMeters,
@@ -60,12 +61,13 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
      * @param category the report category
      * @return list of nearby reports
      */
-    @Query(value = "SELECT r FROM Report r WHERE " +
-           "ST_DWithin(r.location, :location, :distanceMeters, true) = true " +
-           "AND r.createdAt >= :since " +
+    @Query(value = "SELECT r.* FROM reportes r WHERE " +
+           "ST_DWithin(r.location, :location, :distanceMeters, true) " +
+           "AND r.created_at >= :since " +
            "AND r.category = :category " +
-           "AND r.isDuplicate IS FALSE " +
-           "ORDER BY r.createdAt DESC")
+           "AND r.is_duplicate = false " +
+           "ORDER BY r.created_at DESC",
+           nativeQuery = true)
     List<Report> findNearbyReportsWithinTimeWindow(
         @Param("location") Point location,
         @Param("distanceMeters") double distanceMeters,
