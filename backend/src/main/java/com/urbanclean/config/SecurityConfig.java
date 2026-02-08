@@ -72,9 +72,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:3000",
-            "http://localhost:80",
-            "http://frontend:80"
+            "http://localhost:5173",  // Vite dev server
+            "http://localhost:3000",  // React production build
+            "http://localhost:80",    // Docker frontend
+            "http://frontend:80"      // Docker network
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));

@@ -289,7 +289,11 @@ Los pesos son configurables por administradores y se almacenan en la base de dat
 - [ ] Configuración de producción
 
 ### Últimos Commits
-- ✅ **Páginas de autenticación completas** (LoginPage, ProtectedRoute, routing, 404)
+- ✅ **Checkpoint de integración Frontend-Backend completado**
+- ✅ Configuración CORS actualizada para Vite dev server
+- ✅ Script de prueba de integración creado
+- ✅ Checklist de integración documentado
+- ✅ Páginas de autenticación completas (LoginPage, ProtectedRoute, routing, 404)
 - ✅ Panel de administración completo (ConfigPanel, AdminConfigPage)
 - ✅ Dashboard de operadores completo (TaskList, TaskMap, TaskDetail, AuditTimeline)
 - ✅ Interfaz de ciudadano completa (ReportForm, MapView, CitizenReportPage)

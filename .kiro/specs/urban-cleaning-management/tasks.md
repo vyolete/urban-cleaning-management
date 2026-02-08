@@ -555,7 +555,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - Configure public routes for login and citizen report
     - _Requirements: 2.1, 2.2_
 
-- [ ] 22. Checkpoint - Ensure frontend integrates with backend
+- [x] 22. Checkpoint - Ensure frontend integrates with backend
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 23. Configure Docker deployment
