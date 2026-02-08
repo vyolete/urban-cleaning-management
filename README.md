@@ -213,18 +213,74 @@ Los pesos son configurables por administradores y se almacenan en la base de dat
 5. Actualiza estado (EN_PROGRESO)
 6. Marca como RESUELTO
 
+## 🔌 API Endpoints
+
+### Autenticación
+- `POST /api/auth/login` - Iniciar sesión
+- `POST /api/auth/register` - Registrar usuario
+
+### Reportes
+- `POST /api/reports` - Crear reporte (multipart: JSON + foto)
+- `GET /api/reports` - Listar todos los reportes (TECNICO/ADMIN)
+- `GET /api/reports/{id}` - Obtener reporte por ID
+- `GET /api/reports/my` - Obtener mis reportes
+
+### Tareas
+- `GET /api/tasks` - Listar tareas con filtros (estado, zona geográfica)
+- `GET /api/tasks/{id}` - Obtener detalle de tarea
+- `PATCH /api/tasks/{id}/state` - Actualizar estado de tarea
+- `GET /api/tasks/{id}/audit-history` - Historial de auditoría
+
+### Configuración (Admin)
+- `GET /api/admin/config/algorithm-weights` - Obtener configuración actual
+- `PUT /api/admin/config/algorithm-weights` - Actualizar pesos del algoritmo
+- `GET /api/admin/config/algorithm-weights/history` - Historial de configuraciones
+
 ## 📈 Estado del Proyecto
 
-🚧 **En Desarrollo** - Trabajo de Fin de Máster
+🚧 **En Desarrollo Activo** - Trabajo de Fin de Máster
 
-- [x] Especificaciones completas
-- [x] Diseño de arquitectura
-- [x] Plan de implementación
-- [ ] Implementación backend
-- [ ] Implementación frontend
-- [ ] Despliegue Docker
-- [ ] Testing completo
-- [ ] Documentación API
+### Fase 1: Planificación ✅
+- [x] Especificaciones completas (EARS + INCOSE)
+- [x] Diseño de arquitectura con 47 propiedades de correctitud
+- [x] Plan de implementación con 25 tareas
+
+### Fase 2: Backend (En Progreso - 60% Completado)
+- [x] Estructura del proyecto e inicialización
+- [x] Modelo de datos y entidades JPA
+- [x] Autenticación y autorización (JWT + Spring Security)
+- [x] Módulo de reportes con validación geoespacial
+- [x] **Algoritmo de priorización** (P = Wc×Cat + Wz×Zona + Wt×Tiempo)
+- [x] **Servicio de deduplicación** (PostGIS ST_DWithin)
+- [x] Gestión de tareas y máquina de estados
+- [x] Sistema de auditoría inmutable
+- [x] Endpoints REST para operadores
+- [x] Configuración dinámica del algoritmo
+- [x] Manejo global de excepciones
+- [ ] Características de seguridad adicionales (rate limiting)
+- [ ] Testing unitario y property-based testing
+
+### Fase 3: Frontend (Pendiente)
+- [ ] Estructura del proyecto React
+- [ ] Interfaz de ciudadano para reportes
+- [ ] Dashboard de operadores
+- [ ] Panel de administración
+- [ ] Integración con mapas (Leaflet)
+
+### Fase 4: Despliegue (Pendiente)
+- [ ] Dockerfiles optimizados
+- [ ] Docker Compose completo
+- [ ] Scripts de inicialización de BD
+- [ ] Configuración de producción
+
+### Últimos Commits
+- ✅ Manejo global de excepciones con respuestas consistentes
+- ✅ Gestión de configuración del algoritmo para administradores
+- ✅ Endpoints de gestión de tareas con filtros y auditoría
+- ✅ Sistema de auditoría para cambios de estado
+- ✅ Servicio de deduplicación con PostGIS
+- ✅ Algoritmo de cálculo de prioridad implementado
+- ✅ Módulo de reportes con geofencing y almacenamiento de fotos
 
 ## 👥 Autor
 

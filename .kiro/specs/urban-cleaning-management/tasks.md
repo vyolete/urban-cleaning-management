@@ -117,7 +117,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
 - [x] 5. Checkpoint - Ensure authentication and authorization tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 6. Implement report submission module
+- [x] 6. Implement report submission module
   - [x] 6.1 Create file storage service
     - Create `FileStorageService` to handle photo uploads
     - Implement file type validation (JPEG, PNG only)
@@ -169,14 +169,14 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - Test invalid file type returns 400
     - _Requirements: 3.1, 3.2, 3.3, 3.5, 3.6_
 
-- [ ] 7. Implement priority calculation algorithm
-  - [ ] 7.1 Create algorithm configuration service
+- [x] 7. Implement priority calculation algorithm
+  - [x] 7.1 Create algorithm configuration service
     - Create `ConfigService` to manage algorithm weights
     - Implement getCurrentConfig method to retrieve active configuration
     - Implement default weight values if no configuration exists
     - _Requirements: 4.2, 13.5_
 
-  - [ ] 7.2 Implement priority calculator service
+  - [x] 7.2 Implement priority calculator service
     - Create `PriorityCalculatorService` with calculatePriority method
     - Implement formula: P = (Wc * Category) + (Wz * Zone) + (Wt * Time)
     - Implement mapCategoryToValue to convert category string to numeric severity
@@ -204,8 +204,8 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 18: Priority score persistence**
     - **Validates: Requirements 4.6**
 
-- [ ] 8. Implement deduplication service
-  - [ ] 8.1 Create deduplication service
+- [x] 8. Implement deduplication service
+  - [x] 8.1 Create deduplication service
     - Create `DeduplicationService` with checkForDuplicates method
     - Use PostGIS ST_DWithin to find reports within distance threshold
     - Check temporal proximity within configured time window
@@ -238,8 +238,8 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 25: Maximum priority score selection**
     - **Validates: Requirements 5.6**
 
-- [ ] 9. Implement task management module
-  - [ ] 9.1 Create task service
+- [x] 9. Implement task management module
+  - [x] 9.1 Create task service
     - Create `TaskService` with createTask method that creates task from report
     - Calculate priority score using PriorityCalculatorService
     - Check for duplicates using DeduplicationService
@@ -250,7 +250,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 26: Initial state is PENDIENTE**
     - **Validates: Requirements 6.1**
 
-  - [ ] 9.3 Implement state transition logic
+  - [x] 9.3 Implement state transition logic
     - Add updateState method to TaskService
     - Implement state machine validation: PENDIENTE → ASIGNADO → EN_PROGRESO → RESUELTO
     - Throw exception for invalid transitions
@@ -264,13 +264,13 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 28: Invalid transition rejection**
     - **Validates: Requirements 6.5**
 
-  - [ ] 9.6 Integrate report service with task creation
+  - [x] 9.6 Integrate report service with task creation
     - Update ReportService to call TaskService.createTask after saving report
     - Ensure transactional consistency
     - _Requirements: 3.1, 4.1_
 
-- [ ] 10. Implement audit logging
-  - [ ] 10.1 Create audit service
+- [x] 10. Implement audit logging
+  - [x] 10.1 Create audit service
     - Create `AuditService` with logStateChange method
     - Create audit log entry with task, user, previous state, new state, timestamp
     - Use millisecond precision for timestamps
@@ -293,7 +293,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 32: Chronological audit query ordering**
     - **Validates: Requirements 7.6**
 
-  - [ ] 10.6 Integrate audit service with task state changes
+  - [x] 10.6 Integrate audit service with task state changes
     - Update TaskService.updateState to call AuditService.logStateChange
     - Ensure audit log is created before state change is committed
     - _Requirements: 7.1_
@@ -301,8 +301,8 @@ This implementation plan breaks down the Urban Cleaning Management System into d
 - [ ] 11. Checkpoint - Ensure core backend functionality tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 12. Implement task management endpoints
-  - [ ] 12.1 Create task controller
+- [x] 12. Implement task management endpoints
+  - [x] 12.1 Create task controller
     - Create `TaskController` with GET /api/tasks endpoint
     - Implement filtering by state and geographic zone
     - Order results by priority score descending
@@ -326,19 +326,19 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 36: Geographic zone filter correctness**
     - **Validates: Requirements 8.4**
 
-  - [ ] 12.6 Add task detail endpoint
+  - [x] 12.6 Add task detail endpoint
     - Add GET /api/tasks/{id} endpoint
     - Include duplicate count and merged reports
     - _Requirements: 5.5, 8.2_
 
-  - [ ] 12.7 Add state update endpoint
+  - [x] 12.7 Add state update endpoint
     - Add PATCH /api/tasks/{id}/state endpoint
     - Accept new state in request body
     - Call TaskService.updateState
     - Return updated task
     - _Requirements: 6.2, 6.3, 6.4, 9.4_
 
-  - [ ] 12.8 Add audit history endpoint
+  - [x] 12.8 Add audit history endpoint
     - Add GET /api/tasks/{id}/audit-history endpoint
     - Return chronologically ordered audit logs
     - Create `AuditLogResponse` DTO
@@ -352,15 +352,15 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - Test audit history returns chronological logs
     - _Requirements: 8.1, 8.3, 6.2, 7.6_
 
-- [ ] 13. Implement configuration management
-  - [ ] 13.1 Create configuration controller
+- [x] 13. Implement configuration management
+  - [x] 13.1 Create configuration controller
     - Create `ConfigController` with GET /api/admin/config/algorithm-weights endpoint
     - Add PUT /api/admin/config/algorithm-weights endpoint
     - Secure endpoints with @PreAuthorize("hasRole('ADMIN')")
     - Create DTOs: `AlgorithmWeightsRequest`, `AlgorithmWeightsResponse`
     - _Requirements: 13.1_
 
-  - [ ] 13.2 Implement weight update logic
+  - [x] 13.2 Implement weight update logic
     - Add updateWeights method to ConfigService
     - Validate weight values are within acceptable ranges
     - Store new configuration with effective dates
@@ -380,15 +380,15 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 47: Weight configuration history**
     - **Validates: Requirements 13.4**
 
-- [ ] 14. Implement global exception handling
-  - [ ] 14.1 Create custom exceptions
+- [x] 14. Implement global exception handling
+  - [x] 14.1 Create custom exceptions
     - Create `AuthenticationException` for auth failures
     - Create `ValidationException` for validation errors
     - Create `ResourceNotFoundException` for missing resources
     - Create `InvalidStateTransitionException` for state machine violations
     - _Requirements: 9.6, 9.7_
 
-  - [ ] 14.2 Create global exception handler
+  - [x] 14.2 Create global exception handler
     - Create `GlobalExceptionHandler` with @RestControllerAdvice
     - Handle AuthenticationException → 401
     - Handle AccessDeniedException → 403
