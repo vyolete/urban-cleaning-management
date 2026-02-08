@@ -12,6 +12,8 @@ backend/build/
 backend/out/
 backend/*.iml
 backend/.idea/
+**/target/
+**/.mvn/
 
 # Frontend (React / Node)
 frontend/node_modules/

@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: urbanclean-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-urbanclean}
+      POSTGRES_USER: ${DB_USER:-urbanclean_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - urbanclean-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-urbanclean_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: urbanclean-backend
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-urbanclean}
+      DB_USER: ${DB_USER:-urbanclean_user}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key_change_this}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      UPLOAD_DIR: /uploads
+      GEOFENCE_MIN_LAT: ${GEOFENCE_MIN_LAT:-40.3}
+      GEOFENCE_MAX_LAT: ${GEOFENCE_MAX_LAT:-40.6}
+      GEOFENCE_MIN_LON: ${GEOFENCE_MIN_LON:--3.9}
+      GEOFENCE_MAX_LON: ${GEOFENCE_MAX_LON:--3.5}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - urbanclean-network
+    volumes:
+      - backend_uploads:/uploads
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: urbanclean-frontend
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_URL: http://localhost:8080/api
+    depends_on:
+      - backend
+    networks:
+      - urbanclean-network
+
+volumes:
+  postgres_data:
+  backend_uploads:
+
+networks:
+  urbanclean-network:
+    driver: bridge

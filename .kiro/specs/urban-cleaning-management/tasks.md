@@ -6,7 +6,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
 
 ## Tasks
 
-- [ ] 1. Initialize project structure and dependencies
+- [-] 1. Initialize project structure and dependencies
   - Create monorepo structure with `/backend`, `/frontend`, and `/docker` directories
   - Initialize Spring Boot project with Maven (Java 17)
   - Initialize React project with Create React App
