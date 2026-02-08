@@ -458,13 +458,13 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - Create useAuth custom hook
     - _Requirements: 1.1_
 
-- [ ] 18. Implement citizen interface
+- [x] 18. Implement citizen interface
   - [x] 18.1 Create geolocation hook
     - Create useGeolocation hook using navigator.geolocation API
     - Return location, error, and loading states
     - _Requirements: 3.1_
 
-  - [ ] 18.2 Create report form component
+  - [x] 18.2 Create report form component
     - Create ReportForm component with category, description, and photo inputs
     - Use useGeolocation hook to capture current location
     - Implement form validation
@@ -473,14 +473,14 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - Submit report using reportService
     - _Requirements: 3.1, 3.5_
 
-  - [ ] 18.3 Create map view component
+  - [x] 18.3 Create map view component
     - Create MapView component using react-leaflet
     - Display user location marker
     - Show geofencing boundaries if available
     - Allow location confirmation
     - _Requirements: 3.2_
 
-  - [ ] 18.4 Create citizen report page
+  - [x] 18.4 Create citizen report page
     - Create CitizenReportPage combining ReportForm and MapView
     - Handle successful submission with confirmation message
     - Handle errors with user-friendly messages

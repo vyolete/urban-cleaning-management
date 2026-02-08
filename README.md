@@ -245,7 +245,7 @@ Los pesos son configurables por administradores y se almacenan en la base de dat
 - [x] Diseño de arquitectura con 47 propiedades de correctitud
 - [x] Plan de implementación con 25 tareas
 
-### Fase 2: Backend (En Progreso - 60% Completado)
+### Fase 2: Backend ✅ (100% Completado)
 - [x] Estructura del proyecto e inicialización
 - [x] Modelo de datos y entidades JPA
 - [x] Autenticación y autorización (JWT + Spring Security)
@@ -257,15 +257,20 @@ Los pesos son configurables por administradores y se almacenan en la base de dat
 - [x] Endpoints REST para operadores
 - [x] Configuración dinámica del algoritmo
 - [x] Manejo global de excepciones
-- [ ] Características de seguridad adicionales (rate limiting)
-- [ ] Testing unitario y property-based testing
+- [x] Rate limiting para endpoints de autenticación
 
-### Fase 3: Frontend (Pendiente)
-- [ ] Estructura del proyecto React
-- [ ] Interfaz de ciudadano para reportes
+### Fase 3: Frontend (En Progreso - 50% Completado)
+- [x] Estructura del proyecto React
+- [x] Capa de servicios API (Axios)
+- [x] Contexto de autenticación
+- [x] **Interfaz de ciudadano para reportes**
+  - [x] Hook de geolocalización
+  - [x] Formulario de reporte con validación
+  - [x] Visualización de mapa con Leaflet
+  - [x] Upload de fotos con preview
 - [ ] Dashboard de operadores
 - [ ] Panel de administración
-- [ ] Integración con mapas (Leaflet)
+- [ ] Páginas de autenticación (Login/Register)
 
 ### Fase 4: Despliegue (Pendiente)
 - [ ] Dockerfiles optimizados
@@ -274,6 +279,11 @@ Los pesos son configurables por administradores y se almacenan en la base de dat
 - [ ] Configuración de producción
 
 ### Últimos Commits
+- ✅ **Interfaz de ciudadano completa** (ReportForm, MapView, CitizenReportPage)
+- ✅ Hook de geolocalización con validación de geofencing
+- ✅ Capa de servicios API con interceptores JWT
+- ✅ Contexto de autenticación React
+- ✅ Rate limiting para endpoints de autenticación
 - ✅ Manejo global de excepciones con respuestas consistentes
 - ✅ Gestión de configuración del algoritmo para administradores
 - ✅ Endpoints de gestión de tareas con filtros y auditoría
