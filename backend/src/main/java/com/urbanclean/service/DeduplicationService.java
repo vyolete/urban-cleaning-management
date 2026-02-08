@@ -65,6 +65,12 @@ public class DeduplicationService {
         // Find the parent task (task with highest priority among duplicates)
         Task parentTask = findOrCreateParentTask(nearbyReports, newReport);
         
+        // If no parent task found, return empty (will create new task)
+        if (parentTask == null) {
+            log.debug("No parent task available for duplicates, will create new task");
+            return Optional.empty();
+        }
+        
         // Mark new report as duplicate
         newReport.setIsDuplicate(true);
         newReport.setParentTask(parentTask);
@@ -95,17 +101,21 @@ public class DeduplicationService {
             }
         }
         
-        // No existing parent task found, use the task from the first nearby report
+        // No existing parent task found, try to find task from the first nearby report
         Report firstReport = nearbyReports.get(0);
-        Task parentTask = taskRepository.findByReport(firstReport)
-                .orElseThrow(() -> new IllegalStateException(
-                        "Task not found for report: " + firstReport.getId()));
+        Optional<Task> existingTask = taskRepository.findByReport(firstReport);
         
-        // Mark the first report as having duplicates
-        firstReport.setParentTask(parentTask);
+        if (existingTask.isPresent()) {
+            Task parentTask = existingTask.get();
+            // Mark the first report as having duplicates
+            firstReport.setParentTask(parentTask);
+            log.debug("Using task from first nearby report: {}", parentTask.getId());
+            return parentTask;
+        }
         
-        log.debug("Created parent task relationship: {}", parentTask.getId());
-        return parentTask;
+        // No task found for nearby reports, return null to indicate new task should be created
+        log.debug("No existing task found for nearby reports, will create new task");
+        return null;
     }
 
     /**
