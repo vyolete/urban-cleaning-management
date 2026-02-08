@@ -443,7 +443,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - Configure environment variables for API URL
     - _Requirements: 11.2_
 
-  - [ ] 17.2 Create API service layer
+  - [x] 17.2 Create API service layer
     - Create axios instance with base URL configuration
     - Add request interceptor to attach JWT token
     - Add response interceptor for error handling
