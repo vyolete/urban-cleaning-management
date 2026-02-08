@@ -1,0 +1,81 @@
+# Backend (Spring Boot / Maven)
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/.settings/
+backend/.classpath
+backend/.project
+backend/.factorypath
+backend/bin/
+backend/build/
+backend/out/
+backend/*.iml
+backend/.idea/
+
+# Frontend (React / Node)
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnp
+frontend/.pnp.js
+frontend/coverage/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+docker/data/
+postgres_data/
+
+# Uploads
+uploads/
+*.jpg
+*.jpeg
+*.png
+*.gif
+!frontend/public/**/*.png
+!frontend/public/**/*.jpg
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Security
+*.pem
+*.key
+*.crt
+secrets/
