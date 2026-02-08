@@ -43,7 +43,7 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
     @Query(value = "SELECT r FROM Report r WHERE " +
            "ST_DWithin(r.location, :location, :distanceMeters, true) = true " +
            "AND r.createdAt >= :since " +
-           "AND r.isDuplicate = false " +
+           "AND r.isDuplicate IS FALSE " +
            "ORDER BY r.createdAt DESC")
     List<Report> findProximateReports(
         @Param("location") Point location,
@@ -64,7 +64,7 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
            "ST_DWithin(r.location, :location, :distanceMeters, true) = true " +
            "AND r.createdAt >= :since " +
            "AND r.category = :category " +
-           "AND r.isDuplicate = false " +
+           "AND r.isDuplicate IS FALSE " +
            "ORDER BY r.createdAt DESC")
     List<Report> findNearbyReportsWithinTimeWindow(
         @Param("location") Point location,
