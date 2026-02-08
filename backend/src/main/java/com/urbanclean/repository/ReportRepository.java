@@ -59,6 +59,7 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
      * @param distanceMeters the distance threshold in meters
      * @param since the time threshold
      * @param category the report category
+     * @param excludeReportId the ID of the report to exclude (usually the current report)
      * @return list of nearby reports
      */
     @Query(value = "SELECT r.* FROM reportes r WHERE " +
@@ -66,13 +67,15 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
            "AND r.created_at >= :since " +
            "AND r.category = :category " +
            "AND r.is_duplicate = false " +
+           "AND r.id != :excludeReportId " +
            "ORDER BY r.created_at DESC",
            nativeQuery = true)
     List<Report> findNearbyReportsWithinTimeWindow(
         @Param("location") Point location,
         @Param("distanceMeters") double distanceMeters,
         @Param("since") LocalDateTime since,
-        @Param("category") String category
+        @Param("category") String category,
+        @Param("excludeReportId") UUID excludeReportId
     );
 
     /**

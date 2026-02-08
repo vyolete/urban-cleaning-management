@@ -46,12 +46,13 @@ public class DeduplicationService {
         log.debug("Checking for duplicates: distance={} meters, time window={} hours",
                 distanceThreshold, timeWindowHours);
         
-        // Find nearby reports within time window
+        // Find nearby reports within time window (excluding the current report)
         List<Report> nearbyReports = reportRepository.findNearbyReportsWithinTimeWindow(
                 newReport.getLocation(),
                 distanceThreshold,
                 timeThreshold,
-                newReport.getCategory()
+                newReport.getCategory(),
+                newReport.getId()  // Exclude the current report
         );
         
         if (nearbyReports.isEmpty()) {
@@ -93,6 +94,8 @@ public class DeduplicationService {
      * Find existing parent task or create one from the first report
      */
     private Task findOrCreateParentTask(List<Report> nearbyReports, Report newReport) {
+        log.info("DEDUPLICATION FIX: Searching for parent task among {} nearby reports", nearbyReports.size());
+        
         // Check if any nearby report already has a parent task
         for (Report report : nearbyReports) {
             if (report.getParentTask() != null) {
@@ -109,12 +112,12 @@ public class DeduplicationService {
             Task parentTask = existingTask.get();
             // Mark the first report as having duplicates
             firstReport.setParentTask(parentTask);
-            log.debug("Using task from first nearby report: {}", parentTask.getId());
+            log.info("DEDUPLICATION FIX: Found existing task {} for first nearby report", parentTask.getId());
             return parentTask;
         }
         
         // No task found for nearby reports, return null to indicate new task should be created
-        log.debug("No existing task found for nearby reports, will create new task");
+        log.info("DEDUPLICATION FIX: No existing task found, returning null to create new task");
         return null;
     }
 
