@@ -116,10 +116,14 @@ curl http://localhost:8080/actuator/health
 - **Solución**: Ya está configurado en SecurityConfig.java para permitir localhost:3000 y localhost:5173
 
 #### Error: "Coordinates outside geofencing boundaries"
-- **Causa**: Las coordenadas están fuera del área permitida
-- **Solución**: Usa coordenadas dentro de Madrid:
-  - Latitud: entre 40.3 y 40.6
-  - Longitud: entre -3.9 y -3.5
+- **Causa**: Las coordenadas están fuera del área permitida (Madrid, España)
+- **Solución**: El sistema está configurado para Madrid. Si estás en otra ubicación:
+  1. Haz clic en "Ingresar ubicación manualmente" en el formulario
+  2. Usa coordenadas de prueba dentro de Madrid:
+     - **Latitud**: 40.4168 (ejemplo: Puerta del Sol)
+     - **Longitud**: -3.7038
+  3. Área válida: Latitud 40.3 a 40.6, Longitud -3.9 a -3.5
+- **Nota**: El geofencing es una característica de seguridad para evitar reportes fuera del área de servicio
 
 ## Problema: Foto no se carga
 
