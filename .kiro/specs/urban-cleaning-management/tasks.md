@@ -15,7 +15,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
   - Add frontend dependencies: React Router, Axios, Leaflet, PropTypes
   - _Requirements: 11.1, 11.2, 11.3_
 
-- [-] 2. Set up database schema and entities
+- [x] 2. Set up database schema and entities
   - [x] 2.1 Create JPA entities for domain model
     - Create `User` entity with UUID, username, passwordHash, email, role, timestamps
     - Create `Report` entity with UUID, location (PostGIS Point), category, description, photoUrl, timestamps
@@ -40,22 +40,22 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 40: Referential integrity enforcement**
     - **Validates: Requirements 10.7**
 
-- [ ] 3. Implement authentication and authorization
-  - [ ] 3.1 Create security configuration
+- [-] 3. Implement authentication and authorization
+  - [x] 3.1 Create security configuration
     - Configure BCryptPasswordEncoder bean
     - Configure Spring Security filter chain with JWT authentication
     - Configure CORS to allow frontend origin
     - Add security headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection)
     - _Requirements: 1.3, 12.1, 12.2_
 
-  - [ ] 3.2 Implement JWT token provider
+  - [x] 3.2 Implement JWT token provider
     - Create `JwtTokenProvider` class to generate tokens with user identity and role claims
     - Implement token validation with signature and expiration checks
     - Implement claim extraction methods (username, role, userId)
     - Configure token expiration to 24 hours
     - _Requirements: 1.1, 1.4_
 
-  - [ ] 3.3 Implement authentication service
+  - [x] 3.3 Implement authentication service
     - Create `AuthService` with login method that validates credentials
     - Integrate BCryptPasswordEncoder for password validation
     - Generate JWT token on successful authentication
@@ -78,7 +78,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 4: Expired tokens require re-authentication**
     - **Validates: Requirements 1.4**
 
-  - [ ] 3.8 Create authentication controller
+  - [x] 3.8 Create authentication controller
     - Create `AuthController` with POST /api/auth/login endpoint
     - Create POST /api/auth/register endpoint for user registration
     - Implement DTOs: `LoginRequest`, `LoginResponse`, `RegisterRequest`
@@ -91,13 +91,13 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - _Requirements: 1.1, 1.2_
 
 - [ ] 4. Implement role-based access control
-  - [ ] 4.1 Create JWT authentication filter
+  - [x] 4.1 Create JWT authentication filter
     - Create `JwtAuthenticationFilter` extending OncePerRequestFilter
     - Extract JWT from Authorization header
     - Validate token and set SecurityContext with user details
     - _Requirements: 2.3_
 
-  - [ ] 4.2 Configure method-level security
+  - [x] 4.2 Configure method-level security
     - Enable @PreAuthorize annotations
     - Configure role hierarchy if needed
     - _Requirements: 2.1, 2.2_
