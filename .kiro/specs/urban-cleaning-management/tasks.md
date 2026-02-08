@@ -410,7 +410,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 39: Server error status codes**
     - **Validates: Requirements 9.7**
 
-- [ ] 15. Implement security features
+- [x] 15. Implement security features
   - [ ]* 15.1 Write property test for CORS validation
     - **Property 41: CORS origin validation**
     - **Validates: Requirements 12.1**
@@ -423,7 +423,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 43: Input sanitization**
     - **Validates: Requirements 12.4**
 
-  - [ ] 15.4 Implement rate limiting
+  - [x] 15.4 Implement rate limiting
     - Add rate limiting filter for authentication endpoints
     - Configure maximum requests per time window
     - Return 429 Too Many Requests when limit exceeded
