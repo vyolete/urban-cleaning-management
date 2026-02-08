@@ -34,14 +34,13 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
     List<Task> findByState(TaskState state);
 
     /**
-     * Find task by primary report ID
-     * Uses native query to avoid Hibernate JOIN issues
+     * Find tasks by primary report ID
+     * Returns list to avoid NonUniqueResultException from Hibernate JOINs
      * @param reportId the ID of the report associated with the task
-     * @return optional containing the task
+     * @return list of tasks (should contain 0 or 1 element)
      */
-    @Query(value = "SELECT * FROM tareas WHERE primary_report_id = :reportId LIMIT 1", 
-           nativeQuery = true)
-    Optional<Task> findByReportId(@Param("reportId") UUID reportId);
+    @Query("SELECT t FROM Task t WHERE t.primaryReport.id = :reportId")
+    List<Task> findByReportId(@Param("reportId") UUID reportId);
     
     /**
      * Find task by report (deprecated - use findByReportId instead)

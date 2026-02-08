@@ -157,10 +157,10 @@ public class DeduplicationService {
         
         // No existing parent task found, try to find task from the first nearby report
         Report firstReport = nearbyReports.get(0);
-        Optional<Task> existingTask = taskRepository.findByReportId(firstReport.getId());
+        List<Task> existingTasks = taskRepository.findByReportId(firstReport.getId());
         
-        if (existingTask.isPresent()) {
-            Task parentTask = existingTask.get();
+        if (!existingTasks.isEmpty()) {
+            Task parentTask = existingTasks.get(0);
             log.info("Found existing task {} for first nearby report {}", 
                     parentTask.getId(), firstReport.getId());
             return parentTask;
@@ -187,10 +187,10 @@ public class DeduplicationService {
         
         // No existing parent task found, try to find task from the first nearby report
         Report firstReport = nearbyReports.get(0);
-        Optional<Task> existingTask = taskRepository.findByReportId(firstReport.getId());
+        List<Task> existingTasks = taskRepository.findByReportId(firstReport.getId());
         
-        if (existingTask.isPresent()) {
-            Task parentTask = existingTask.get();
+        if (!existingTasks.isEmpty()) {
+            Task parentTask = existingTasks.get(0);
             // Mark the first report as having duplicates
             firstReport.setParentTask(parentTask);
             log.info("DEDUPLICATION FIX: Found existing task {} for first nearby report", parentTask.getId());
