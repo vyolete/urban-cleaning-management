@@ -305,7 +305,8 @@ Los pesos son configurables por administradores y se almacenan en la base de dat
   - [x] Documentación completa de despliegue
 
 ### Últimos Commits
-- ✅ **Configuración Docker completa** (Dockerfiles, docker-compose, init-db.sql)
+- ✅ **Pruebas de integración E2E completas** (guías, scripts automatizados)
+- ✅ Configuración Docker completa (Dockerfiles, docker-compose, init-db.sql)
 - ✅ Checkpoint de integración Frontend-Backend completado
 - ✅ Configuración CORS actualizada para Vite dev server
 - ✅ Script de prueba de integración creado
