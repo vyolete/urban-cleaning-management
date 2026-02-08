@@ -31,10 +31,9 @@ public class ReportController {
     /**
      * Submit a new report (multipart request)
      * POST /api/reports
-     * Accessible by authenticated users (citizens, operators, admins)
+     * Accessible by anyone (anonymous reports allowed)
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('CIUDADANO', 'TECNICO', 'ADMIN')")
     public ResponseEntity<ReportResponse> submitReport(
             @Valid @RequestPart("data") ReportSubmissionRequest request,
             @RequestPart("photo") MultipartFile photo) {
@@ -51,7 +50,7 @@ public class ReportController {
                 .category(report.getCategory())
                 .description(report.getDescription())
                 .photoUrl(report.getPhotoUrl())
-                .submitterUsername(report.getSubmitter().getUsername())
+                .submitterUsername(report.getSubmitter() != null ? report.getSubmitter().getUsername() : "Anónimo")
                 .createdAt(report.getCreatedAt())
                 .isDuplicate(report.getIsDuplicate())
                 .build();
