@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ public class ReportService {
     private final FileStorageService fileStorageService;
     private final GeofencingService geofencingService;
     private final TaskService taskService;
+    private final DeduplicationService deduplicationService;
 
     /**
      * Create a new report
@@ -68,8 +70,16 @@ public class ReportService {
         Report savedReport = reportRepository.save(report);
         log.info("Report created: {} by user: {}", savedReport.getId(), submitter.getUsername());
 
-        // Create task from report with priority calculation
-        taskService.createTask(savedReport);
+        // Check for duplicates
+        Optional<Task> parentTask = deduplicationService.checkForDuplicates(savedReport);
+        
+        if (parentTask.isEmpty()) {
+            // No duplicates found, create new task with priority calculation
+            taskService.createTask(savedReport);
+        } else {
+            // Duplicate found, save the updated report with parent task reference
+            reportRepository.save(savedReport);
+        }
 
         return savedReport;
     }

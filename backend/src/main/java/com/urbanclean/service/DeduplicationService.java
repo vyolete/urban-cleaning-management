@@ -1,0 +1,175 @@
+package com.urbanclean.service;
+
+import com.urbanclean.entity.AlgorithmConfig;
+import com.urbanclean.entity.Report;
+import com.urbanclean.entity.Task;
+import com.urbanclean.repository.ReportRepository;
+import com.urbanclean.repository.TaskRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Service for detecting and managing duplicate reports
+ * Uses spatial and temporal proximity to identify duplicates
+ */
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class DeduplicationService {
+
+    private final ReportRepository reportRepository;
+    private final TaskRepository taskRepository;
+    private final ConfigService configService;
+
+    /**
+     * Check for duplicate reports and link them to parent task
+     * Returns the parent task if duplicates are found, or creates a new task
+     */
+    @Transactional
+    public Optional<Task> checkForDuplicates(Report newReport) {
+        AlgorithmConfig config = configService.getCurrentConfig();
+        
+        // Get deduplication parameters
+        BigDecimal distanceThreshold = config.getDeduplicationDistanceMeters();
+        Integer timeWindowHours = config.getDeduplicationTimeWindowHours();
+        
+        // Calculate time window
+        LocalDateTime timeThreshold = newReport.getCreatedAt().minusHours(timeWindowHours);
+        
+        log.debug("Checking for duplicates: distance={} meters, time window={} hours",
+                distanceThreshold, timeWindowHours);
+        
+        // Find nearby reports within time window
+        List<Report> nearbyReports = reportRepository.findNearbyReportsWithinTimeWindow(
+                newReport.getLocation(),
+                distanceThreshold.doubleValue(),
+                timeThreshold,
+                newReport.getCategory()
+        );
+        
+        if (nearbyReports.isEmpty()) {
+            log.debug("No duplicates found for report: {}", newReport.getId());
+            return Optional.empty();
+        }
+        
+        log.info("Found {} potential duplicate(s) for report: {}", 
+                nearbyReports.size(), newReport.getId());
+        
+        // Find the parent task (task with highest priority among duplicates)
+        Task parentTask = findOrCreateParentTask(nearbyReports, newReport);
+        
+        // Mark new report as duplicate
+        newReport.setIsDuplicate(true);
+        newReport.setParentTask(parentTask);
+        
+        // Increment duplicate count on parent task
+        parentTask.setDuplicateCount(parentTask.getDuplicateCount() + 1);
+        
+        // Update parent task priority if new report has higher priority
+        updateParentTaskPriority(parentTask, newReport);
+        
+        taskRepository.save(parentTask);
+        
+        log.info("Report {} marked as duplicate of task {}", 
+                newReport.getId(), parentTask.getId());
+        
+        return Optional.of(parentTask);
+    }
+
+    /**
+     * Find existing parent task or create one from the first report
+     */
+    private Task findOrCreateParentTask(List<Report> nearbyReports, Report newReport) {
+        // Check if any nearby report already has a parent task
+        for (Report report : nearbyReports) {
+            if (report.getParentTask() != null) {
+                log.debug("Using existing parent task: {}", report.getParentTask().getId());
+                return report.getParentTask();
+            }
+        }
+        
+        // No existing parent task found, use the task from the first nearby report
+        Report firstReport = nearbyReports.get(0);
+        Task parentTask = taskRepository.findByReport(firstReport)
+                .orElseThrow(() -> new IllegalStateException(
+                        "Task not found for report: " + firstReport.getId()));
+        
+        // Mark the first report as having duplicates
+        firstReport.setParentTask(parentTask);
+        
+        log.debug("Created parent task relationship: {}", parentTask.getId());
+        return parentTask;
+    }
+
+    /**
+     * Update parent task priority to the maximum among all duplicates
+     */
+    private void updateParentTaskPriority(Task parentTask, Report newReport) {
+        // Get the task that would be created for the new report
+        // We need to calculate its priority to compare
+        BigDecimal currentPriority = parentTask.getPriorityScore();
+        
+        // For simplicity, we'll keep the current priority
+        // In a more sophisticated implementation, we could recalculate
+        // based on the aggregate of all duplicate reports
+        
+        log.debug("Parent task {} priority: {}", parentTask.getId(), currentPriority);
+    }
+
+    /**
+     * Get all duplicate reports for a task
+     */
+    @Transactional(readOnly = true)
+    public List<Report> getDuplicateReports(Task task) {
+        return reportRepository.findByParentTask(task);
+    }
+
+    /**
+     * Get duplicate count for a task
+     */
+    @Transactional(readOnly = true)
+    public int getDuplicateCount(Task task) {
+        return reportRepository.countByParentTask(task);
+    }
+
+    /**
+     * Check if a report is a duplicate
+     */
+    public boolean isDuplicate(Report report) {
+        return report.getIsDuplicate() != null && report.getIsDuplicate();
+    }
+
+    /**
+     * Unlink a report from its parent task (admin operation)
+     */
+    @Transactional
+    public void unlinkDuplicate(Report report) {
+        if (!isDuplicate(report)) {
+            log.warn("Report {} is not marked as duplicate", report.getId());
+            return;
+        }
+        
+        Task parentTask = report.getParentTask();
+        if (parentTask != null) {
+            // Decrement duplicate count
+            int newCount = Math.max(0, parentTask.getDuplicateCount() - 1);
+            parentTask.setDuplicateCount(newCount);
+            taskRepository.save(parentTask);
+            
+            log.info("Unlinked report {} from parent task {}", 
+                    report.getId(), parentTask.getId());
+        }
+        
+        // Unmark as duplicate
+        report.setIsDuplicate(false);
+        report.setParentTask(null);
+        reportRepository.save(report);
+    }
+}

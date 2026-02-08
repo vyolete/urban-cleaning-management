@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -31,6 +32,14 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
      * @return list of tasks
      */
     List<Task> findByState(TaskState state);
+
+    /**
+     * Find task by report
+     * @param report the report associated with the task
+     * @return optional containing the task
+     */
+    @Query("SELECT t FROM Task t WHERE t.report = :report")
+    Optional<Task> findByReport(@Param("report") com.urbanclean.entity.Report report);
 
     /**
      * Find all tasks ordered by priority score descending
