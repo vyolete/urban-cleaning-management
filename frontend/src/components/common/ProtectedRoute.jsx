@@ -1,6 +1,7 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useAuth } from '../../context/AuthContext';
+import './ProtectedRoute.css';
 
 /**
  * Protected Route Component
@@ -9,6 +10,7 @@ import { useAuth } from '../../context/AuthContext';
  */
 function ProtectedRoute({ children, requiredRole, requiredRoles }) {
   const { isAuthenticated, hasRole, hasAnyRole, loading } = useAuth();
+  const location = useLocation();
 
   // Show loading state while checking authentication
   if (loading) {
@@ -22,16 +24,19 @@ function ProtectedRoute({ children, requiredRole, requiredRoles }) {
 
   // Check if user is authenticated
   if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
+    // Save the location they were trying to access
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Check for required single role
   if (requiredRole && !hasRole(requiredRole)) {
     return (
-      <div className="container mt-4">
-        <div className="alert alert-error">
+      <div className="access-denied-container">
+        <div className="access-denied-card">
+          <span className="denied-icon">🚫</span>
           <h2>Acceso Denegado</h2>
           <p>No tienes permisos para acceder a esta página.</p>
+          <p className="required-role">Rol requerido: {requiredRole}</p>
         </div>
       </div>
     );
@@ -40,10 +45,14 @@ function ProtectedRoute({ children, requiredRole, requiredRoles }) {
   // Check for required multiple roles (user must have at least one)
   if (requiredRoles && requiredRoles.length > 0 && !hasAnyRole(requiredRoles)) {
     return (
-      <div className="container mt-4">
-        <div className="alert alert-error">
+      <div className="access-denied-container">
+        <div className="access-denied-card">
+          <span className="denied-icon">🚫</span>
           <h2>Acceso Denegado</h2>
           <p>No tienes permisos para acceder a esta página.</p>
+          <p className="required-role">
+            Roles requeridos: {requiredRoles.join(', ')}
+          </p>
         </div>
       </div>
     );

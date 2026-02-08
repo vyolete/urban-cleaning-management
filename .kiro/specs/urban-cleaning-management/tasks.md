@@ -535,21 +535,21 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - Display success/error messages
     - _Requirements: 13.1_
 
-- [ ] 21. Implement authentication pages
-  - [ ] 21.1 Create login page
+- [x] 21. Implement authentication pages
+  - [x] 21.1 Create login page
     - Create LoginPage with username and password inputs
     - Call authService.login on form submission
     - Store token and redirect on success
     - Display error messages on failure
     - _Requirements: 1.1, 1.2_
 
-  - [ ] 21.2 Create protected route component
+  - [x] 21.2 Create protected route component
     - Create ProtectedRoute component checking authentication
     - Redirect to login if not authenticated
     - Check user role for role-specific routes
     - _Requirements: 2.1, 2.2_
 
-  - [ ] 21.3 Configure routing
+  - [x] 21.3 Configure routing
     - Set up React Router with routes for all pages
     - Configure protected routes for operator and admin pages
     - Configure public routes for login and citizen report
