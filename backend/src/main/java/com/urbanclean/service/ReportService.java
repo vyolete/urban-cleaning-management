@@ -33,6 +33,7 @@ public class ReportService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final GeofencingService geofencingService;
+    private final TaskService taskService;
 
     /**
      * Create a new report
@@ -66,6 +67,9 @@ public class ReportService {
 
         Report savedReport = reportRepository.save(report);
         log.info("Report created: {} by user: {}", savedReport.getId(), submitter.getUsername());
+
+        // Create task from report with priority calculation
+        taskService.createTask(savedReport);
 
         return savedReport;
     }

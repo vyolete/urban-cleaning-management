@@ -26,6 +26,13 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
     List<Task> findByStateOrderByPriorityScoreDesc(TaskState state);
 
     /**
+     * Find tasks by state
+     * @param state the task state to filter by
+     * @return list of tasks
+     */
+    List<Task> findByState(TaskState state);
+
+    /**
      * Find all tasks ordered by priority score descending
      * @return list of all tasks ordered by priority
      */
