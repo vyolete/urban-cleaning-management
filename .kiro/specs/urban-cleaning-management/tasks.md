@@ -6,7 +6,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
 
 ## Tasks
 
-- [-] 1. Initialize project structure and dependencies
+- [x] 1. Initialize project structure and dependencies
   - Create monorepo structure with `/backend`, `/frontend`, and `/docker` directories
   - Initialize Spring Boot project with Maven (Java 17)
   - Initialize React project with Create React App
@@ -15,8 +15,8 @@ This implementation plan breaks down the Urban Cleaning Management System into d
   - Add frontend dependencies: React Router, Axios, Leaflet, PropTypes
   - _Requirements: 11.1, 11.2, 11.3_
 
-- [ ] 2. Set up database schema and entities
-  - [ ] 2.1 Create JPA entities for domain model
+- [-] 2. Set up database schema and entities
+  - [x] 2.1 Create JPA entities for domain model
     - Create `User` entity with UUID, username, passwordHash, email, role, timestamps
     - Create `Report` entity with UUID, location (PostGIS Point), category, description, photoUrl, timestamps
     - Create `Task` entity with UUID, location, category, state enum, priorityScore, duplicateCount, timestamps
@@ -28,7 +28,7 @@ This implementation plan breaks down the Urban Cleaning Management System into d
     - **Property 11: Report data completeness**
     - **Validates: Requirements 3.4**
 
-  - [ ] 2.3 Create JPA repositories
+  - [x] 2.3 Create JPA repositories
     - Create `UserRepository` extending JpaRepository with findByUsername method
     - Create `ReportRepository` with spatial query methods using @Query with PostGIS functions
     - Create `TaskRepository` with findByStateOrderByPriorityScoreDesc method
