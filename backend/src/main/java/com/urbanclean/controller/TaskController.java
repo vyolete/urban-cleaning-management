@@ -167,9 +167,9 @@ public class TaskController {
                 .duplicateCount(task.getDuplicateCount())
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
-                .reportId(task.getReport().getId())
-                .description(task.getReport().getDescription())
-                .photoUrl(task.getReport().getPhotoUrl())
+                .reportId(task.getPrimaryReport().getId())
+                .description(task.getPrimaryReport().getDescription())
+                .photoUrl(task.getPrimaryReport().getPhotoUrl())
                 .assignedOperatorUsername(
                     task.getAssignedOperator() != null ? 
                     task.getAssignedOperator().getUsername() : null
@@ -184,7 +184,7 @@ public class TaskController {
         return AuditLogResponse.builder()
                 .id(auditLog.getId())
                 .taskId(auditLog.getTask().getId())
-                .changedByUsername(auditLog.getChangedBy().getUsername())
+                .changedByUsername(auditLog.getUser().getUsername())
                 .previousState(auditLog.getPreviousState())
                 .newState(auditLog.getNewState())
                 .changedAt(auditLog.getChangedAt())

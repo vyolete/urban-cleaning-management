@@ -41,7 +41,7 @@ public class AuditService {
 
         AuditLog auditLog = AuditLog.builder()
                 .task(task)
-                .changedBy(currentUser)
+                .user(currentUser)
                 .previousState(previousState)
                 .newState(newState)
                 .changedAt(LocalDateTime.now())
@@ -79,7 +79,7 @@ public class AuditService {
      */
     @Transactional(readOnly = true)
     public List<AuditLog> getAuditLogsByUser(User user) {
-        return auditLogRepository.findByChangedByOrderByChangedAtDesc(user);
+        return auditLogRepository.findByUserOrderByChangedAtDesc(user);
     }
 
     /**

@@ -104,8 +104,8 @@ public class ConfigController {
                 .weightCategory(config.getWeightCategory())
                 .weightZone(config.getWeightZone())
                 .weightTime(config.getWeightTime())
-                .deduplicationDistanceMeters(config.getDeduplicationDistanceMeters())
-                .deduplicationTimeWindowHours(config.getDeduplicationTimeWindowHours())
+                .deduplicationDistanceMeters(java.math.BigDecimal.valueOf(config.getDistanceThresholdMeters()))
+                .deduplicationTimeWindowHours(config.getTimeWindowHours())
                 .effectiveFrom(config.getEffectiveFrom())
                 .effectiveTo(config.getEffectiveTo())
                 .createdByUsername(

@@ -38,7 +38,7 @@ public class TaskService {
 
         // Create task entity
         Task task = Task.builder()
-                .report(report)
+                .primaryReport(report)
                 .location(report.getLocation())
                 .category(report.getCategory())
                 .state(TaskState.PENDIENTE)
@@ -137,7 +137,7 @@ public class TaskService {
         log.info("Recalculating priority for all pending tasks");
         
         taskRepository.findByState(TaskState.PENDIENTE).forEach(task -> {
-            BigDecimal newPriority = priorityCalculatorService.recalculatePriority(task.getReport());
+            BigDecimal newPriority = priorityCalculatorService.recalculatePriority(task.getPrimaryReport());
             task.setPriorityScore(newPriority);
             taskRepository.save(task);
             log.debug("Task {} priority updated to {}", task.getId(), newPriority);

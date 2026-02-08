@@ -26,11 +26,36 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
     List<AuditLog> findByTaskOrderByChangedAtAsc(Task task);
 
     /**
+     * Find audit logs for a specific task by ID ordered chronologically
+     * @param taskId the task ID to get audit history for
+     * @return list of audit logs in chronological order
+     */
+    List<AuditLog> findByTaskIdOrderByChangedAtAsc(UUID taskId);
+
+    /**
      * Find audit logs by user
      * @param user the user who performed the changes
      * @return list of audit logs
      */
     List<AuditLog> findByUser(User user);
+
+    /**
+     * Find audit logs by user ordered by date descending
+     * @param user the user who performed the changes
+     * @return list of audit logs ordered by date descending
+     */
+    List<AuditLog> findByUserOrderByChangedAtDesc(User user);
+
+    /**
+     * Find recent audit logs (limited)
+     * @param limit the maximum number of logs to return
+     * @return list of recent audit logs
+     */
+    @org.springframework.data.jpa.repository.Query(
+        value = "SELECT * FROM historial_cambios ORDER BY changed_at DESC LIMIT :limit",
+        nativeQuery = true
+    )
+    List<AuditLog> findRecentAuditLogs(int limit);
 
     /**
      * Find audit logs within a time range

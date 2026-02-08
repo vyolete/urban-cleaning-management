@@ -37,8 +37,8 @@ public class DeduplicationService {
         AlgorithmConfig config = configService.getCurrentConfig();
         
         // Get deduplication parameters
-        BigDecimal distanceThreshold = config.getDeduplicationDistanceMeters();
-        Integer timeWindowHours = config.getDeduplicationTimeWindowHours();
+        Double distanceThreshold = config.getDistanceThresholdMeters();
+        Integer timeWindowHours = config.getTimeWindowHours();
         
         // Calculate time window
         LocalDateTime timeThreshold = newReport.getCreatedAt().minusHours(timeWindowHours);
@@ -49,7 +49,7 @@ public class DeduplicationService {
         // Find nearby reports within time window
         List<Report> nearbyReports = reportRepository.findNearbyReportsWithinTimeWindow(
                 newReport.getLocation(),
-                distanceThreshold.doubleValue(),
+                distanceThreshold,
                 timeThreshold,
                 newReport.getCategory()
         );

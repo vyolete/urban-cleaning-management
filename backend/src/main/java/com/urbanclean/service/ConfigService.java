@@ -47,8 +47,8 @@ public class ConfigService {
                 .weightCategory(DEFAULT_WEIGHT_CATEGORY)
                 .weightZone(DEFAULT_WEIGHT_ZONE)
                 .weightTime(DEFAULT_WEIGHT_TIME)
-                .deduplicationDistanceMeters(DEFAULT_DEDUP_DISTANCE)
-                .deduplicationTimeWindowHours(DEFAULT_DEDUP_TIME_WINDOW)
+                .distanceThresholdMeters(DEFAULT_DEDUP_DISTANCE.doubleValue())
+                .timeWindowHours(DEFAULT_DEDUP_TIME_WINDOW)
                 .effectiveFrom(LocalDateTime.now())
                 .build();
 
@@ -79,8 +79,8 @@ public class ConfigService {
                 .weightCategory(weightCategory)
                 .weightZone(weightZone)
                 .weightTime(weightTime)
-                .deduplicationDistanceMeters(deduplicationDistance)
-                .deduplicationTimeWindowHours(deduplicationTimeWindow)
+                .distanceThresholdMeters(deduplicationDistance.doubleValue())
+                .timeWindowHours(deduplicationTimeWindow)
                 .effectiveFrom(LocalDateTime.now())
                 .build();
 

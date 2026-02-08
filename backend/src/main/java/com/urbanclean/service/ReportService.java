@@ -3,6 +3,7 @@ package com.urbanclean.service;
 import com.urbanclean.dto.request.ReportSubmissionRequest;
 import com.urbanclean.dto.response.ReportResponse;
 import com.urbanclean.entity.Report;
+import com.urbanclean.entity.Task;
 import com.urbanclean.entity.User;
 import com.urbanclean.exception.custom.ResourceNotFoundException;
 import com.urbanclean.exception.custom.ValidationException;
