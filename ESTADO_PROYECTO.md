@@ -41,6 +41,112 @@
 
 ## 🔧 Cambios Recientes
 
+### 9 Feb 2026 - ✅ Fase 5 Completada: Audit Trail Enhancement & Security Monitoring
+
+**Tarea 20: Security Monitoring**
+- Creada entidad `FailedLoginAttempt` para trackear intentos de login fallidos
+- Implementado `SecurityMonitoringService` con detección automática de actividad sospechosa
+- Thresholds: 5 intentos por username, 10 por IP en ventana de 15 minutos
+- Flagging automático de intentos sospechosos
+- Cleanup automático de registros antiguos (diario a las 3 AM)
+- Integrado con AuthService y AuthController
+
+**Archivos creados:**
+- `backend/src/main/java/com/urbanclean/entity/FailedLoginAttempt.java`
+- `backend/src/main/java/com/urbanclean/repository/FailedLoginAttemptRepository.java`
+- `backend/src/main/java/com/urbanclean/service/SecurityMonitoringService.java`
+- `backend/src/main/resources/db/migration/V10__create_failed_login_attempts_table.sql`
+
+**Archivos modificados:**
+- `backend/src/main/java/com/urbanclean/service/AuthService.java`
+- `backend/src/main/java/com/urbanclean/controller/AuthController.java`
+
+**Tarea 19: Audit Logging con IP Capture**
+- Agregado campo `ipAddress` (VARCHAR 45) a AuditLog entity
+- Creada migración V9 para agregar columna a base de datos
+- Implementados métodos `captureIpAddress()` y `sanitizeIpAddress()` en AuditService
+- Soporte para IPv4 e IPv6
+- Manejo de headers X-Forwarded-For y X-Real-IP para proxies
+
+**Archivos modificados:**
+- `backend/src/main/java/com/urbanclean/entity/AuditLog.java`
+- `backend/src/main/java/com/urbanclean/service/AuditService.java`
+
+**Archivos creados:**
+- `backend/src/main/resources/db/migration/V9__add_ip_address_to_audit_log.sql`
+
+**Tarea 13: Email Notifications con Eventos**
+- Implementado sistema de notificaciones basado en eventos de Spring
+- Creados eventos `TaskResolvedEvent` y `TaskReopenedEvent`
+- Implementado `TaskEventListener` con ejecución asíncrona
+- Desacoplamiento entre lógica de negocio y envío de emails
+- Integrado con TaskService y FeedbackService
+
+**Archivos creados:**
+- `backend/src/main/java/com/urbanclean/event/TaskResolvedEvent.java`
+- `backend/src/main/java/com/urbanclean/event/TaskReopenedEvent.java`
+- `backend/src/main/java/com/urbanclean/event/TaskEventListener.java`
+
+**Archivos modificados:**
+- `backend/src/main/java/com/urbanclean/service/TaskService.java`
+- `backend/src/main/java/com/urbanclean/service/FeedbackService.java`
+
+**Estado**: ✅ Compilación exitosa, Fase 5 completada
+
+### 9 Feb 2026 - ✅ JWT Token Invalidation Implementado (Tarea 7)
+**Archivos modificados:**
+- `backend/src/main/java/com/urbanclean/entity/User.java` - Agregado campo `tokenVersion`
+- `backend/src/main/resources/db/migration/V8__add_token_version_to_users.sql` - Migración DB
+- `backend/src/main/java/com/urbanclean/security/JwtTokenProvider.java` - Soporte tokenVersion
+- `backend/src/main/java/com/urbanclean/security/JwtAuthenticationFilter.java` - Validación tokenVersion
+- `backend/src/main/java/com/urbanclean/service/AuthService.java` - Incluye tokenVersion en JWT
+- `backend/src/main/java/com/urbanclean/service/PasswordResetService.java` - Incrementa tokenVersion
+- `backend/src/main/java/com/urbanclean/controller/UserController.java` - Incrementa tokenVersion
+
+**Archivos creados:**
+- `backend/JWT_INVALIDATION_IMPLEMENTATION.md` - Documentación completa
+
+**Funcionalidad:**
+- Todos los JWT tokens existentes se invalidan automáticamente cuando el usuario cambia su contraseña
+- Implementado mediante campo `tokenVersion` en la entidad User
+- El tokenVersion se incrementa en cada cambio de contraseña
+- El filtro JWT valida que la versión del token coincida con la versión actual del usuario
+- Backward compatible: tokens antiguos sin versión se tratan como versión 0
+
+**Seguridad mejorada:**
+- ✅ Previene acceso no autorizado con tokens antiguos después de cambio de contraseña
+- ✅ No requiere blacklist de tokens (solución stateless)
+- ✅ Logs de seguridad para monitoreo de intentos con tokens inválidos
+
+**Estado**: ✅ Compilación exitosa, Tarea 7 completada
+
+### 9 Feb 2026 - ✅ GDPR Fase 4 Completada - User Profile Management API
+**Archivos creados:**
+- `backend/src/main/java/com/urbanclean/controller/UserController.java` - Controlador REST
+- `backend/src/main/java/com/urbanclean/dto/request/UpdateProfileRequest.java` - DTO
+- `backend/src/main/java/com/urbanclean/dto/request/ChangePasswordRequest.java` - DTO
+- `backend/src/main/java/com/urbanclean/dto/request/DeleteAccountRequest.java` - DTO
+- `backend/src/main/java/com/urbanclean/dto/response/UserProfileResponse.java` - DTO
+- `GDPR_PHASE4_COMPLETION_SUMMARY.md` - Documentación completa
+- `backend/USER_PROFILE_API_IMPLEMENTATION.md` - Guía de implementación
+
+**Endpoints implementados:**
+- GET `/api/users/profile` - Obtener perfil del usuario
+- PUT `/api/users/profile` - Actualizar perfil
+- POST `/api/users/change-password` - Cambiar contraseña
+- GET `/api/users/reports` - Ver historial de reportes
+- POST `/api/users/delete-account` - Solicitar eliminación (7 días de gracia)
+- POST `/api/users/cancel-deletion` - Cancelar eliminación
+- GET `/api/users/export` - Exportar datos (GDPR portabilidad)
+
+**Cumplimiento GDPR:**
+- ✅ Derecho de Acceso (Artículo 15)
+- ✅ Derecho de Rectificación (Artículo 16)
+- ✅ Derecho al Olvido (Artículo 17)
+- ✅ Derecho a la Portabilidad (Artículo 20)
+
+**Estado**: ✅ Compilación exitosa, listo para integración frontend
+
 ### Commit 1dee483 - Debug de Autenticación
 **Archivos modificados:**
 - `frontend/src/services/authService.js` - Agregados logs de debug
@@ -177,6 +283,15 @@ ORDER BY t.created_at DESC;
 ### Autenticación (Público)
 - `POST /api/auth/login` - Iniciar sesión
 - `POST /api/auth/register` - Registrar usuario
+
+### Perfil de Usuario (Requiere autenticación)
+- `GET /api/users/profile` - Obtener perfil del usuario actual
+- `PUT /api/users/profile` - Actualizar perfil (email, username)
+- `POST /api/users/change-password` - Cambiar contraseña
+- `GET /api/users/reports` - Ver historial de reportes del usuario
+- `POST /api/users/delete-account` - Solicitar eliminación de cuenta (7 días de gracia)
+- `POST /api/users/cancel-deletion` - Cancelar solicitud de eliminación
+- `GET /api/users/export` - Exportar todos los datos del usuario (JSON)
 
 ### Reportes
 - `POST /api/reports` - Crear reporte (público, sin autenticación)

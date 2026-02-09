@@ -56,4 +56,12 @@ public class User {
 
     @Column(name = "original_email_hash", length = 64)
     private String originalEmailHash;
+
+    /**
+     * Token version for JWT invalidation
+     * Incremented when password is reset to invalidate all existing tokens
+     */
+    @Column(name = "token_version", nullable = false)
+    @Builder.Default
+    private Integer tokenVersion = 0;
 }

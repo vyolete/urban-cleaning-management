@@ -30,13 +30,21 @@ public class JwtTokenProvider {
     private Long expiration;
 
     /**
-     * Generate JWT token with user identity and role claims
+     * Generate JWT token with user identity, role claims, and token version
      */
-    public String generateToken(String username, UUID userId, UserRole role) {
+    public String generateToken(String username, UUID userId, UserRole role, Integer tokenVersion) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId.toString());
         claims.put("role", role.name());
+        claims.put("tokenVersion", tokenVersion);
         return createToken(claims, username);
+    }
+
+    /**
+     * Generate JWT token with user identity and role claims (backward compatibility)
+     */
+    public String generateToken(String username, UUID userId, UserRole role) {
+        return generateToken(username, userId, role, 0);
     }
 
     /**
@@ -90,6 +98,13 @@ public class JwtTokenProvider {
     public UserRole getRoleFromToken(String token) {
         String roleStr = extractClaim(token, claims -> claims.get("role", String.class));
         return roleStr != null ? UserRole.valueOf(roleStr) : null;
+    }
+
+    /**
+     * Extract token version from token
+     */
+    public Integer getTokenVersionFromToken(String token) {
+        return extractClaim(token, claims -> claims.get("tokenVersion", Integer.class));
     }
 
     /**

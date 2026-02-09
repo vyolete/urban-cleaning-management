@@ -1,13 +1,16 @@
 package com.urbanclean.service;
 
+import com.urbanclean.repository.NotificationFailureRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Service for sending emails asynchronously with retry logic
@@ -26,6 +30,9 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+
+    @Autowired
+    private NotificationFailureService notificationFailureService;
 
     @Value("${email.from}")
     private String fromEmail;
@@ -135,5 +142,65 @@ public class EmailService {
         );
         
         sendEmail(to, "Account Deletion Request", "email/account-deletion", variables);
+    }
+
+    /**
+     * Send task assignment notification to operator
+     */
+    @Async
+    public void sendTaskAssignmentEmail(String to, String taskId, String category, 
+                                       String location, Double priorityScore, String operatorName) {
+        Map<String, Object> variables = Map.of(
+            "operatorName", operatorName,
+            "taskId", taskId,
+            "category", category,
+            "location", location,
+            "priorityScore", String.format("%.2f", priorityScore),
+            "taskLink", baseUrl + "/tasks/" + taskId
+        );
+        
+        sendEmail(to, "New Task Assigned - Action Required", "email/task-assigned", variables);
+    }
+
+    /**
+     * Send report creation confirmation to citizen
+     */
+    @Async
+    public void sendReportCreatedEmail(String to, String reportId, String category, 
+                                      String citizenName) {
+        Map<String, Object> variables = Map.of(
+            "citizenName", citizenName,
+            "reportId", reportId,
+            "category", category,
+            "reportLink", baseUrl + "/reports/" + reportId
+        );
+        
+        sendEmail(to, "Report Created Successfully", "email/report-created", variables);
+    }
+
+    /**
+     * Recovery method for failed email sending
+     * Records the failure for later analysis
+     */
+    @Recover
+    public void recoverFromEmailFailure(Exception e, String to, String subject, 
+                                       String templateName, Map<String, Object> variables) {
+        log.error("All retry attempts failed for email to: {}. Recording failure.", to);
+        
+        // Extract userId and notificationType from variables if available
+        UUID userId = variables.containsKey("userId") ? 
+            UUID.fromString(variables.get("userId").toString()) : null;
+        String notificationType = variables.containsKey("notificationType") ? 
+            variables.get("notificationType").toString() : "UNKNOWN";
+        
+        if (userId != null && notificationFailureService != null) {
+            notificationFailureService.recordFailure(
+                userId, 
+                notificationType, 
+                to, 
+                e.getMessage(), 
+                3 // Max retry attempts
+            );
+        }
     }
 }

@@ -1,11 +1,13 @@
 package com.urbanclean.service;
 
 import com.urbanclean.entity.*;
+import com.urbanclean.event.TaskReopenedEvent;
 import com.urbanclean.repository.CitizenFeedbackRepository;
 import com.urbanclean.repository.TaskRepository;
 import com.urbanclean.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class FeedbackService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final ApplicationEventPublisher eventPublisher;
     
     private static final int FEEDBACK_DEADLINE_HOURS = 72;
     private static final int MAX_REOPEN_COUNT = 3;
@@ -148,14 +151,21 @@ public class FeedbackService {
         task.setCitizenApproved(false);
         taskRepository.save(task);
         
-        // Notify assigned operator
+        // Publish TaskReopenedEvent to notify assigned operator
         if (task.getAssignedOperator() != null) {
-            emailService.sendTaskReopenedEmail(
-                task.getAssignedOperator().getEmail(),
-                task.getId().toString(),
-                task.getCategory(),
+            String operatorEmail = task.getAssignedOperator().getEmail();
+            String taskCategory = task.getCategory() != null ? task.getCategory().toString() : "Unknown";
+            String taskDescription = task.getPrimaryReport().getDescription();
+            
+            log.info("Publishing TaskReopenedEvent for task {}", taskId);
+            eventPublisher.publishEvent(new TaskReopenedEvent(
+                this,
+                taskId,
+                operatorEmail,
+                taskCategory,
+                taskDescription,
                 justification
-            );
+            ));
         }
         
         log.info("Task {} reopened by citizen {}, reopen count: {}", 

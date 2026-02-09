@@ -9,6 +9,7 @@ import com.urbanclean.exception.custom.AuthenticationException;
 import com.urbanclean.exception.custom.ValidationException;
 import com.urbanclean.repository.UserRepository;
 import com.urbanclean.security.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,12 +31,13 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final SecurityMonitoringService securityMonitoringService;
 
     /**
      * Authenticate user and generate JWT token
      */
     @Transactional(readOnly = true)
-    public LoginResponse login(String username, String password) {
+    public LoginResponse login(String username, String password, HttpServletRequest request) {
         try {
             // Authenticate with Spring Security
             Authentication authentication = authenticationManager.authenticate(
@@ -46,8 +48,13 @@ public class AuthService {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new AuthenticationException("User not found"));
 
-            // Generate JWT token
-            String token = jwtTokenProvider.generateToken(user.getUsername(), user.getId(), user.getRole());
+            // Generate JWT token with token version
+            String token = jwtTokenProvider.generateToken(
+                user.getUsername(), 
+                user.getId(), 
+                user.getRole(),
+                user.getTokenVersion() != null ? user.getTokenVersion() : 0
+            );
 
             log.info("User {} logged in successfully", username);
 
@@ -61,8 +68,22 @@ public class AuthService {
 
         } catch (org.springframework.security.core.AuthenticationException e) {
             log.warn("Failed login attempt for user: {}", username);
+            
+            // Log failed attempt for security monitoring
+            if (request != null) {
+                securityMonitoringService.logFailedLoginAttempt(username, request);
+            }
+            
             throw new AuthenticationException("Invalid username or password");
         }
+    }
+
+    /**
+     * Authenticate user and generate JWT token (backward compatibility)
+     */
+    @Transactional(readOnly = true)
+    public LoginResponse login(String username, String password) {
+        return login(username, password, null);
     }
 
     /**

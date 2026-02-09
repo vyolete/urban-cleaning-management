@@ -134,6 +134,11 @@ public class PasswordResetService {
         
         // Update password
         user.setPasswordHash(passwordEncoder.encode(newPassword));
+        
+        // Increment token version to invalidate all existing JWTs
+        Integer currentVersion = user.getTokenVersion() != null ? user.getTokenVersion() : 0;
+        user.setTokenVersion(currentVersion + 1);
+        
         userRepository.save(user);
         
         // Mark token as used
@@ -142,7 +147,8 @@ public class PasswordResetService {
         resetToken.setIpAddress(ipAddress);
         tokenRepository.save(resetToken);
         
-        log.info("Password successfully reset for user: {}", user.getUsername());
+        log.info("Password successfully reset for user: {}. Token version incremented to: {}", 
+            user.getUsername(), user.getTokenVersion());
         return true;
     }
 

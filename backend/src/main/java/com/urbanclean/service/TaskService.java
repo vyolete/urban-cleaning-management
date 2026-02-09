@@ -3,11 +3,16 @@ package com.urbanclean.service;
 import com.urbanclean.entity.Report;
 import com.urbanclean.entity.Task;
 import com.urbanclean.entity.TaskState;
+import com.urbanclean.entity.User;
+import com.urbanclean.event.TaskAssignedEvent;
+import com.urbanclean.event.TaskResolvedEvent;
 import com.urbanclean.exception.custom.InvalidStateTransitionException;
 import com.urbanclean.exception.custom.ResourceNotFoundException;
 import com.urbanclean.repository.TaskRepository;
+import com.urbanclean.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +29,8 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final PriorityCalculatorService priorityCalculatorService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final UserRepository userRepository;
 
     /**
      * Create a task from a report
@@ -59,6 +66,51 @@ public class TaskService {
     public Task getTaskById(UUID id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found: " + id));
+    }
+
+    /**
+     * Assign task to an operator
+     * Changes state to ASIGNADO and publishes TaskAssignedEvent
+     */
+    @Transactional
+    public Task assignTask(UUID taskId, UUID operatorId) {
+        log.info("Assigning task {} to operator {}", taskId, operatorId);
+        
+        Task task = getTaskById(taskId);
+        
+        // Validate current state
+        if (task.getState() != TaskState.PENDIENTE) {
+            throw new InvalidStateTransitionException(
+                String.format("Task must be in PENDIENTE state to be assigned. Current state: %s", task.getState())
+            );
+        }
+        
+        // Get operator
+        User operator = userRepository.findById(operatorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Operator not found: " + operatorId));
+        
+        // Assign task
+        task.setAssignedOperator(operator);
+        task.setState(TaskState.ASIGNADO);
+        
+        Task savedTask = taskRepository.save(task);
+        
+        // Publish event for notification
+        String location = String.format("%.6f, %.6f", 
+            task.getLocation().getY(), 
+            task.getLocation().getX());
+        
+        eventPublisher.publishEvent(new TaskAssignedEvent(
+            this,
+            taskId,
+            operatorId,
+            task.getCategory().toString(),
+            location,
+            task.getPriorityScore().doubleValue()
+        ));
+        
+        log.info("Task {} assigned to operator {} successfully", taskId, operatorId);
+        return savedTask;
     }
 
     /**
@@ -106,8 +158,27 @@ public class TaskService {
         
         // Update state
         task.setState(newState);
+        Task savedTask = taskRepository.save(task);
+        
+        // Publish TaskResolvedEvent if transitioning to RESUELTO
+        if (newState == TaskState.RESUELTO && task.getPrimaryReport() != null 
+            && task.getPrimaryReport().getSubmitter() != null) {
+            
+            String citizenEmail = task.getPrimaryReport().getSubmitter().getEmail();
+            String taskCategory = task.getCategory() != null ? task.getCategory().toString() : "Unknown";
+            String taskDescription = task.getPrimaryReport().getDescription();
+            
+            log.info("Publishing TaskResolvedEvent for task {}", taskId);
+            eventPublisher.publishEvent(new TaskResolvedEvent(
+                this,
+                taskId,
+                citizenEmail,
+                taskCategory,
+                taskDescription
+            ));
+        }
 
-        return taskRepository.save(task);
+        return savedTask;
     }
     
     /**

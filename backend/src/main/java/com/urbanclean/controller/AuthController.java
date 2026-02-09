@@ -5,6 +5,7 @@ import com.urbanclean.dto.request.RegisterRequest;
 import com.urbanclean.dto.response.LoginResponse;
 import com.urbanclean.entity.User;
 import com.urbanclean.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +29,15 @@ public class AuthController {
      * POST /api/auth/login
      */
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest) {
         log.info("Login attempt for user: {}", request.getUsername());
-        LoginResponse response = authService.login(request.getUsername(), request.getPassword());
+        LoginResponse response = authService.login(
+            request.getUsername(), 
+            request.getPassword(),
+            httpRequest
+        );
         return ResponseEntity.ok(response);
     }
 

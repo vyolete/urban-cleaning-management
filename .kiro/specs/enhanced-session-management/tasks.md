@@ -11,7 +11,7 @@ This implementation plan breaks down the enhanced session management feature int
   - Implement JPA entities with proper indexes
   - _Requirements: 1.3, 2.2, 3.1, 7.1_
 
-- [ ] 1.1 Create RefreshToken entity and repository
+- [x] 1.1 Create RefreshToken entity and repository
   - Define RefreshToken entity with all fields (token_hash, token_id, user_id, device_fingerprint, etc.)
   - Add indexes on token_hash, token_id, user_id, expires_at
   - Create RefreshTokenRepository with custom queries

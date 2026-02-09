@@ -121,6 +121,32 @@ public class TaskController {
     }
 
     /**
+     * Assign task to an operator
+     * POST /api/tasks/{id}/assign
+     * Accessible by admins
+     */
+    @PostMapping("/{id}/assign")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<TaskResponse> assignTask(
+            @PathVariable UUID id,
+            @RequestParam UUID operatorId) {
+        
+        log.info("Assign task request: taskId={}, operatorId={}", id, operatorId);
+
+        // Get current state before assignment
+        Task task = taskService.getTaskById(id);
+        TaskState previousState = task.getState();
+
+        // Assign task
+        Task assignedTask = taskService.assignTask(id, operatorId);
+
+        // Log state change
+        auditService.logStateChange(assignedTask, previousState, TaskState.ASIGNADO);
+
+        return ResponseEntity.ok(mapToResponse(assignedTask));
+    }
+
+    /**
      * Get audit history for a task
      * GET /api/tasks/{id}/audit-history
      * Accessible by operators and admins
