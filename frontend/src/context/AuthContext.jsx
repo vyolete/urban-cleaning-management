@@ -27,11 +27,18 @@ export function AuthProvider({ children }) {
         const storedToken = authService.getToken();
         const storedUser = authService.getCurrentUser();
 
+        console.log('AuthContext - initAuth - Stored token:', storedToken ? 'Present' : 'Not found');
+        console.log('AuthContext - initAuth - Stored user:', storedUser);
+        console.log('AuthContext - initAuth - User role:', storedUser?.role);
+        console.log('AuthContext - initAuth - Is authenticated:', authService.isAuthenticated());
+
         if (storedToken && authService.isAuthenticated()) {
           setToken(storedToken);
           setUser(storedUser);
+          console.log('AuthContext - initAuth - User set in state');
         } else {
           // Token expired or invalid, clear storage
+          console.log('AuthContext - initAuth - Token invalid or expired, clearing storage');
           authService.logout();
         }
       } catch (error) {
@@ -57,6 +64,9 @@ export function AuthProvider({ children }) {
       setError(null);
 
       const response = await authService.login(username, password);
+      
+      console.log('AuthContext - Setting user:', response.user);
+      console.log('AuthContext - User role:', response.user?.role);
       
       setToken(response.token);
       setUser(response.user);

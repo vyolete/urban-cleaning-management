@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login Flow</title>
+</head>
+<body>
+    <h1>Test Login Flow</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="checkStorage()">Check Storage</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    <pre id="output"></pre>
+
+    <script>
+        const output = document.getElementById('output');
+
+        async function testLogin() {
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+                output.textContent = 'Backend response:\n' + JSON.stringify(data, null, 2);
+
+                // Simulate frontend logic
+                const { token, role, username } = data;
+                const user = {
+                    username: username,
+                    role: role
+                };
+
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+
+                output.textContent += '\n\nStored user:\n' + JSON.stringify(user, null, 2);
+                output.textContent += '\n\nUser role: ' + user.role;
+                output.textContent += '\nRole type: ' + typeof user.role;
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function checkStorage() {
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : null;
+
+            output.textContent = 'Token: ' + (token ? 'Present' : 'Not found') + '\n\n';
+            output.textContent += 'User:\n' + JSON.stringify(user, null, 2);
+            
+            if (user) {
+                output.textContent += '\n\nUser role: ' + user.role;
+                output.textContent += '\nRole type: ' + typeof user.role;
+                
+                // Test role checks
+                const requiredRoles = ['ROLE_TECNICO', 'ROLE_ADMIN'];
+                const hasRole = requiredRoles.includes(user.role);
+                output.textContent += '\n\nHas any role from ' + JSON.stringify(requiredRoles) + ': ' + hasRole;
+            }
+        }
+
+        function clearStorage() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            output.textContent = 'Storage cleared';
+        }
+    </script>
+</body>
+</html>
