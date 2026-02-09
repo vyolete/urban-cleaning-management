@@ -13,12 +13,20 @@ This document specifies the requirements for an Urban Cleaning Management WebApp
 - **Report**: A citizen-submitted incident containing location, category, description, and photo
 - **Task**: A work item created from one or more reports, assigned to operators
 - **Priority_Score**: A calculated numeric value determining task urgency (P = Wc * Category + Wz * Zone + Wt * Time)
-- **Task_State**: The current status of a task (PENDIENTE, ASIGNADO, EN_PROGRESO, RESUELTO)
+- **Task_State**: The current status of a task (PENDIENTE, ASIGNADO, EN_PROGRESO, RESUELTO, REABIERTO)
 - **Geofencing**: Geographic boundary validation for coordinates
 - **Deduplication**: Process of identifying and merging similar reports within proximity and time thresholds
 - **Audit_Log**: Immutable record of state changes with user and timestamp information
 - **JWT**: JSON Web Token used for authentication
 - **BCrypt**: Password hashing algorithm
+- **OTP**: One-Time Password token used for password recovery
+- **MTTR**: Mean Time To Resolution - average time to resolve tasks
+- **Heatmap**: Geographic visualization showing incident concentration
+- **Citizen_Feedback**: User confirmation or rejection of task resolution
+- **Email_Notification**: Asynchronous email alerts for system events
+- **RGPD**: General Data Protection Regulation (EU privacy law)
+- **RFC_5322**: Email address format standard
+- **OpenAPI**: API documentation specification (formerly Swagger)
 
 ## Requirements
 
@@ -188,3 +196,121 @@ This document specifies the requirements for an Urban Cleaning Management WebApp
 3. WHEN weight parameters change, THE System SHALL trigger recalculation of Priority_Score for pending tasks
 4. THE System SHALL store historical weight configurations for audit purposes
 5. THE System SHALL apply default weight values when no custom configuration exists
+
+### Requirement 14: Password Recovery
+
+**User Story:** As a user who forgot my password, I want to securely reset it via email, so that I can regain access to my account.
+
+#### Acceptance Criteria
+
+1. WHEN a user requests password recovery, THE System SHALL generate a cryptographically secure one-time token
+2. WHEN a recovery token is generated, THE System SHALL set an expiration time of 15 minutes
+3. WHEN a recovery request is submitted, THE System SHALL send an email with a unique recovery link
+4. THE System SHALL not reveal whether an email address exists in the system when processing recovery requests
+5. WHEN a recovery token is used, THE System SHALL invalidate it immediately
+6. WHEN a recovery link expires, THE System SHALL reject password reset attempts with that token
+7. THE System SHALL only accept recovery links over HTTPS connections
+8. WHEN a password is successfully reset, THE System SHALL invalidate all existing JWT tokens for that user
+
+### Requirement 15: Task Reopening and Citizen Feedback
+
+**User Story:** As a Citizen, I want to confirm or reject task resolution, so that I can ensure my reported incident was properly addressed.
+
+#### Acceptance Criteria
+
+1. WHEN a task transitions to RESUELTO state, THE System SHALL send a notification to the original reporter
+2. THE System SHALL provide two actions in the notification: "Confirm Solution" and "Reject/Reopen"
+3. WHEN a Citizen confirms resolution, THE System SHALL mark the task as citizen-approved
+4. WHEN a Citizen rejects resolution, THE System SHALL transition the task to REABIERTO state
+5. WHEN reopening a task, THE System SHALL require a mandatory justification field
+6. IF no citizen response is received within 72 hours, THEN THE System SHALL automatically close the task
+7. THE System SHALL only allow the original reporter to provide feedback on their own reports
+8. WHEN a task is reopened, THE System SHALL notify the assigned operator
+9. THE System SHALL record citizen satisfaction feedback for quality statistics
+
+### Requirement 16: Email Notification System
+
+**User Story:** As a system user, I want to receive email notifications about important events, so that I stay informed about my reports and tasks.
+
+#### Acceptance Criteria
+
+1. WHEN a task state changes to RESUELTO, THE System SHALL send an email notification to the citizen reporter
+2. WHEN a task is reopened, THE System SHALL send an email notification to the assigned operator
+3. WHEN a new task is assigned, THE System SHALL send an email notification to the operator
+4. THE System SHALL process email sending asynchronously to avoid blocking API responses
+5. WHEN email sending fails, THE System SHALL log the failure and retry up to 3 times
+6. THE System SHALL use HTML templates for email formatting
+7. THE System SHALL allow users to enable or disable notification preferences
+8. WHEN an email cannot be delivered after retries, THE System SHALL record the failure for administrator review
+
+### Requirement 17: Analytics Dashboard
+
+**User Story:** As an Administrator, I want to view aggregated analytics and KPIs, so that I can make data-driven operational decisions.
+
+#### Acceptance Criteria
+
+1. THE System SHALL provide an endpoint to retrieve task distribution by category
+2. THE System SHALL provide an endpoint to retrieve task distribution by state
+3. THE System SHALL provide an endpoint to calculate Mean Time To Resolution (MTTR)
+4. THE System SHALL provide an endpoint to generate heatmap data showing incident concentration by geographic area
+5. WHEN analytics queries are executed, THE System SHALL use database aggregation functions (GROUP BY, COUNT, AVG)
+6. THE System SHALL cache analytics results for 5 minutes to reduce database load
+7. THE System SHALL support filtering analytics by date range
+8. THE System SHALL support filtering analytics by geographic zone
+9. WHEN loading the analytics dashboard, THE System SHALL respond within 2 seconds
+
+### Requirement 18: User Profile Management
+
+**User Story:** As a user, I want to manage my personal information and view my activity history, so that I can maintain control over my data.
+
+#### Acceptance Criteria
+
+1. THE System SHALL provide an endpoint for users to retrieve their own profile information
+2. THE System SHALL provide an endpoint for users to update their own profile information
+3. THE System SHALL provide an endpoint for users to change their password
+4. THE System SHALL provide an endpoint for users to view their complete report history
+5. THE System SHALL provide an endpoint for users to delete their account and associated data
+6. WHEN a user updates profile information, THE System SHALL validate that they can only modify their own data
+7. WHEN a user changes their password, THE System SHALL require the current password for verification
+8. WHEN a user deletes their account, THE System SHALL anonymize their historical reports rather than deleting them
+9. THE System SHALL provide an endpoint to export user data in JSON format for portability
+
+### Requirement 19: Input Validation and Security
+
+**User Story:** As a security engineer, I want comprehensive input validation, so that the system is protected against malicious inputs.
+
+#### Acceptance Criteria
+
+1. WHEN a user registers, THE System SHALL validate password complexity (minimum 8 characters, 1 uppercase, 1 number, 1 special character)
+2. WHEN a user registers, THE System SHALL validate email format using RFC 5322 compliant regular expression
+3. WHEN processing user inputs, THE System SHALL sanitize all text fields to prevent XSS attacks
+4. WHEN executing database queries, THE System SHALL use parameterized queries to prevent SQL injection
+5. THE System SHALL validate file upload MIME types match actual file content
+6. THE System SHALL enforce maximum file size limits on all uploads
+7. THE System SHALL validate coordinate ranges (latitude: -90 to 90, longitude: -180 to 180)
+
+### Requirement 20: Data Export and Interoperability
+
+**User Story:** As an Administrator, I want to export system data in standard formats, so that I can integrate with other municipal systems.
+
+#### Acceptance Criteria
+
+1. THE System SHALL provide an endpoint to export reports in CSV format
+2. THE System SHALL provide an endpoint to export reports in JSON format
+3. WHEN generating CSV exports, THE System SHALL include headers with field names
+4. WHEN generating exports, THE System SHALL complete the operation within 5 seconds for up to 1000 records
+5. THE System SHALL validate that CSV files are compatible with Microsoft Excel and Google Sheets
+6. THE System SHALL support filtering export data by date range and status
+
+### Requirement 21: API Documentation
+
+**User Story:** As a frontend developer, I want comprehensive API documentation, so that I can integrate with backend services efficiently.
+
+#### Acceptance Criteria
+
+1. THE System SHALL generate API documentation automatically using OpenAPI/Swagger specification
+2. THE System SHALL expose interactive API documentation at /api/docs endpoint
+3. WHEN API documentation is accessed, THE System SHALL display all available endpoints with request/response schemas
+4. THE System SHALL include example requests and responses in the documentation
+5. THE System SHALL document all error codes and their meanings
+6. THE System SHALL keep documentation synchronized with actual API implementation
