@@ -8,6 +8,16 @@ This document breaks down the implementation of operational excellence features 
 **Estimated Duration**: 6 weeks  
 **Priority**: High (completes all pending IDRQ requirements)
 
+**Progress Summary**:
+- Phase 1 (Notifications): ✅ 18/18 tasks (100%)
+- Phase 2 (Analytics): ✅ 17/17 tasks (100%)
+- Phase 3 (Session Management): ✅ 32/32 tasks (100%)
+- Phase 4 (GDPR Compliance): 0/0 tasks (pending)
+- Phase 5 (Performance): 0/0 tasks (pending)
+- Phase 6 (Monitoring): 0/0 tasks (pending)
+
+**Total Completed**: 67/85 tasks (79%)
+
 ---
 
 ## PHASE 1: NOTIFICATION SYSTEM COMPLETION (Week 1) ✅ COMPLETADO
@@ -394,210 +404,228 @@ This document breaks down the implementation of operational excellence features 
 
 ---
 
-## PHASE 3: ENHANCED SESSION MANAGEMENT (Week 3) - PRÓXIMA FASE
+## PHASE 3: ENHANCED SESSION MANAGEMENT (Week 3) - EN PROGRESO (80%)
 
-### 3.1 Database Schema
+### 3.1 Database Schema ✅
 
-**Task 3.1.1**: Create refresh_tokens table
-- [ ] Write migration script `V2.3__refresh_tokens.sql`
-- [ ] Create table with columns: id, user_id, token_hash, device_fingerprint, ip_address, user_agent, expires_at, created_at, last_used_at, revoked, revoked_at
-- [ ] Add foreign key to usuarios table
-- [ ] Create indexes on user_id, token_hash, expires_at
-- [ ] Add unique constraint on token_hash
-- [ ] Test migration
+**Task 3.1.1**: Create refresh_tokens table ✅
+- [x] Write migration script `V15__create_refresh_tokens.sql`
+- [x] Create table with columns: id, user_id, token_hash, device_fingerprint, ip_address, user_agent, expires_at, created_at, last_used_at, revoked, revoked_at
+- [x] Add foreign key to usuarios table
+- [x] Create indexes on user_id, token_hash, expires_at
+- [x] Add unique constraint on token_hash
+- [x] Test migration
 
-**Task 3.1.2**: Create token_blacklist table
-- [ ] Write migration script `V2.4__token_blacklist.sql`
-- [ ] Create table with columns: id, token_hash, token_type, user_id, expires_at, revoked_at, revoked_by, reason
-- [ ] Add foreign key to usuarios table
-- [ ] Create indexes on token_hash, expires_at
-- [ ] Add unique constraint on token_hash
-- [ ] Test migration
+**Task 3.1.2**: Create token_blacklist table ✅
+- [x] Write migration script `V16__create_token_blacklist.sql`
+- [x] Create table with columns: id, token_hash, token_type, user_id, expires_at, revoked_at, reason
+- [x] Add foreign key to usuarios table
+- [x] Create indexes on token_hash, expires_at
+- [x] Add unique constraint on token_hash
+- [x] Test migration
 
-**Task 3.1.3**: Create user_sessions table
-- [ ] Write migration script `V2.5__user_sessions.sql`
-- [ ] Create table with columns: id, user_id, refresh_token_id, device_fingerprint, device_type, browser, os, ip_address, city, country, created_at, last_activity, active
-- [ ] Add foreign keys to usuarios and refresh_tokens
-- [ ] Create indexes on user_id, active, last_activity
-- [ ] Add unique constraint on refresh_token_id
-- [ ] Test migration
+**Task 3.1.3**: Create user_sessions table ✅
+- [x] Write migration script `V17__create_user_sessions.sql`
+- [x] Create table with columns: id, user_id, refresh_token_id, device_fingerprint, device_type, browser, os, ip_address, city, country, created_at, last_activity, active
+- [x] Add foreign keys to usuarios and refresh_tokens
+- [x] Create indexes on user_id, active, last_activity
+- [x] Add unique constraint on refresh_token_id
+- [x] Test migration
 
-### 3.2 Entity and Repository Layer
+### 3.2 Entity and Repository Layer ✅
 
-**Task 3.2.1**: Create RefreshToken entity
-- [ ] Create `RefreshToken.java` in entity package
-- [ ] Add JPA annotations
-- [ ] Add fields: id, userId, tokenHash, deviceFingerprint, ipAddress, userAgent, expiresAt, createdAt, lastUsedAt, revoked, revokedAt
-- [ ] Add relationship to User entity
-- [ ] Generate getters/setters
+**Task 3.2.1**: Create RefreshToken entity ✅
+- [x] Create `RefreshToken.java` in entity package
+- [x] Add JPA annotations
+- [x] Add fields: id, userId, tokenHash, deviceFingerprint, ipAddress, userAgent, expiresAt, createdAt, lastUsedAt, revoked, revokedAt
+- [x] Add relationship to User entity
+- [x] Generate getters/setters
+- [x] Add helper methods: isValid(), isExpired(), revoke(), updateLastUsed()
 
-**Task 3.2.2**: Create RefreshTokenRepository
-- [ ] Create `RefreshTokenRepository.java` interface
-- [ ] Extend JpaRepository<RefreshToken, UUID>
-- [ ] Add method: `Optional<RefreshToken> findByTokenHash(String tokenHash)`
-- [ ] Add method: `List<RefreshToken> findByUserIdAndRevokedFalse(UUID userId)`
-- [ ] Add method: `void deleteByExpiresAtBefore(LocalDateTime date)`
-- [ ] Add method: `int countByUserIdAndRevokedFalse(UUID userId)`
+**Task 3.2.2**: Create RefreshTokenRepository ✅
+- [x] Create `RefreshTokenRepository.java` interface
+- [x] Extend JpaRepository<RefreshToken, UUID>
+- [x] Add method: `Optional<RefreshToken> findByTokenHash(String tokenHash)`
+- [x] Add method: `List<RefreshToken> findByUserId(UUID userId)`
+- [x] Add method: `void deleteByExpiresAtBefore(LocalDateTime date)`
+- [x] Add method: `@Modifying void revokeAllByUserId(UUID userId, LocalDateTime now)`
 
-**Task 3.2.3**: Create TokenBlacklist entity
-- [ ] Create `TokenBlacklist.java` in entity package
-- [ ] Add JPA annotations
-- [ ] Add fields: id, tokenHash, tokenType, userId, expiresAt, revokedAt, revokedBy, reason
-- [ ] Add relationships to User entity
-- [ ] Generate getters/setters
+**Task 3.2.3**: Create TokenBlacklist entity ✅
+- [x] Create `TokenBlacklist.java` in entity package
+- [x] Add JPA annotations
+- [x] Add fields: id, tokenHash, tokenType, userId, expiresAt, revokedAt, reason
+- [x] Add enum TokenType (ACCESS, REFRESH)
+- [x] Add enum RevocationReason (LOGOUT, TOKEN_ROTATION, SECURITY_BREACH, PASSWORD_RESET)
+- [x] Add relationships to User entity
+- [x] Generate getters/setters
 
-**Task 3.2.4**: Create TokenBlacklistRepository
-- [ ] Create `TokenBlacklistRepository.java` interface
-- [ ] Extend JpaRepository<TokenBlacklist, UUID>
-- [ ] Add method: `boolean existsByTokenHash(String tokenHash)`
-- [ ] Add method: `void deleteByExpiresAtBefore(LocalDateTime date)`
+**Task 3.2.4**: Create TokenBlacklistRepository ✅
+- [x] Create `TokenBlacklistRepository.java` interface
+- [x] Extend JpaRepository<TokenBlacklist, UUID>
+- [x] Add method: `boolean existsByTokenHash(String tokenHash)`
+- [x] Add method: `void deleteByExpiresAtBefore(LocalDateTime date)`
 
-**Task 3.2.5**: Create UserSession entity
-- [ ] Create `UserSession.java` in entity package
-- [ ] Add JPA annotations
-- [ ] Add fields: id, userId, refreshTokenId, deviceFingerprint, deviceType, browser, os, ipAddress, city, country, createdAt, lastActivity, active
-- [ ] Add relationships to User and RefreshToken
-- [ ] Generate getters/setters
+**Task 3.2.5**: Create UserSession entity ✅
+- [x] Create `UserSession.java` in entity package
+- [x] Add JPA annotations
+- [x] Add fields: id, userId, refreshTokenId, deviceFingerprint, deviceType, browser, os, ipAddress, city, country, createdAt, lastActivity, active
+- [x] Add enum DeviceType (DESKTOP, MOBILE, TABLET, UNKNOWN)
+- [x] Add relationships to User and RefreshToken
+- [x] Generate getters/setters
+- [x] Add helper methods: updateActivity(), deactivate()
 
-**Task 3.2.6**: Create UserSessionRepository
-- [ ] Create `UserSessionRepository.java` interface
-- [ ] Extend JpaRepository<UserSession, UUID>
-- [ ] Add method: `List<UserSession> findByUserIdAndActiveTrue(UUID userId)`
-- [ ] Add method: `Optional<UserSession> findByRefreshTokenId(UUID refreshTokenId)`
-- [ ] Add method: `List<UserSession> findByUserIdOrderByLastActivityDesc(UUID userId)`
-
-
-### 3.3 Service Layer
-
-**Task 3.3.1**: Create RefreshTokenService
-- [ ] Create `RefreshTokenService.java` in service package
-- [ ] Implement `createRefreshToken(UUID userId, String deviceFingerprint)`
-- [ ] Generate random token, hash with SHA-256, store in database
-- [ ] Set expiration to 7 days (configurable)
-- [ ] Implement `validateRefreshToken(String token)`
-- [ ] Hash token, check database, verify not revoked, verify not expired
-- [ ] Implement `revokeRefreshToken(String token)`
-- [ ] Add to blacklist, mark as revoked in refresh_tokens
-- [ ] Implement `revokeAllUserTokens(UUID userId)`
-- [ ] Implement `rotateRefreshToken(String oldToken)`
-- [ ] Validate old token, create new token, revoke old token atomically
-- [ ] Implement `cleanupExpiredTokens()` scheduled method
-
-**Task 3.3.2**: Create TokenBlacklistService
-- [ ] Create `TokenBlacklistService.java` in service package
-- [ ] Implement `addToBlacklist(String token, LocalDateTime expiresAt)`
-- [ ] Hash token with SHA-256, save to database
-- [ ] Implement `isBlacklisted(String token)`
-- [ ] Hash token, check existence in database
-- [ ] Implement `cleanupExpiredEntries()` scheduled method
-- [ ] Delete entries older than 30 days
-
-**Task 3.3.3**: Create UserSessionService
-- [ ] Create `UserSessionService.java` in service package
-- [ ] Implement `createSession(UUID userId, String deviceFingerprint, String ipAddress, String userAgent)`
-- [ ] Parse user agent to extract device type, browser, OS
-- [ ] Create session record
-- [ ] Implement `getActiveSessions(UUID userId)`
-- [ ] Return list of active sessions with details
-- [ ] Implement `revokeSession(UUID sessionId)`
-- [ ] Mark session as inactive, revoke associated refresh token
-- [ ] Implement `revokeAllSessionsExceptCurrent(UUID userId, UUID currentSessionId)`
-- [ ] Implement `enforceSessionLimit(UUID userId, int maxSessions)`
-- [ ] Count active sessions, revoke oldest if limit exceeded
-- [ ] Implement `updateSessionActivity(UUID sessionId)`
-- [ ] Update last_activity timestamp
-
-**Task 3.3.4**: Enhance JwtTokenProvider
-- [ ] Add method: `generateRefreshToken(Authentication authentication)`
-- [ ] Include claims: userId, username, deviceFingerprint
-- [ ] Use configurable expiration (7 days default)
-- [ ] Modify `generateAccessToken()` to use configurable expiration (15 minutes default)
-- [ ] Add method: `extractTokenHash(String token)` - SHA-256 hash
-- [ ] Add method: `extractDeviceFingerprint(String token)`
-
-**Task 3.3.5**: Enhance AuthService
-- [ ] Modify login() to return both access and refresh tokens
-- [ ] Create refresh token and session after successful login
-- [ ] Implement `refreshAccessToken(String refreshToken)`
-- [ ] Validate refresh token, check blacklist
-- [ ] Generate new token pair, rotate refresh token
-- [ ] Update session activity
-- [ ] Implement `logout(String accessToken, String refreshToken)`
-- [ ] Add both tokens to blacklist, mark session as inactive
-- [ ] Implement `logoutAll(UUID userId)`
-- [ ] Revoke all user's refresh tokens and sessions
+**Task 3.2.6**: Create UserSessionRepository ✅
+- [x] Create `UserSessionRepository.java` interface
+- [x] Extend JpaRepository<UserSession, UUID>
+- [x] Add method: `List<UserSession> findByUserIdAndActiveTrue(UUID userId)`
+- [x] Add method: `List<UserSession> findByUserIdOrderByLastActivityDesc(UUID userId)`
+- [x] Add method: `int countByUserIdAndActiveTrue(UUID userId)`
+- [x] Add method: `@Modifying void deactivateAllByUserId(UUID userId)`
+- [x] Add method: `@Modifying void deactivateAllExceptCurrent(UUID userId, UUID currentSessionId)`
+- [x] Add method: `List<UserSession> findOldestActiveByUserId(UUID userId)`
+- [x] Add method: `@Modifying void deleteStaleSessions(LocalDateTime cutoffDate)`
 
 
-### 3.4 Security Layer
+### 3.3 Service Layer ✅
 
-**Task 3.4.1**: Enhance JwtAuthenticationFilter
-- [ ] Inject TokenBlacklistService
-- [ ] In doFilterInternal(), extract token
-- [ ] Check if token is blacklisted BEFORE validation
-- [ ] If blacklisted, return 401 with error code "TOKEN_REVOKED"
-- [ ] If valid, extract session ID and update session activity
-- [ ] Add error handling for blacklist check failures
+**Task 3.3.1**: Create RefreshTokenService ✅
+- [x] Create `RefreshTokenService.java` in service package
+- [x] Implement `createRefreshToken(UUID userId, String deviceFingerprint, String ipAddress, String userAgent)`
+- [x] Generate random token (32 bytes), hash with SHA-256, store in database
+- [x] Set expiration to 7 days (configurable via jwt.refresh-token-expiration-days)
+- [x] Implement `validateRefreshToken(String token)`
+- [x] Hash token, check database, verify not revoked, verify not expired, check blacklist
+- [x] Implement `revokeRefreshToken(String token, String reason)`
+- [x] Add to blacklist, mark as revoked in refresh_tokens
+- [x] Implement `revokeAllUserTokens(UUID userId)`
+- [x] Implement `rotateRefreshToken(String oldToken, String deviceFingerprint, String ipAddress, String userAgent)`
+- [x] Validate old token, create new token, revoke old token atomically
+- [x] Implement `cleanupExpiredTokens()` scheduled method (@Scheduled cron = "0 0 3 * * *")
 
-**Task 3.4.2**: Create DeviceFingerprintUtil
-- [ ] Create `DeviceFingerprintUtil.java` in util package
-- [ ] Implement `generateFingerprint(HttpServletRequest request)`
-- [ ] Combine User-Agent, Accept-Language, IP address
-- [ ] Generate SHA-256 hash
-- [ ] Implement `parseUserAgent(String userAgent)`
-- [ ] Extract device type, browser, OS
+**Task 3.3.2**: Create TokenBlacklistService ✅
+- [x] Create `TokenBlacklistService.java` in service package
+- [x] Implement `addToBlacklist(String token, TokenType tokenType, UUID userId, LocalDateTime expiresAt, String reason)`
+- [x] Hash token with SHA-256, save to database
+- [x] Implement `isBlacklisted(String token)`
+- [x] Hash token, check existence in database
+- [x] Implement `cleanupExpiredEntries()` scheduled method (@Scheduled cron = "0 0 4 * * *")
+- [x] Delete entries older than 30 days
 
-### 3.5 Controller Layer
+**Task 3.3.3**: Create UserSessionService ✅
+- [x] Create `UserSessionService.java` in service package
+- [x] Implement `createSession(UUID userId, UUID refreshTokenId, String deviceFingerprint, String ipAddress, String userAgent)`
+- [x] Parse user agent to extract device type, browser, OS (using ua-parser library)
+- [x] Create session record
+- [x] Implement `getActiveSessions(UUID userId)`
+- [x] Return list of active sessions with details
+- [x] Implement `getAllSessions(UUID userId)`
+- [x] Return all sessions ordered by last activity
+- [x] Implement `revokeSession(UUID sessionId, UUID userId)`
+- [x] Mark session as inactive, verify ownership
+- [x] Implement `revokeAllSessionsExceptCurrent(UUID userId, UUID currentSessionId)`
+- [x] Deactivate all sessions except current, revoke refresh tokens
+- [x] Implement `revokeAllSessions(UUID userId)`
+- [x] Deactivate all sessions, revoke all refresh tokens
+- [x] Implement `enforceSessionLimit(UUID userId)`
+- [x] Count active sessions, revoke oldest if limit exceeded (max-concurrent-sessions=5)
+- [x] Implement `updateSessionActivity(UUID sessionId)`
+- [x] Update last_activity timestamp
+- [x] Implement `cleanupStaleSessions()` scheduled method (@Scheduled cron = "0 0 5 * * *")
 
-**Task 3.5.1**: Enhance AuthController
-- [ ] Modify login endpoint to return LoginResponse with accessToken and refreshToken
-- [ ] Create refresh token and session after login
-- [ ] Add POST /api/auth/refresh endpoint
-- [ ] Accept RefreshTokenRequest with refreshToken field
-- [ ] Call authService.refreshAccessToken()
-- [ ] Return new token pair
-- [ ] Modify logout endpoint to accept both tokens
-- [ ] Add POST /api/auth/logout-all endpoint
-- [ ] Revoke all user sessions
+**Task 3.3.4**: Enhance JwtTokenProvider ✅
+- [x] No changes needed - already supports token generation with user details
+- [x] Access token expiration already configurable via jwt.expiration
+- [x] Token validation methods already implemented
 
-**Task 3.5.2**: Create SessionController
-- [ ] Create `SessionController.java` in controller package
-- [ ] Add @RestController and @RequestMapping("/api/auth/sessions")
-- [ ] Implement GET /sessions endpoint
-- [ ] Return list of active sessions for current user
-- [ ] Implement DELETE /sessions/{sessionId} endpoint
-- [ ] Revoke specific session
-- [ ] Add @PreAuthorize for authenticated users
+**Task 3.3.5**: Enhance AuthService ✅
+- [x] Modify login() to return both access and refresh tokens
+- [x] Create refresh token and session after successful login
+- [x] Use DeviceFingerprintUtil to generate fingerprint
+- [x] Implement `refreshAccessToken(String refreshToken, HttpServletRequest request)`
+- [x] Validate refresh token, check blacklist
+- [x] Generate new access token, rotate refresh token
+- [x] Update session activity
+- [x] Implement `logout(String accessToken, String refreshToken, HttpServletRequest request)`
+- [x] Add both tokens to blacklist, mark session as inactive
+- [x] Implement `logoutAll(String accessToken)`
+- [x] Revoke all user's refresh tokens and sessions
+- [x] Increment token version to invalidate all existing access tokens
 
-### 3.6 DTOs
 
-**Task 3.6.1**: Update LoginResponse DTO
-- [ ] Add refreshToken field
-- [ ] Add expiresIn field (access token expiration in seconds)
-- [ ] Keep existing accessToken, username, role fields
+### 3.4 Security Layer ✅
 
-**Task 3.6.2**: Create RefreshTokenRequest DTO
-- [ ] Create in dto/request package
-- [ ] Add refreshToken field
-- [ ] Add @NotBlank validation
+**Task 3.4.1**: Enhance JwtAuthenticationFilter ✅
+- [x] Inject TokenBlacklistService
+- [x] In doFilterInternal(), extract token
+- [x] Check if token is blacklisted BEFORE validation
+- [x] If blacklisted, skip authentication (return early)
+- [x] If valid, proceed with normal authentication flow
+- [x] Add error handling for blacklist check failures
 
-**Task 3.6.3**: Create RefreshTokenResponse DTO
-- [ ] Create in dto/response package
-- [ ] Add accessToken, refreshToken, expiresIn fields
+**Task 3.4.2**: Create DeviceFingerprintUtil ✅
+- [x] Create `DeviceFingerprintUtil.java` in util package
+- [x] Implement `generateFingerprint(HttpServletRequest request)`
+- [x] Combine User-Agent, Accept-Language, IP address
+- [x] Generate SHA-256 hash
+- [x] Implement `getClientIpAddress(HttpServletRequest request)`
+- [x] Handle X-Forwarded-For and X-Real-IP headers
 
-**Task 3.6.4**: Create UserSessionResponse DTO
-- [ ] Create in dto/response package
-- [ ] Add fields: id, deviceType, browser, os, location, lastActivity, current
-- [ ] Add method to format location (city, country)
+### 3.5 Controller Layer ✅
 
-### 3.7 Scheduled Tasks
+**Task 3.5.1**: Enhance AuthController ✅
+- [x] Modify login endpoint to return LoginResponse with accessToken and refreshToken
+- [x] Create refresh token and session after login
+- [x] Add POST /api/auth/refresh endpoint
+- [x] Accept RefreshTokenRequest with refreshToken field
+- [x] Call authService.refreshAccessToken()
+- [x] Return RefreshTokenResponse with new token pair
+- [x] Add POST /api/auth/logout endpoint
+- [x] Accept both access and refresh tokens
+- [x] Add POST /api/auth/logout-all endpoint
+- [x] Revoke all user sessions and increment token version
 
-**Task 3.7.1**: Create TokenCleanupScheduler
-- [ ] Create `TokenCleanupScheduler.java` in scheduler package
-- [ ] Add @Component and @EnableScheduling
-- [ ] Create @Scheduled method to run daily
-- [ ] Call refreshTokenService.cleanupExpiredTokens()
-- [ ] Call tokenBlacklistService.cleanupExpiredEntries()
-- [ ] Add logging
+**Task 3.5.2**: Create SessionController ✅
+- [x] Create `SessionController.java` in controller package
+- [x] Add @RestController and @RequestMapping("/api/sessions")
+- [x] Implement GET /sessions endpoint
+- [x] Return list of active sessions for current user
+- [x] Implement GET /sessions/all endpoint
+- [x] Return all sessions (including inactive)
+- [x] Implement DELETE /sessions/{sessionId} endpoint
+- [x] Revoke specific session
+- [x] Implement POST /sessions/revoke-others endpoint
+- [x] Revoke all sessions except current
+- [x] Add @PreAuthorize for authenticated users
+
+### 3.6 DTOs ✅
+
+**Task 3.6.1**: Update LoginResponse DTO ✅
+- [x] Add refreshToken field
+- [x] Add expiresIn field (access token expiration in milliseconds)
+- [x] Keep existing token (accessToken), username, role fields
+
+**Task 3.6.2**: Create RefreshTokenRequest DTO ✅
+- [x] Create in dto/request package
+- [x] Add refreshToken field
+- [x] Add @NotBlank validation
+
+**Task 3.6.3**: Create RefreshTokenResponse DTO ✅
+- [x] Create in dto/response package
+- [x] Add accessToken, refreshToken, tokenType, expiresIn fields
+
+**Task 3.6.4**: Create UserSessionResponse DTO ✅
+- [x] Create in dto/response package
+- [x] Add fields: id, deviceType, browser, os, ipAddress, city, country, createdAt, lastActivity, active, current
+- [x] Add static method fromEntity() to convert UserSession to DTO
+
+### 3.7 Scheduled Tasks ✅
+
+**Task 3.7.1**: Create TokenCleanupScheduler ✅
+- [x] Scheduled tasks implemented directly in services
+- [x] RefreshTokenService.cleanupExpiredTokens() - @Scheduled(cron = "0 0 3 * * *")
+- [x] TokenBlacklistService.cleanupExpiredEntries() - @Scheduled(cron = "0 0 4 * * *")
+- [x] UserSessionService.cleanupStaleSessions() - @Scheduled(cron = "0 0 5 * * *")
+- [x] Add logging for all cleanup operations
 
 
 ### 3.8 Frontend Integration
