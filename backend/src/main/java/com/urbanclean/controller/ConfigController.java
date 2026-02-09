@@ -1,7 +1,11 @@
 package com.urbanclean.controller;
 
 import com.urbanclean.dto.request.AlgorithmWeightsRequest;
+import com.urbanclean.dto.request.DuplicateDetectionRequest;
+import com.urbanclean.dto.request.TokenExpirationRequest;
 import com.urbanclean.dto.response.AlgorithmWeightsResponse;
+import com.urbanclean.dto.response.DuplicateDetectionResponse;
+import com.urbanclean.dto.response.TokenExpirationResponse;
 import com.urbanclean.entity.AlgorithmConfig;
 import com.urbanclean.repository.AlgorithmConfigRepository;
 import com.urbanclean.service.ConfigService;
@@ -17,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * REST Controller for algorithm configuration management
+ * REST Controller for system configuration management
  */
 @RestController
 @RequestMapping("/api/admin/config")
@@ -113,5 +117,79 @@ public class ConfigController {
                     config.getCreatedBy().getUsername() : "system"
                 )
                 .build();
+    }
+
+    // ========================================================================
+    // TOKEN EXPIRATION CONFIGURATION ENDPOINTS
+    // ========================================================================
+
+    /**
+     * Get current token expiration configuration
+     * GET /api/admin/config/token-expiration
+     * Accessible by admins only
+     */
+    @GetMapping("/token-expiration")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<TokenExpirationResponse> getTokenExpirationConfig() {
+        log.info("Get token expiration configuration request");
+        
+        TokenExpirationResponse response = configService.getTokenExpirationConfig();
+        
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Update token expiration configuration
+     * PUT /api/admin/config/token-expiration
+     * Accessible by admins only
+     */
+    @PutMapping("/token-expiration")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<TokenExpirationResponse> updateTokenExpirationConfig(
+            @Valid @RequestBody TokenExpirationRequest request) {
+        
+        log.info("Update token expiration configuration request: access={}min, refresh={}days",
+                request.getAccessTokenExpirationMinutes(), request.getRefreshTokenExpirationDays());
+
+        TokenExpirationResponse response = configService.updateTokenExpirationConfig(request);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    // ========================================================================
+    // DUPLICATE DETECTION CONFIGURATION ENDPOINTS
+    // ========================================================================
+
+    /**
+     * Get current duplicate detection configuration
+     * GET /api/admin/config/duplicate-detection
+     * Accessible by admins only
+     */
+    @GetMapping("/duplicate-detection")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DuplicateDetectionResponse> getDuplicateDetectionConfig() {
+        log.info("Get duplicate detection configuration request");
+        
+        DuplicateDetectionResponse response = configService.getDuplicateDetectionConfig();
+        
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Update duplicate detection configuration
+     * PUT /api/admin/config/duplicate-detection
+     * Accessible by admins only
+     */
+    @PutMapping("/duplicate-detection")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DuplicateDetectionResponse> updateDuplicateDetectionConfig(
+            @Valid @RequestBody DuplicateDetectionRequest request) {
+        
+        log.info("Update duplicate detection configuration request: radius={}m, timeWindow={}h",
+                request.getDetectionRadiusMeters(), request.getTimeWindowHours());
+
+        DuplicateDetectionResponse response = configService.updateDuplicateDetectionConfig(request);
+        
+        return ResponseEntity.ok(response);
     }
 }
