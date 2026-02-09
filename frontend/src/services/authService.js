@@ -1,7 +1,11 @@
 import api from './api';
 
+// Token refresh interval (check every minute)
+let refreshInterval = null;
+
 /**
  * Authentication service for user login, registration, and session management
+ * Supports refresh tokens and automatic token renewal
  */
 const authService = {
   /**
@@ -17,7 +21,7 @@ const authService = {
         password,
       });
 
-      const { token, role, username: userName } = response.data;
+      const { token, refreshToken, role, username: userName, expiresIn } = response.data;
 
       // Construct user object from response
       const user = {
@@ -25,11 +29,16 @@ const authService = {
         role: role,
       };
 
-      // Store token and user in localStorage
+      // Store tokens and user in localStorage
       if (token) {
         localStorage.setItem('token', token);
+        localStorage.setItem('refreshToken', refreshToken);
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('tokenExpiresAt', Date.now() + expiresIn);
       }
+
+      // Start automatic token refresh
+      this.startTokenRefresh();
 
       return { token, user };
     } catch (error) {
@@ -56,12 +65,157 @@ const authService = {
   },
 
   /**
-   * Logout current user
-   * Clears token and user data from localStorage
+   * Refresh access token using refresh token
+   * @returns {Promise<Object>} New token pair
    */
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  async refreshAccessToken() {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await api.post('/auth/refresh', {
+        refreshToken,
+      });
+
+      const { accessToken, refreshToken: newRefreshToken, expiresIn } = response.data;
+
+      // Update tokens in localStorage
+      localStorage.setItem('token', accessToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      localStorage.setItem('tokenExpiresAt', Date.now() + expiresIn);
+
+      return { token: accessToken };
+    } catch (error) {
+      // If refresh fails, logout user
+      console.error('Token refresh failed:', error);
+      this.logout();
+      // Redirect to login page
+      window.location.href = '/login';
+      throw error;
+    }
+  },
+
+  /**
+   * Start automatic token refresh
+   * Checks every minute if token needs refresh (< 5 minutes remaining)
+   */
+  startTokenRefresh() {
+    // Clear any existing interval
+    this.stopTokenRefresh();
+
+    // Check every minute
+    refreshInterval = setInterval(async () => {
+      const tokenExpiresAt = localStorage.getItem('tokenExpiresAt');
+      
+      if (!tokenExpiresAt) {
+        this.stopTokenRefresh();
+        return;
+      }
+
+      const expiresAt = parseInt(tokenExpiresAt, 10);
+      const now = Date.now();
+      const timeUntilExpiry = expiresAt - now;
+      const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+      // If less than 5 minutes remaining, refresh token
+      if (timeUntilExpiry < fiveMinutes && timeUntilExpiry > 0) {
+        try {
+          await this.refreshAccessToken();
+          console.log('Token refreshed automatically');
+        } catch (error) {
+          console.error('Automatic token refresh failed:', error);
+          this.stopTokenRefresh();
+        }
+      }
+    }, 60000); // Check every minute
+  },
+
+  /**
+   * Stop automatic token refresh
+   */
+  stopTokenRefresh() {
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+      refreshInterval = null;
+    }
+  },
+
+  /**
+   * Logout current user
+   * Clears tokens and user data from localStorage
+   * Revokes tokens on backend
+   */
+  async logout() {
+    try {
+      const token = this.getToken();
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      // Stop token refresh
+      this.stopTokenRefresh();
+
+      // Call backend logout endpoint
+      if (token) {
+        try {
+          await api.post('/auth/logout', {
+            refreshToken,
+          }, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        } catch (error) {
+          console.error('Backend logout failed:', error);
+          // Continue with local logout even if backend fails
+        }
+      }
+
+      // Clear localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('tokenExpiresAt');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Clear localStorage anyway
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('tokenExpiresAt');
+    }
+  },
+
+  /**
+   * Logout from all devices
+   * Revokes all user sessions
+   */
+  async logoutAll() {
+    try {
+      const token = this.getToken();
+
+      // Stop token refresh
+      this.stopTokenRefresh();
+
+      // Call backend logout-all endpoint
+      if (token) {
+        await api.post('/auth/logout-all', {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      }
+
+      // Clear localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('tokenExpiresAt');
+    } catch (error) {
+      console.error('Logout all error:', error);
+      throw error;
+    }
   },
 
   /**

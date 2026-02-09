@@ -30,6 +30,9 @@ export function AuthProvider({ children }) {
         if (storedToken && authService.isAuthenticated()) {
           setToken(storedToken);
           setUser(storedUser);
+          
+          // Start automatic token refresh
+          authService.startTokenRefresh();
         } else {
           // Token expired or invalid, clear storage
           authService.logout();
@@ -43,6 +46,11 @@ export function AuthProvider({ children }) {
     };
 
     initAuth();
+
+    // Cleanup: stop token refresh on unmount
+    return () => {
+      authService.stopTokenRefresh();
+    };
   }, []);
 
   /**
@@ -96,11 +104,16 @@ export function AuthProvider({ children }) {
   /**
    * Logout current user
    */
-  const logout = () => {
-    authService.logout();
-    setToken(null);
-    setUser(null);
-    setError(null);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setToken(null);
+      setUser(null);
+      setError(null);
+    }
   };
 
   /**
