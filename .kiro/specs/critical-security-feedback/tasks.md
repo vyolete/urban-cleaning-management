@@ -8,13 +8,13 @@ This document outlines the implementation tasks for critical security and user f
 
 ### Phase 1: Foundation - Email Service & Enhanced Validation
 
-- [ ] 1. Set up email infrastructure
-  - [ ] 1.1 Add Spring Mail dependencies to pom.xml
+- [-] 1. Set up email infrastructure
+  - [x] 1.1 Add Spring Mail dependencies to pom.xml
     - Add spring-boot-starter-mail dependency
     - Configure SMTP properties in application.yml
     - _Requirements: 1.3_
   
-  - [ ] 1.2 Create EmailService with async support
+  - [x] 1.2 Create EmailService with async support
     - Implement @Async email sending
     - Create HTML email template engine
     - Add retry logic with exponential backoff (3 attempts)
