@@ -189,19 +189,19 @@ This document outlines the implementation tasks for critical security and user f
 
 ### Phase 3: Task Reopening & Citizen Feedback
 
-- [ ] 9. Enhance task state machine
-  - [ ] 9.1 Add REABIERTO to TaskState enum
+- [-] 9. Enhance task state machine
+  - [x] 9.1 Add REABIERTO to TaskState enum
     - Update TaskState enum
     - Update state transition validation
     - _Requirements: 2.4, 3.1_
   
-  - [ ] 9.2 Add fields to Task entity
+  - [x] 9.2 Add fields to Task entity
     - Add resolutionEvidence field (String, 1000 chars)
     - Add reopenCount field (Integer, default 0)
     - Add citizenApproved field (Boolean, default false)
     - _Requirements: 2.3, 3.5, 3.7_
   
-  - [ ] 9.3 Create database migration
+  - [x] 9.3 Create database migration
     - Add new fields to tareas table
     - Update state enum to include REABIERTO
     - _Requirements: 2.4, 3.1_
@@ -211,22 +211,22 @@ This document outlines the implementation tasks for critical security and user f
     - **Validates: Requirements 3.5**
     - Generate tasks, attempt RESUELTO transition, verify evidence required
 
-- [ ] 10. Create citizen feedback data model
-  - [ ] 10.1 Create CitizenFeedback entity
+- [-] 10. Create citizen feedback data model
+  - [x] 10.1 Create CitizenFeedback entity
     - Add fields: id, task, citizen, type, justification, submittedAt, feedbackDeadline
     - Add unique constraint on task_id
     - _Requirements: 2.3, 2.5, 2.6_
   
-  - [ ] 10.2 Create CitizenFeedbackRepository
+  - [x] 10.2 Create CitizenFeedbackRepository
     - Add method: findByTaskId
     - Add method: findPendingFeedbackPastDeadline
     - _Requirements: 2.6_
   
-  - [ ] 10.3 Create FeedbackType enum
+  - [x] 10.3 Create FeedbackType enum
     - CONFIRMED, REJECTED
     - _Requirements: 2.3, 2.4_
   
-  - [ ] 10.4 Create database migration
+  - [x] 10.4 Create database migration
     - Create citizen_feedback table
     - Add foreign keys to tareas and users
     - Add index on feedback_deadline
