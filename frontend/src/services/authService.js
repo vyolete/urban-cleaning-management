@@ -17,7 +17,13 @@ const authService = {
         password,
       });
 
-      const { token, user } = response.data;
+      const { token, role, username: userName } = response.data;
+
+      // Construct user object from response
+      const user = {
+        username: userName,
+        role: role,
+      };
 
       // Store token and user in localStorage
       if (token) {
@@ -25,7 +31,7 @@ const authService = {
         localStorage.setItem('user', JSON.stringify(user));
       }
 
-      return response.data;
+      return { token, user };
     } catch (error) {
       throw error;
     }
