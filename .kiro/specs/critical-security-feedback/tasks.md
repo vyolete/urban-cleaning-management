@@ -365,15 +365,15 @@ This document outlines the implementation tasks for critical security and user f
     - **Validates: Requirements 4.6**
     - Generate users with reports, delete accounts, verify reports preserved
 
-- [ ] 16. Implement data portability (data export)
-  - [ ] 16.1 Create UserDataService export methods
+- [x] 16. Implement data portability (data export)
+  - [x] 16.1 Create UserDataService export methods
     - Implement exportUserData(userId) → JSON
     - Include: profile, reports, feedback, activity history
     - Format timestamps as ISO 8601
     - Format coordinates as WGS84
     - _Requirements: 5.2, 5.3, 5.6, 5.7_
   
-  - [ ] 16.2 Create data export DTOs
+  - [x] 16.2 Create data export DTOs
     - UserDataExport (profile, reports, feedback, metadata)
     - Structure according to documented schema
     - _Requirements: 5.8_

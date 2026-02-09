@@ -1,6 +1,11 @@
 package com.urbanclean.service;
 
+import com.urbanclean.dto.response.UserDataExport;
+import com.urbanclean.entity.CitizenFeedback;
+import com.urbanclean.entity.Report;
 import com.urbanclean.entity.User;
+import com.urbanclean.repository.CitizenFeedbackRepository;
+import com.urbanclean.repository.ReportRepository;
 import com.urbanclean.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +18,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Service for GDPR-compliant user data management
@@ -26,10 +33,13 @@ import java.util.UUID;
 public class UserDataService {
 
     private final UserRepository userRepository;
+    private final ReportRepository reportRepository;
+    private final CitizenFeedbackRepository feedbackRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     
     private static final int DELETION_GRACE_PERIOD_DAYS = 7;
+    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
     /**
      * Request account deletion
@@ -236,5 +246,107 @@ public class UserDataService {
         long daysRemaining = java.time.Duration.between(LocalDateTime.now(), gracePeriodEnd).toDays();
         
         return Math.max(0, daysRemaining);
+    }
+
+    /**
+     * Export all user data in JSON format (GDPR data portability)
+     * Includes profile, reports, feedback, and activity history
+     * 
+     * @param userId ID of the user
+     * @return UserDataExport with all user data
+     */
+    @Transactional(readOnly = true)
+    public UserDataExport exportUserData(UUID userId) {
+        log.info("Exporting data for user: {}", userId);
+        
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        // Check if user is anonymized
+        if (user.getAnonymized()) {
+            throw new IllegalStateException("Cannot export data for anonymized account");
+        }
+        
+        // Export profile
+        UserDataExport.UserProfileExport profile = UserDataExport.UserProfileExport.builder()
+            .userId(user.getId().toString())
+            .username(user.getUsername())
+            .email(user.getEmail())
+            .role(user.getRole().toString())
+            .createdAt(formatDateTime(user.getCreatedAt()))
+            .updatedAt(formatDateTime(user.getUpdatedAt()))
+            .build();
+        
+        // Export reports (submitted by this user)
+        List<Report> userReports = reportRepository.findBySubmitter(user);
+        List<UserDataExport.ReportExport> reports = userReports.stream()
+            .map(this::mapReportToExport)
+            .collect(Collectors.toList());
+        
+        // Export feedback (provided by this user)
+        List<CitizenFeedback> userFeedback = feedbackRepository.findAll().stream()
+            .filter(f -> f.getCitizen().getId().equals(userId))
+            .toList();
+        List<UserDataExport.FeedbackExport> feedback = userFeedback.stream()
+            .map(this::mapFeedbackToExport)
+            .collect(Collectors.toList());
+        
+        // Create metadata
+        UserDataExport.ExportMetadata metadata = UserDataExport.ExportMetadata.builder()
+            .exportedAt(formatDateTime(LocalDateTime.now()))
+            .dataFormat("JSON")
+            .version("1.0")
+            .totalReports(reports.size())
+            .totalFeedback(feedback.size())
+            .build();
+        
+        UserDataExport export = UserDataExport.builder()
+            .profile(profile)
+            .reports(reports)
+            .feedback(feedback)
+            .metadata(metadata)
+            .build();
+        
+        log.info("Data export completed for user: {}. Reports: {}, Feedback: {}", 
+            userId, reports.size(), feedback.size());
+        
+        return export;
+    }
+
+    /**
+     * Map Report entity to ReportExport DTO
+     */
+    private UserDataExport.ReportExport mapReportToExport(Report report) {
+        return UserDataExport.ReportExport.builder()
+            .reportId(report.getId().toString())
+            .latitude(report.getLocation().getY()) // WGS84 latitude
+            .longitude(report.getLocation().getX()) // WGS84 longitude
+            .category(report.getCategory())
+            .description(report.getDescription())
+            .photoUrl(report.getPhotoUrl())
+            .createdAt(formatDateTime(report.getCreatedAt()))
+            .isDuplicate(report.getIsDuplicate())
+            .taskId(report.getParentTask() != null ? report.getParentTask().getId().toString() : null)
+            .build();
+    }
+
+    /**
+     * Map CitizenFeedback entity to FeedbackExport DTO
+     */
+    private UserDataExport.FeedbackExport mapFeedbackToExport(CitizenFeedback feedback) {
+        return UserDataExport.FeedbackExport.builder()
+            .feedbackId(feedback.getId().toString())
+            .taskId(feedback.getTask().getId().toString())
+            .type(feedback.getType().toString())
+            .justification(feedback.getJustification())
+            .submittedAt(formatDateTime(feedback.getSubmittedAt()))
+            .build();
+    }
+
+    /**
+     * Format LocalDateTime to ISO 8601 string
+     */
+    private String formatDateTime(LocalDateTime dateTime) {
+        return dateTime != null ? dateTime.format(ISO_FORMATTER) : null;
     }
 }
