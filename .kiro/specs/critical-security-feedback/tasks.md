@@ -72,26 +72,26 @@ This document outlines the implementation tasks for critical security and user f
 
 ### Phase 2: Password Recovery System
 
-- [ ] 4. Create password reset data model
-  - [ ] 4.1 Create PasswordResetToken entity
+- [x] 4. Create password reset data model
+  - [x] 4.1 Create PasswordResetToken entity
     - Add fields: id, token, user, expiresAt, used, usedAt, createdAt, ipAddress
     - Add indexes on token, user_id, expires_at
     - _Requirements: 1.1, 1.2_
   
-  - [ ] 4.2 Create PasswordResetTokenRepository
+  - [x] 4.2 Create PasswordResetTokenRepository
     - Add method: findByToken
     - Add method: findByUserAndUsedFalse
     - Add method: deleteExpiredTokens
     - _Requirements: 1.1_
   
-  - [ ] 4.3 Create database migration
+  - [x] 4.3 Create database migration
     - Create password_reset_tokens table
     - Add foreign key to users table
     - Add indexes
     - _Requirements: 1.1_
 
-- [ ] 5. Implement password reset service layer
-  - [ ] 5.1 Create PasswordResetService
+- [x] 5. Implement password reset service layer
+  - [x] 5.1 Create PasswordResetService
     - Implement initiatePasswordReset(email, ipAddress)
     - Implement validateToken(token)
     - Implement resetPassword(token, newPassword, ipAddress)
@@ -99,6 +99,27 @@ This document outlines the implementation tasks for critical security and user f
     - _Requirements: 1.1, 1.2, 1.3, 1.5, 1.6, 1.8_
   
   - [ ]* 5.2 Write unit tests for PasswordResetService
+
+- [x] 6. Create password reset REST endpoints
+  - [x] 6.1 Create PasswordResetController
+    - POST /api/auth/password-reset/initiate
+    - GET /api/auth/password-reset/validate/{token}
+    - POST /api/auth/password-reset/complete
+    - _Requirements: 1.1, 1.2, 1.4_
+  
+  - [x] 6.2 Create request/response DTOs
+    - PasswordResetInitiateRequest
+    - PasswordResetCompleteRequest
+    - PasswordResetResponse
+    - _Requirements: 1.1_
+
+- [x] 7. Checkpoint - Test password reset flow
+  - ✅ Password reset token entity and repository created
+  - ✅ Password reset service with secure token generation
+  - ✅ REST endpoints for initiate, validate, complete
+  - ✅ Email integration for sending reset links
+  - ✅ Scheduled cleanup of expired tokens
+  - **Phase 2 Complete!**
     - Test token generation (UUID format)
     - Test 15-minute expiration
     - Test token invalidation after use
