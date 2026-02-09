@@ -267,19 +267,19 @@ This document outlines the implementation tasks for critical security and user f
     - **Validates: Requirements 3.8**
     - Generate tasks, reopen multiple times, verify flagging after 3 reopenings
 
-- [ ] 12. Implement feedback API endpoints
-  - [ ] 12.1 Create FeedbackController
+- [x] 12. Implement feedback API endpoints
+  - [x] 12.1 Create FeedbackController
     - POST /api/tasks/{id}/feedback/confirm
     - POST /api/tasks/{id}/feedback/reject
     - GET /api/tasks/{id}/feedback
     - _Requirements: 2.3, 2.4_
   
-  - [ ] 12.2 Create DTOs
+  - [x] 12.2 Create DTOs
     - RejectFeedbackRequest (justification)
     - FeedbackResponse (type, submittedAt, justification)
     - _Requirements: 2.5_
   
-  - [ ] 12.3 Update GlobalExceptionHandler
+  - [x] 12.3 Update GlobalExceptionHandler
     - Add FEEDBACK_UNAUTHORIZED error
     - Add FEEDBACK_DEADLINE_PASSED error
     - Add REOPEN_LIMIT_EXCEEDED error
