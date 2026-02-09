@@ -2,11 +2,11 @@
 
 **Fecha**: 9 de febrero de 2026  
 **Estado**: 🔄 EN PROGRESO  
-**Progreso**: 7/14 tareas (50%)
+**Progreso**: 9/14 tareas (64%)
 
 ## Resumen
 
-Se ha iniciado la implementación de la Fase 4 del proyecto Operational Excellence, que incluye configuración dinámica de expiración de tokens y parámetros de detección de duplicados.
+Se ha avanzado significativamente en la implementación de la Fase 4 del proyecto Operational Excellence, incluyendo configuración dinámica de expiración de tokens, parámetros de detección de duplicados, e integración con JwtTokenProvider.
 
 ## Tareas Completadas ✅
 
@@ -106,18 +106,36 @@ Se ha iniciado la implementación de la Fase 4 del proyecto Operational Excellen
 ### Controladores
 10. `backend/src/main/java/com/urbanclean/controller/ConfigController.java` (modificado)
 
+### Security
+11. `backend/src/main/java/com/urbanclean/security/JwtTokenProvider.java` (modificado)
+
 ## Compilación
 
 ✅ **BUILD SUCCESS** - Todos los archivos compilan correctamente sin errores
 
+### 4.6 Integration with JwtTokenProvider (2/2 tareas) ✅
+
+#### Task 4.6.1: Modify JwtTokenProvider to use dynamic configuration ✅
+- ✅ Inyectado `ConfigService` en JwtTokenProvider
+- ✅ Implementado método `getTokenExpirationConfig()` con cache local (TTL 1 minuto)
+- ✅ Implementado método `getAccessTokenExpiration()` que usa configuración dinámica
+- ✅ Modificado `createToken()` para usar expiración dinámica
+- ✅ Agregado logging para debugging
+- ✅ Fallback a valores por defecto si falla la configuración
+
+#### Task 4.6.2: Implement configuration caching ✅
+- ✅ Cache local en memoria con TTL de 1 minuto
+- ✅ Evita consultas repetidas a base de datos
+- ✅ Actualización automática cada minuto
+
+### 4.7 Integration with DeduplicationService (1/1 tarea) ✅
+
+#### Task 4.7.1: Already implemented ✅
+- ✅ DeduplicationService ya usa ConfigService.getCurrentConfig()
+- ✅ Obtiene `distanceThresholdMeters` y `timeWindowHours` dinámicamente
+- ✅ No requiere cambios adicionales
+
 ## Tareas Pendientes
-
-### 4.6 Integration with JwtTokenProvider (2 tareas)
-- [ ] Modificar `JwtTokenProvider` para usar configuración dinámica
-- [ ] Implementar cache de configuración en JwtTokenProvider
-
-### 4.7 Integration with DeduplicationService (1 tarea)
-- [ ] Ya implementado - DeduplicationService ya usa ConfigService
 
 ### 4.8 Testing (4 tareas)
 - [ ] Unit test ConfigService
@@ -127,10 +145,10 @@ Se ha iniciado la implementación de la Fase 4 del proyecto Operational Excellen
 
 ## Próximos Pasos
 
-1. **Integrar JwtTokenProvider** con la configuración dinámica de tokens
+1. ✅ ~~Integrar JwtTokenProvider con la configuración dinámica de tokens~~ **COMPLETADO**
 2. **Crear tests unitarios** para ConfigService
 3. **Crear tests de integración** para los endpoints
-4. **Verificar** que la configuración dinámica funciona correctamente
+4. **Verificar** que la configuración dinámica funciona correctamente end-to-end
 
 ## Notas Técnicas
 
@@ -141,9 +159,16 @@ Se ha iniciado la implementación de la Fase 4 del proyecto Operational Excellen
 - Los campos no utilizados se llenan con valores por defecto
 
 ### Caching
-- Configuraciones cacheadas para reducir consultas a base de datos
+- **ConfigService**: Configuraciones cacheadas con Spring Cache (`@Cacheable`)
+- **JwtTokenProvider**: Cache local en memoria con TTL de 1 minuto
 - Cache se invalida automáticamente al actualizar configuración
-- TTL no configurado (cache infinito hasta invalidación manual)
+- Doble capa de cache reduce significativamente consultas a BD
+
+### Integración con JwtTokenProvider
+- JwtTokenProvider ahora consulta configuración dinámica para expiración de tokens
+- Cache local de 1 minuto evita overhead en cada generación de token
+- Fallback a valores por defecto (15 min) si falla la configuración
+- Logging detallado para debugging
 
 ### Seguridad
 - Todos los endpoints protegidos con `@PreAuthorize("hasRole('ADMIN')")`
@@ -156,8 +181,16 @@ Se ha iniciado la implementación de la Fase 4 del proyecto Operational Excellen
 - **Detection Radius**: 50 metros (rango: 10-1000 m)
 - **Time Window**: 24 horas (rango: 1-168 h)
 
+## Beneficios de la Implementación
+
+1. **Flexibilidad**: Administradores pueden ajustar configuraciones sin reiniciar el servidor
+2. **Seguridad**: Tokens más cortos para mayor seguridad, más largos para mejor UX
+3. **Optimización**: Ajustar parámetros de deduplicación según patrones de uso
+4. **Auditoría**: Historial completo de cambios de configuración
+5. **Performance**: Caching multinivel reduce carga en base de datos
+
 ---
 
 **Documento generado**: 9 de febrero de 2026  
 **Autor**: Sistema de Desarrollo Automatizado  
-**Versión**: 1.0
+**Versión**: 1.1
