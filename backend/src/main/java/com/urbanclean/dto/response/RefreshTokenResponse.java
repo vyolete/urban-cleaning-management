@@ -1,21 +1,20 @@
 package com.urbanclean.dto.response;
 
-import com.urbanclean.entity.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO for login responses
+ * DTO for refresh token responses
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoginResponse {
+public class RefreshTokenResponse {
 
-    private String token;
+    private String accessToken;
 
     private String refreshToken;
 
@@ -23,8 +22,4 @@ public class LoginResponse {
     private String tokenType = "Bearer";
 
     private Long expiresIn;
-
-    private UserRole role;
-
-    private String username;
 }

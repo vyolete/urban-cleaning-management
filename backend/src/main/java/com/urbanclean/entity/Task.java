@@ -81,4 +81,7 @@ public class Task {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    @Column(name = "resolved_at")
+    private LocalDateTime resolvedAt;
 }

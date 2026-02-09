@@ -2,6 +2,7 @@ package com.urbanclean.security;
 
 import com.urbanclean.entity.User;
 import com.urbanclean.repository.UserRepository;
+import com.urbanclean.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +24,7 @@ import java.util.Optional;
 
 /**
  * JWT Authentication Filter that validates JWT tokens on each request
- * Includes token version validation to invalidate tokens after password reset
+ * Includes token version validation and blacklist checking
  */
 @Component
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(
@@ -45,33 +47,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = extractJwtFromRequest(request);
 
             // Validate token and set authentication
-            if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
-                String username = jwtTokenProvider.getUsernameFromToken(jwt);
+            if (StringUtils.hasText(jwt)) {
+                // Check if token is blacklisted
+                if (tokenBlacklistService.isBlacklisted(jwt)) {
+                    log.warn("Attempted to use blacklisted token");
+                    filterChain.doFilter(request, response);
+                    return;
+                }
 
-                // Load user details
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                // Validate token
+                if (jwtTokenProvider.validateToken(jwt)) {
+                    String username = jwtTokenProvider.getUsernameFromToken(jwt);
 
-                // Validate token against user details
-                if (jwtTokenProvider.validateToken(jwt, userDetails)) {
-                    // Validate token version to ensure token hasn't been invalidated
-                    if (isTokenVersionValid(jwt, username)) {
-                        // Create authentication token
-                        UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(
-                                        userDetails,
-                                        null,
-                                        userDetails.getAuthorities()
-                                );
+                    // Load user details
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                        authentication.setDetails(
-                                new WebAuthenticationDetailsSource().buildDetails(request)
-                        );
+                    // Validate token against user details
+                    if (jwtTokenProvider.validateToken(jwt, userDetails)) {
+                        // Validate token version to ensure token hasn't been invalidated
+                        if (isTokenVersionValid(jwt, username)) {
+                            // Create authentication token
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(
+                                            userDetails,
+                                            null,
+                                            userDetails.getAuthorities()
+                                    );
 
-                        // Set authentication in security context
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                        log.debug("Set authentication for user: {}", username);
-                    } else {
-                        log.warn("Token version mismatch for user: {}. Token has been invalidated.", username);
+                            authentication.setDetails(
+                                    new WebAuthenticationDetailsSource().buildDetails(request)
+                            );
+
+                            // Set authentication in security context
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                            log.debug("Set authentication for user: {}", username);
+                        } else {
+                            log.warn("Token version mismatch for user: {}. Token has been invalidated.", username);
+                        }
                     }
                 }
             }

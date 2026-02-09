@@ -152,6 +152,7 @@ public class TaskService {
                 throw new IllegalArgumentException("Resolution evidence is required when marking task as resolved");
             }
             task.setResolutionEvidence(evidence);
+            task.setResolvedAt(java.time.LocalDateTime.now()); // Set resolved timestamp for MTTR calculation
         }
 
         log.info("Updating task {} state: {} -> {} with evidence", taskId, currentState, newState);
