@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './UserInfo.css';
 
@@ -6,6 +7,7 @@ import './UserInfo.css';
  * Displays current user information and logout button
  */
 function UserInfo() {
+  const navigate = useNavigate();
   const { 
     user, 
     isAuthenticated, 
@@ -13,6 +15,11 @@ function UserInfo() {
     getRoleDisplayName, 
     logout 
   } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   if (!isAuthenticated()) {
     return null;
@@ -25,7 +32,7 @@ function UserInfo() {
         <span className="user-role">{getRoleDisplayName()}</span>
       </div>
       <button 
-        onClick={logout} 
+        onClick={handleLogout} 
         className="btn btn-secondary btn-sm"
         aria-label="Cerrar sesión"
       >

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TaskList from '../components/operator/TaskList';
 import TaskMap from '../components/operator/TaskMap';
 import TaskDetail from '../components/operator/TaskDetail';
 import AuditTimeline from '../components/operator/AuditTimeline';
+import UserInfo from '../components/common/UserInfo';
 import taskService from '../services/taskService';
 import './OperatorDashboard.css';
 
@@ -10,6 +12,7 @@ import './OperatorDashboard.css';
  * Operator dashboard page - main interface for operators to manage tasks
  */
 function OperatorDashboard() {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -76,6 +79,9 @@ function OperatorDashboard() {
           <h1>Dashboard de Operadores</h1>
           <p className="subtitle">Gestión de Tareas de Limpieza Urbana</p>
         </div>
+
+        {/* User Info with Logout */}
+        <UserInfo />
 
         {/* View Mode Selector */}
         <div className="view-mode-selector">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ConfigPanel from '../components/admin/ConfigPanel';
+import UserInfo from '../components/common/UserInfo';
 import './AdminConfigPage.css';
 
 /**
@@ -24,6 +25,10 @@ function AdminConfigPage() {
           <h1>Panel de Administración</h1>
           <p className="subtitle">Configuración del Sistema de Priorización</p>
         </div>
+        
+        {/* User Info with Logout */}
+        <UserInfo />
+        
         {lastUpdate && (
           <div className="last-update">
             <span className="update-label">Última actualización:</span>
