@@ -8,6 +8,16 @@ echo "Ejecutando Backend Localmente"
 echo "======================================"
 echo ""
 
+# Set Java 21 (required for Lombok compatibility)
+export JAVA_HOME=$(/usr/libexec/java_home -v 21 2>/dev/null)
+if [ -z "$JAVA_HOME" ]; then
+    echo "ERROR: Java 21 no está instalado"
+    echo "Por favor instala Java 21 (Amazon Corretto 21 recomendado)"
+    exit 1
+fi
+echo "Using Java: $JAVA_HOME"
+echo ""
+
 # Verificar que PostgreSQL esté corriendo en Docker
 echo "Verificando PostgreSQL..."
 if ! docker ps | grep -q urbanclean-postgres; then
