@@ -12,12 +12,6 @@ function ProtectedRoute({ children, requiredRole, requiredRoles }) {
   const { isAuthenticated, hasRole, hasAnyRole, loading, user } = useAuth();
   const location = useLocation();
 
-  console.log('ProtectedRoute - User:', user);
-  console.log('ProtectedRoute - User role:', user?.role);
-  console.log('ProtectedRoute - Required role:', requiredRole);
-  console.log('ProtectedRoute - Required roles:', requiredRoles);
-  console.log('ProtectedRoute - Is authenticated:', isAuthenticated());
-
   // Show loading state while checking authentication
   if (loading) {
     return (
@@ -36,8 +30,6 @@ function ProtectedRoute({ children, requiredRole, requiredRoles }) {
 
   // Check for required single role
   if (requiredRole && !hasRole(requiredRole)) {
-    console.log('ProtectedRoute - Access denied: single role check failed');
-    console.log('ProtectedRoute - Has role result:', hasRole(requiredRole));
     return (
       <div className="access-denied-container">
         <div className="access-denied-card">
@@ -53,8 +45,6 @@ function ProtectedRoute({ children, requiredRole, requiredRoles }) {
 
   // Check for required multiple roles (user must have at least one)
   if (requiredRoles && requiredRoles.length > 0 && !hasAnyRole(requiredRoles)) {
-    console.log('ProtectedRoute - Access denied: multiple roles check failed');
-    console.log('ProtectedRoute - Has any role result:', hasAnyRole(requiredRoles));
     return (
       <div className="access-denied-container">
         <div className="access-denied-card">
@@ -70,7 +60,6 @@ function ProtectedRoute({ children, requiredRole, requiredRoles }) {
     );
   }
 
-  console.log('ProtectedRoute - Access granted');
   // User is authenticated and has required permissions
   return children;
 }

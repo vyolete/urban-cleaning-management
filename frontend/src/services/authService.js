@@ -17,8 +17,6 @@ const authService = {
         password,
       });
 
-      console.log('Login response:', response.data);
-
       const { token, role, username: userName } = response.data;
 
       // Construct user object from response
@@ -27,14 +25,10 @@ const authService = {
         role: role,
       };
 
-      console.log('Constructed user object:', user);
-      console.log('User role:', user.role);
-
       // Store token and user in localStorage
       if (token) {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
-        console.log('Stored in localStorage - user:', localStorage.getItem('user'));
       }
 
       return { token, user };
