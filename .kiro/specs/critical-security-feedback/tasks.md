@@ -323,24 +323,24 @@ This document outlines the implementation tasks for critical security and user f
 
 ### Phase 4: GDPR Compliance
 
-- [ ] 15. Implement right to erasure (account deletion)
-  - [ ] 15.1 Add fields to User entity
+- [x] 15. Implement right to erasure (account deletion)
+  - [x] 15.1 Add fields to User entity
     - Add deletedAt field (LocalDateTime, nullable)
     - Add anonymized field (Boolean, default false)
     - Add originalEmailHash field (String, nullable)
     - _Requirements: 4.3, 4.5_
   
-  - [ ] 15.2 Create database migration
+  - [x] 15.2 Create database migration
     - Add new fields to users table
     - _Requirements: 4.3_
   
-  - [ ] 15.3 Create UserDataService
+  - [x] 15.3 Create UserDataService
     - Implement requestAccountDeletion(userId, password)
     - Implement cancelAccountDeletion(userId)
     - Implement anonymizeUserData(userId) scheduled method
     - _Requirements: 4.2, 4.3, 4.11_
   
-  - [ ] 15.4 Implement anonymization logic
+  - [x] 15.4 Implement anonymization logic
     - Replace username with "usuario_anonimo_{hash}"
     - Replace email with hashed identifier
     - Clear passwordHash

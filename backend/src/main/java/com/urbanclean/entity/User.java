@@ -46,4 +46,14 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @Column(name = "anonymized")
+    @Builder.Default
+    private Boolean anonymized = false;
+
+    @Column(name = "original_email_hash", length = 64)
+    private String originalEmailHash;
 }
