@@ -83,6 +83,34 @@ public class TaskService {
     }
     
     /**
+     * Update task state with resolution evidence
+     * Required when transitioning to RESUELTO state
+     */
+    @Transactional
+    public Task updateStateWithEvidence(UUID taskId, TaskState newState, String evidence) {
+        Task task = getTaskById(taskId);
+        TaskState currentState = task.getState();
+
+        // Validate state transition
+        validateStateTransition(currentState, newState);
+        
+        // Validate evidence requirement for RESUELTO state
+        if (newState == TaskState.RESUELTO) {
+            if (evidence == null || evidence.trim().isEmpty()) {
+                throw new IllegalArgumentException("Resolution evidence is required when marking task as resolved");
+            }
+            task.setResolutionEvidence(evidence);
+        }
+
+        log.info("Updating task {} state: {} -> {} with evidence", taskId, currentState, newState);
+        
+        // Update state
+        task.setState(newState);
+
+        return taskRepository.save(task);
+    }
+    
+    /**
      * Get previous state before update (for audit logging)
      */
     public TaskState getPreviousState(Task task) {
@@ -95,6 +123,7 @@ public class TaskService {
      * - PENDIENTE -> ASIGNADO
      * - ASIGNADO -> EN_PROGRESO
      * - EN_PROGRESO -> RESUELTO
+     * - REABIERTO -> EN_PROGRESO
      */
     private void validateStateTransition(TaskState currentState, TaskState newState) {
         if (currentState == newState) {
@@ -115,8 +144,13 @@ public class TaskService {
             case EN_PROGRESO:
                 isValidTransition = (newState == TaskState.RESUELTO);
                 break;
+            case REABIERTO:
+                // Reopened tasks go back to EN_PROGRESO
+                isValidTransition = (newState == TaskState.EN_PROGRESO);
+                break;
             case RESUELTO:
-                // No transitions allowed from RESUELTO
+                // No manual transitions allowed from RESUELTO
+                // State changes to REABIERTO are handled by FeedbackService
                 isValidTransition = false;
                 break;
         }

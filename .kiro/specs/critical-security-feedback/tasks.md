@@ -189,7 +189,7 @@ This document outlines the implementation tasks for critical security and user f
 
 ### Phase 3: Task Reopening & Citizen Feedback
 
-- [-] 9. Enhance task state machine
+- [x] 9. Enhance task state machine
   - [x] 9.1 Add REABIERTO to TaskState enum
     - Update TaskState enum
     - Update state transition validation
@@ -211,7 +211,7 @@ This document outlines the implementation tasks for critical security and user f
     - **Validates: Requirements 3.5**
     - Generate tasks, attempt RESUELTO transition, verify evidence required
 
-- [-] 10. Create citizen feedback data model
+- [x] 10. Create citizen feedback data model
   - [x] 10.1 Create CitizenFeedback entity
     - Add fields: id, task, citizen, type, justification, submittedAt, feedbackDeadline
     - Add unique constraint on task_id
@@ -232,14 +232,14 @@ This document outlines the implementation tasks for critical security and user f
     - Add index on feedback_deadline
     - _Requirements: 2.3_
 
-- [ ] 11. Implement feedback service layer
-  - [ ] 11.1 Create FeedbackService
+- [x] 11. Implement feedback service layer
+  - [x] 11.1 Create FeedbackService
     - Implement confirmResolution(taskId, citizenId)
     - Implement rejectResolution(taskId, citizenId, justification)
     - Implement autoCloseTasks() scheduled method (runs hourly)
     - _Requirements: 2.3, 2.4, 2.5, 2.6_
   
-  - [ ] 11.2 Update TaskService
+  - [x] 11.2 Update TaskService
     - Add validation for RESUELTO transition (require evidence)
     - Add logic to create feedback deadline (72h) on RESUELTO
     - Add logic to handle REABIERTO → EN_PROGRESO transition
