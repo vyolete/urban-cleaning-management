@@ -1,0 +1,1 @@
+{"name":"hikaricp.connections.active","description":"Active connections","measurements":[{"statistic":"VALUE","value":0.0}],"availableTags":[{"tag":"application","values":["urban-cleaning-backend"]},{"tag":"pool","values":["HikariPool-1"]}]}
