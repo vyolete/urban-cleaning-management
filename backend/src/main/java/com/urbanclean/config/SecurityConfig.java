@@ -1,7 +1,7 @@
 package com.urbanclean.config;
 
 import com.urbanclean.security.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,12 +31,20 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
     private final RateLimitingFilter rateLimitingFilter;
+
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            UserDetailsService userDetailsService,
+            @Autowired(required = false) RateLimitingFilter rateLimitingFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.userDetailsService = userDetailsService;
+        this.rateLimitingFilter = rateLimitingFilter;
+    }
 
     /**
      * Configure BCrypt password encoder
@@ -100,17 +108,28 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/reports").permitAll()  // Allow anonymous report submission
-                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/actuator/**").permitAll()  // Allow actuator endpoints for monitoring
                 .requestMatchers("/error").permitAll()
+                // SpringDoc OpenAPI endpoints
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/docs/**").permitAll()
+                .requestMatchers("/api/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(authenticationProvider());
+            
+        // Add rate limiting filter only if available (not in test profile)
+        if (rateLimitingFilter != null) {
+            http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
+        }
+        
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             // Add security headers
             .headers(headers -> headers
                 .contentTypeOptions(contentType -> {})

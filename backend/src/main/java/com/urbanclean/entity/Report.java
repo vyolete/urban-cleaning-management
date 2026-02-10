@@ -41,7 +41,7 @@ public class Report {
     @Column(nullable = false, length = 1000)
     private String description;
 
-    @Column(nullable = false, name = "photo_url")
+    @Column(name = "photo_url")
     private String photoUrl;
 
     @CreationTimestamp

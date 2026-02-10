@@ -120,4 +120,36 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
      * @return number of reports in the category
      */
     long countByCategory(String category);
+    
+    // ========== ANALYTICS METHODS ==========
+    
+    /**
+     * Generate heatmap data using PostGIS ST_SnapToGrid
+     * Returns array of [latitude, longitude, intensity]
+     * @param cellSize the grid cell size in degrees (e.g., 0.005 for ~500m)
+     * @param startDate start of date range
+     * @param endDate end of date range
+     * @param category optional category filter (can be null)
+     * @return list of heatmap cells with coordinates and intensity
+     */
+    @Query(value = "SELECT " +
+           "ST_Y(ST_Centroid(grid)) as latitude, " +
+           "ST_X(ST_Centroid(grid)) as longitude, " +
+           "COUNT(*) as intensity " +
+           "FROM ( " +
+           "    SELECT ST_SnapToGrid(location, :cellSize) as grid " +
+           "    FROM reportes " +
+           "    WHERE created_at BETWEEN :startDate AND :endDate " +
+           "    AND (:category IS NULL OR category = :category) " +
+           ") grouped " +
+           "GROUP BY grid " +
+           "ORDER BY intensity DESC " +
+           "LIMIT 1000",
+           nativeQuery = true)
+    List<Object[]> getHeatmapData(
+        @Param("cellSize") double cellSize,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate,
+        @Param("category") String category
+    );
 }

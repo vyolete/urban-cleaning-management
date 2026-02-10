@@ -6,12 +6,14 @@ import com.urbanclean.entity.TaskState;
 import com.urbanclean.entity.User;
 import com.urbanclean.repository.AuditLogRepository;
 import com.urbanclean.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,15 +31,15 @@ public class AuditService {
     private final UserRepository userRepository;
 
     /**
-     * Log a state change for a task
+     * Log a state change for a task with IP address capture
      * Creates an immutable audit log entry
      */
     @Transactional
-    public AuditLog logStateChange(Task task, TaskState previousState, TaskState newState) {
+    public AuditLog logStateChange(Task task, TaskState previousState, TaskState newState, String ipAddress) {
         User currentUser = getCurrentUser();
         
-        log.info("Logging state change for task {}: {} -> {} by user {}",
-                task.getId(), previousState, newState, currentUser.getUsername());
+        log.info("Logging state change for task {}: {} -> {} by user {} from IP {}",
+                task.getId(), previousState, newState, currentUser.getUsername(), ipAddress);
 
         AuditLog auditLog = AuditLog.builder()
                 .task(task)
@@ -45,9 +47,82 @@ public class AuditService {
                 .previousState(previousState)
                 .newState(newState)
                 .changedAt(LocalDateTime.now())
+                .ipAddress(sanitizeIpAddress(ipAddress))
                 .build();
 
         return auditLogRepository.save(auditLog);
+    }
+
+    /**
+     * Log a state change for a task (backward compatibility - no IP)
+     * Creates an immutable audit log entry
+     */
+    @Transactional
+    public AuditLog logStateChange(Task task, TaskState previousState, TaskState newState) {
+        return logStateChange(task, previousState, newState, null);
+    }
+
+    /**
+     * Capture IP address from HTTP request
+     * Handles X-Forwarded-For header for proxied requests
+     * Supports both IPv4 and IPv6
+     */
+    public String captureIpAddress(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+
+        // Check X-Forwarded-For header (for requests behind proxy/load balancer)
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (StringUtils.hasText(xForwardedFor)) {
+            // X-Forwarded-For can contain multiple IPs: "client, proxy1, proxy2"
+            // Take the first one (original client IP)
+            String clientIp = xForwardedFor.split(",")[0].trim();
+            log.debug("IP from X-Forwarded-For: {}", clientIp);
+            return clientIp;
+        }
+
+        // Check X-Real-IP header (alternative proxy header)
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (StringUtils.hasText(xRealIp)) {
+            log.debug("IP from X-Real-IP: {}", xRealIp);
+            return xRealIp;
+        }
+
+        // Fallback to remote address
+        String remoteAddr = request.getRemoteAddr();
+        log.debug("IP from RemoteAddr: {}", remoteAddr);
+        return remoteAddr;
+    }
+
+    /**
+     * Sanitize IP address before storage
+     * Validates format and removes any malicious content
+     */
+    private String sanitizeIpAddress(String ipAddress) {
+        if (ipAddress == null || ipAddress.trim().isEmpty()) {
+            return null;
+        }
+
+        // Trim whitespace
+        String sanitized = ipAddress.trim();
+
+        // Basic validation: IPv4 or IPv6 format
+        // IPv4: xxx.xxx.xxx.xxx (max 15 chars)
+        // IPv6: xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx (max 45 chars)
+        if (sanitized.length() > 45) {
+            log.warn("IP address too long, truncating: {}", sanitized);
+            sanitized = sanitized.substring(0, 45);
+        }
+
+        // Remove any non-IP characters (basic sanitization)
+        // Allow: digits, dots (IPv4), colons (IPv6), and letters a-f (IPv6)
+        if (!sanitized.matches("[0-9a-fA-F.:]+")) {
+            log.warn("Invalid IP address format, rejecting: {}", sanitized);
+            return null;
+        }
+
+        return sanitized;
     }
 
     /**

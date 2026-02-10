@@ -1,0 +1,259 @@
+.active-sessions {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.sessions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.sessions-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.btn-logout-all {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-logout-all:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.btn-logout-all:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error-message button {
+  background-color: #721c24;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.error-message button:hover {
+  background-color: #5a1419;
+}
+
+.no-sessions {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.no-sessions p {
+  font-size: 16px;
+  margin: 0;
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.session-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.session-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #ccc;
+}
+
+.session-card.current-session {
+  border-color: #28a745;
+  background-color: #f8fff9;
+}
+
+.session-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.session-info {
+  flex: 1;
+}
+
+.session-device {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.session-device strong {
+  font-size: 16px;
+  color: #333;
+}
+
+.current-badge {
+  background-color: #28a745;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.session-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+}
+
+.session-location,
+.session-time,
+.session-created {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.session-actions {
+  display: flex;
+  align-items: center;
+}
+
+.btn-revoke {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-revoke:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.btn-revoke:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sessions-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sessions-info {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.btn-refresh {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .active-sessions {
+    padding: 16px;
+  }
+
+  .sessions-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .btn-logout-all {
+    width: 100%;
+  }
+
+  .session-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .session-icon {
+    font-size: 24px;
+  }
+
+  .session-actions {
+    width: 100%;
+  }
+
+  .btn-revoke {
+    width: 100%;
+  }
+
+  .sessions-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .btn-refresh {
+    width: 100%;
+  }
+}

@@ -46,6 +46,9 @@ public class AuditLog {
     @Column(nullable = false, updatable = false, name = "changed_at")
     private LocalDateTime changedAt;
 
+    @Column(updatable = false, name = "ip_address", length = 45)
+    private String ipAddress;
+
     @PrePersist
     protected void onCreate() {
         if (changedAt == null) {

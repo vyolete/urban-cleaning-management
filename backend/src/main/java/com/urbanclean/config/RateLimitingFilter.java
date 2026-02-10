@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Prevents brute force attacks by limiting requests per IP address
  */
 @Component
+@Profile("!test")  // Disable rate limiting in test profile
 @Slf4j
 public class RateLimitingFilter extends OncePerRequestFilter {
 
@@ -35,8 +37,12 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     // Store request counts per IP address
     private final Map<String, RequestCounter> requestCounts = new ConcurrentHashMap<>();
     
-    // Object mapper for JSON responses
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    // Object mapper for JSON responses (injected from Spring context)
+    private final ObjectMapper objectMapper;
+    
+    public RateLimitingFilter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     protected void doFilterInternal(

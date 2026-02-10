@@ -1,5 +1,6 @@
 package com.urbanclean.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,35 +16,43 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Standard error response structure for all API errors")
 public class ErrorResponse {
     
-    /**
-     * Error code for categorizing the error
-     */
+    @Schema(
+        description = "Machine-readable error code for categorizing the error type",
+        example = "VALIDATION_ERROR",
+        allowableValues = {"VALIDATION_ERROR", "AUTHENTICATION_ERROR", "AUTHORIZATION_ERROR", "RESOURCE_NOT_FOUND", "DUPLICATE_RESOURCE", "GEOFENCING_ERROR", "INTERNAL_ERROR"}
+    )
     private String errorCode;
     
-    /**
-     * Human-readable error message
-     */
+    @Schema(
+        description = "Human-readable error message explaining what went wrong",
+        example = "Coordinates outside geofencing boundaries"
+    )
     private String message;
     
-    /**
-     * Timestamp when the error occurred
-     */
+    @Schema(
+        description = "Timestamp when the error occurred in ISO 8601 format",
+        example = "2026-02-09T19:30:00"
+    )
     private LocalDateTime timestamp;
     
-    /**
-     * Additional details about the error (optional)
-     */
+    @Schema(
+        description = "Additional details about the error providing context (optional)",
+        example = "{\"latitude\": \"40.7128\", \"longitude\": \"-74.0060\", \"maxDistance\": \"50km\"}"
+    )
     private Map<String, Object> details;
     
-    /**
-     * HTTP status code
-     */
+    @Schema(
+        description = "HTTP status code",
+        example = "400"
+    )
     private Integer status;
     
-    /**
-     * Request path where the error occurred
-     */
+    @Schema(
+        description = "Request path where the error occurred",
+        example = "/api/reports"
+    )
     private String path;
 }

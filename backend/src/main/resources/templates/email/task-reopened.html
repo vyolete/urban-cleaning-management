@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Reopened - Action Required</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #e67e22;
+            margin: 0;
+        }
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .task-info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .justification {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Task Reopened</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hello,</p>
+            
+            <p>A task that was previously marked as resolved has been reopened by the citizen who reported it.</p>
+            
+            <div class="task-info">
+                <strong>Task ID:</strong> <span th:text="${taskId}"></span><br>
+                <strong>Category:</strong> <span th:text="${category}"></span>
+            </div>
+            
+            <div class="justification">
+                <strong>Citizen's Feedback:</strong><br>
+                <p th:text="${justification}"></p>
+            </div>
+            
+            <p>Please review the task and take appropriate action to address the citizen's concerns.</p>
+            
+            <div style="text-align: center;">
+                <a th:href="${taskLink}" class="button">View Task Details</a>
+            </div>
+            
+            <p>Thank you for your prompt attention to this matter.</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Urban Cleaning Management System</p>
+            <p>This is an automated message, please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

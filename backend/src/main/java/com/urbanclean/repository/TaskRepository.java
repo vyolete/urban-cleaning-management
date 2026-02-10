@@ -110,4 +110,80 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
      * @return number of tasks in the state
      */
     long countByState(TaskState state);
+    
+    // ========== ANALYTICS METHODS ==========
+    
+    /**
+     * Count tasks by category within date range
+     * Returns array of [category, count]
+     * @param startDate start of date range
+     * @param endDate end of date range
+     * @return list of category counts
+     */
+    @Query("SELECT t.category, COUNT(t) FROM Task t " +
+           "WHERE t.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY t.category " +
+           "ORDER BY COUNT(t) DESC")
+    List<Object[]> countByCategory(
+        @Param("startDate") java.time.LocalDateTime startDate,
+        @Param("endDate") java.time.LocalDateTime endDate
+    );
+    
+    /**
+     * Count tasks by state within date range
+     * Returns array of [state, count]
+     * @param startDate start of date range
+     * @param endDate end of date range
+     * @return list of state counts
+     */
+    @Query("SELECT t.state, COUNT(t) FROM Task t " +
+           "WHERE t.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY t.state " +
+           "ORDER BY COUNT(t) DESC")
+    List<Object[]> countByState(
+        @Param("startDate") java.time.LocalDateTime startDate,
+        @Param("endDate") java.time.LocalDateTime endDate
+    );
+    
+    /**
+     * Find resolved tasks within date range for MTTR calculation
+     * @param startDate start of date range
+     * @param endDate end of date range
+     * @return list of resolved tasks
+     */
+    @Query("SELECT t FROM Task t " +
+           "WHERE t.state = 'RESUELTO' " +
+           "AND t.resolvedAt BETWEEN :startDate AND :endDate")
+    List<Task> findResolvedTasks(
+        @Param("startDate") java.time.LocalDateTime startDate,
+        @Param("endDate") java.time.LocalDateTime endDate
+    );
+    
+    /**
+     * Get operator statistics within date range
+     * Returns array of [operatorId, username, tasksResolved, avgResolutionTime, tasksInProgress, tasksReopened, activeSince]
+     * @param startDate start of date range
+     * @param endDate end of date range
+     * @return list of operator statistics
+     */
+    @Query(value = "SELECT " +
+           "u.id, " +
+           "u.username, " +
+           "SUM(CASE WHEN t.state = 'RESUELTO' THEN 1 ELSE 0 END), " +
+           "AVG(CASE WHEN t.state = 'RESUELTO' AND t.resolved_at IS NOT NULL " +
+           "    THEN EXTRACT(EPOCH FROM (t.resolved_at - t.created_at)) / 3600.0 ELSE NULL END), " +
+           "SUM(CASE WHEN t.state IN ('ASIGNADO', 'EN_PROGRESO') THEN 1 ELSE 0 END), " +
+           "SUM(CASE WHEN t.state = 'REABIERTO' THEN 1 ELSE 0 END), " +
+           "u.created_at " +
+           "FROM tareas t " +
+           "JOIN usuarios u ON t.assigned_operator_id = u.id " +
+           "WHERE t.assigned_operator_id IS NOT NULL " +
+           "AND t.created_at BETWEEN :startDate AND :endDate " +
+           "GROUP BY u.id, u.username, u.created_at " +
+           "ORDER BY SUM(CASE WHEN t.state = 'RESUELTO' THEN 1 ELSE 0 END) DESC",
+           nativeQuery = true)
+    List<Object[]> getOperatorStatistics(
+        @Param("startDate") java.time.LocalDateTime startDate,
+        @Param("endDate") java.time.LocalDateTime endDate
+    );
 }

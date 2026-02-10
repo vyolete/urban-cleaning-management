@@ -119,6 +119,63 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle illegal state exceptions (400 Bad Request)
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(
+            IllegalStateException ex,
+            HttpServletRequest request) {
+        
+        log.warn("Illegal state: {}", ex.getMessage());
+        
+        // Determine specific error code based on message
+        String errorCode = "ILLEGAL_STATE";
+        if (ex.getMessage().contains("feedback already provided")) {
+            errorCode = "FEEDBACK_ALREADY_PROVIDED";
+        } else if (ex.getMessage().contains("RESUELTO state")) {
+            errorCode = "INVALID_TASK_STATE";
+        } else if (ex.getMessage().contains("deadline")) {
+            errorCode = "FEEDBACK_DEADLINE_PASSED";
+        }
+        
+        ErrorResponse error = ErrorResponse.builder()
+                .errorCode(errorCode)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .path(request.getRequestURI())
+                .build();
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Handle security exceptions (403 Forbidden)
+     */
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ErrorResponse> handleSecurityException(
+            SecurityException ex,
+            HttpServletRequest request) {
+        
+        log.warn("Security violation: {}", ex.getMessage());
+        
+        String errorCode = "SECURITY_VIOLATION";
+        if (ex.getMessage().contains("original reporter")) {
+            errorCode = "FEEDBACK_UNAUTHORIZED";
+        }
+        
+        ErrorResponse error = ErrorResponse.builder()
+                .errorCode(errorCode)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .path(request.getRequestURI())
+                .build();
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    /**
      * Handle illegal argument exceptions (400 Bad Request)
      */
     @ExceptionHandler(IllegalArgumentException.class)

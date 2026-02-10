@@ -59,6 +59,17 @@ public class Task {
     @Builder.Default
     private Integer duplicateCount = 0;
 
+    @Column(length = 1000, name = "resolution_evidence")
+    private String resolutionEvidence;
+
+    @Column(name = "reopen_count")
+    @Builder.Default
+    private Integer reopenCount = 0;
+
+    @Column(name = "citizen_approved")
+    @Builder.Default
+    private Boolean citizenApproved = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to")
     private User assignedOperator;
@@ -70,4 +81,7 @@ public class Task {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    @Column(name = "resolved_at")
+    private LocalDateTime resolvedAt;
 }
