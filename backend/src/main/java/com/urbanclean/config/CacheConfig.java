@@ -17,10 +17,15 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         return new ConcurrentMapCacheManager(
+            // Analytics caches
             "taskDistribution",
             "mttr",
             "heatmap",
-            "operatorMetrics"
+            "operatorMetrics",
+            // Config service caches
+            "tokenExpirationConfig",
+            "duplicateDetectionConfig",
+            "algorithmConfig"
         );
     }
 }

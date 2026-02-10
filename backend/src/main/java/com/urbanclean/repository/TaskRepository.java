@@ -166,20 +166,22 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
      * @param endDate end of date range
      * @return list of operator statistics
      */
-    @Query("SELECT " +
-           "t.assignedOperator.id, " +
-           "t.assignedOperator.username, " +
+    @Query(value = "SELECT " +
+           "u.id, " +
+           "u.username, " +
            "SUM(CASE WHEN t.state = 'RESUELTO' THEN 1 ELSE 0 END), " +
-           "AVG(CASE WHEN t.state = 'RESUELTO' AND t.resolvedAt IS NOT NULL " +
-           "    THEN EXTRACT(EPOCH FROM (t.resolvedAt - t.createdAt)) / 3600.0 ELSE NULL END), " +
+           "AVG(CASE WHEN t.state = 'RESUELTO' AND t.resolved_at IS NOT NULL " +
+           "    THEN EXTRACT(EPOCH FROM (t.resolved_at - t.created_at)) / 3600.0 ELSE NULL END), " +
            "SUM(CASE WHEN t.state IN ('ASIGNADO', 'EN_PROGRESO') THEN 1 ELSE 0 END), " +
            "SUM(CASE WHEN t.state = 'REABIERTO' THEN 1 ELSE 0 END), " +
-           "t.assignedOperator.createdAt " +
-           "FROM Task t " +
-           "WHERE t.assignedOperator IS NOT NULL " +
-           "AND t.createdAt BETWEEN :startDate AND :endDate " +
-           "GROUP BY t.assignedOperator.id, t.assignedOperator.username, t.assignedOperator.createdAt " +
-           "ORDER BY SUM(CASE WHEN t.state = 'RESUELTO' THEN 1 ELSE 0 END) DESC")
+           "u.created_at " +
+           "FROM tareas t " +
+           "JOIN usuarios u ON t.assigned_operator_id = u.id " +
+           "WHERE t.assigned_operator_id IS NOT NULL " +
+           "AND t.created_at BETWEEN :startDate AND :endDate " +
+           "GROUP BY u.id, u.username, u.created_at " +
+           "ORDER BY SUM(CASE WHEN t.state = 'RESUELTO' THEN 1 ELSE 0 END) DESC",
+           nativeQuery = true)
     List<Object[]> getOperatorStatistics(
         @Param("startDate") java.time.LocalDateTime startDate,
         @Param("endDate") java.time.LocalDateTime endDate

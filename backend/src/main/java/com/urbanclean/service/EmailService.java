@@ -1,6 +1,7 @@
 package com.urbanclean.service;
 
 import com.urbanclean.repository.NotificationFailureRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Service for sending emails asynchronously with retry logic
+ * Service for sending emails asynchronously with retry logic and circuit breaker
  */
 @Service
 @RequiredArgsConstructor
@@ -44,10 +45,12 @@ public class EmailService {
     private String baseUrl;
 
     /**
-     * Send email asynchronously with retry logic
+     * Send email asynchronously with retry logic and circuit breaker
      * Retries up to 3 times with exponential backoff (1s, 2s, 4s)
+     * Circuit breaker opens after 50% failure rate in 10 requests
      */
     @Async
+    @CircuitBreaker(name = "emailService", fallbackMethod = "emailFallback")
     @Retryable(
         retryFor = {MessagingException.class},
         maxAttempts = 3,
@@ -85,6 +88,31 @@ public class EmailService {
         } catch (Exception e) {
             log.error("Unexpected error sending email to: {}. Error: {}", to, e.getMessage());
             throw new RuntimeException("Unexpected error sending email", e);
+        }
+    }
+
+    /**
+     * Fallback method for circuit breaker.
+     * Called when circuit is open or email sending fails.
+     */
+    private void emailFallback(String to, String subject, String templateName, 
+                              Map<String, Object> variables, Exception e) {
+        log.error("Circuit breaker activated for email to: {}. Logging failure.", to, e);
+        
+        // Extract userId and notificationType from variables if available
+        UUID userId = variables.containsKey("userId") ? 
+            UUID.fromString(variables.get("userId").toString()) : null;
+        String notificationType = variables.containsKey("notificationType") ? 
+            variables.get("notificationType").toString() : "UNKNOWN";
+        
+        if (userId != null && notificationFailureService != null) {
+            notificationFailureService.recordFailure(
+                userId, 
+                notificationType, 
+                to, 
+                "Circuit breaker activated: " + e.getMessage(), 
+                0 // Circuit breaker fallback
+            );
         }
     }
 

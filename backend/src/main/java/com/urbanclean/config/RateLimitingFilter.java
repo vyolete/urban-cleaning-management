@@ -35,8 +35,12 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     // Store request counts per IP address
     private final Map<String, RequestCounter> requestCounts = new ConcurrentHashMap<>();
     
-    // Object mapper for JSON responses
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    // Object mapper for JSON responses (injected from Spring context)
+    private final ObjectMapper objectMapper;
+    
+    public RateLimitingFilter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     protected void doFilterInternal(

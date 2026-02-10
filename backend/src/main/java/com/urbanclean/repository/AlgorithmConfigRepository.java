@@ -4,6 +4,7 @@ import com.urbanclean.entity.AlgorithmConfig;
 import com.urbanclean.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public interface AlgorithmConfigRepository extends JpaRepository<AlgorithmConfig
            "c.effectiveFrom <= CURRENT_TIMESTAMP AND " +
            "(c.effectiveTo IS NULL OR c.effectiveTo > CURRENT_TIMESTAMP) " +
            "ORDER BY c.effectiveFrom DESC")
-    Optional<AlgorithmConfig> findCurrentConfigByType(String configType);
+    Optional<AlgorithmConfig> findCurrentConfigByType(@Param("configType") String configType);
 
     /**
      * Find configuration effective at a specific time
@@ -48,7 +49,7 @@ public interface AlgorithmConfigRepository extends JpaRepository<AlgorithmConfig
            "c.effectiveFrom <= :timestamp AND " +
            "(c.effectiveTo IS NULL OR c.effectiveTo > :timestamp) " +
            "ORDER BY c.effectiveFrom DESC")
-    Optional<AlgorithmConfig> findConfigAt(LocalDateTime timestamp);
+    Optional<AlgorithmConfig> findConfigAt(@Param("timestamp") LocalDateTime timestamp);
 
     /**
      * Find all historical configurations ordered by effective date
