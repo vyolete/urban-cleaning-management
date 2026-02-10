@@ -32,7 +32,7 @@ echo ""
 # Configurar variables de entorno
 export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/urbanclean
 export SPRING_DATASOURCE_USERNAME=urbanclean_user
-export SPRING_DATASOURCE_PASSWORD=urbanclean_pass
+export SPRING_DATASOURCE_PASSWORD=password
 export JWT_SECRET=your_jwt_secret_key_change_this_in_production_min_256_bits_long
 export JWT_EXPIRATION=86400000
 export UPLOAD_DIR=./uploads

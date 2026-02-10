@@ -10,6 +10,13 @@ import com.urbanclean.entity.AlgorithmConfig;
 import com.urbanclean.repository.AlgorithmConfigRepository;
 import com.urbanclean.service.ConfigService;
 import com.urbanclean.service.TaskService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +34,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/admin/config")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Configuration Management", description = "Admin endpoints for managing system configuration including algorithm weights, token expiration, and duplicate detection")
 public class ConfigController {
 
     private final ConfigService configService;
@@ -38,6 +46,28 @@ public class ConfigController {
      * GET /api/admin/config/algorithm-weights
      * Accessible by admins only
      */
+    @Operation(
+        summary = "Get current algorithm weights",
+        description = "Retrieves the currently active priority calculation algorithm configuration. " +
+                     "This includes weights for category, zone risk, and time elapsed, as well as " +
+                     "deduplication parameters. Only administrators can access this endpoint.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Current algorithm weights retrieved successfully",
+            content = @Content(schema = @Schema(implementation = AlgorithmWeightsResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - Invalid or missing JWT token"
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - User does not have ADMIN role"
+        )
+    })
     @GetMapping("/algorithm-weights")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AlgorithmWeightsResponse> getCurrentWeights() {
@@ -54,9 +84,41 @@ public class ConfigController {
      * PUT /api/admin/config/algorithm-weights
      * Accessible by admins only
      */
+    @Operation(
+        summary = "Update algorithm weights",
+        description = "Updates the priority calculation algorithm configuration. This creates a new configuration version " +
+                     "and automatically triggers recalculation of priority scores for all pending tasks. " +
+                     "The weights must sum to 1.0 (validated by the system). Changes take effect immediately. " +
+                     "Only administrators can modify algorithm weights.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Algorithm weights updated successfully and priorities recalculated",
+            content = @Content(schema = @Schema(implementation = AlgorithmWeightsResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request - Invalid weights (must sum to 1.0) or invalid parameters"
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - Invalid or missing JWT token"
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - User does not have ADMIN role"
+        )
+    })
     @PutMapping("/algorithm-weights")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AlgorithmWeightsResponse> updateWeights(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "New algorithm weights configuration. Weights must sum to 1.0.",
+                required = true,
+                content = @Content(schema = @Schema(implementation = AlgorithmWeightsRequest.class))
+            )
             @Valid @RequestBody AlgorithmWeightsRequest request) {
         
         log.info("Update algorithm weights request: category={}, zone={}, time={}",
@@ -85,6 +147,28 @@ public class ConfigController {
      * GET /api/admin/config/algorithm-weights/history
      * Accessible by admins only
      */
+    @Operation(
+        summary = "Get algorithm weights history",
+        description = "Retrieves the complete history of algorithm weight configurations, ordered by effective date (newest first). " +
+                     "Shows who made each change and when. Useful for auditing and understanding how the priority algorithm " +
+                     "has evolved over time. Only administrators can access configuration history.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Configuration history retrieved successfully",
+            content = @Content(schema = @Schema(implementation = AlgorithmWeightsResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - Invalid or missing JWT token"
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - User does not have ADMIN role"
+        )
+    })
     @GetMapping("/algorithm-weights/history")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AlgorithmWeightsResponse>> getConfigurationHistory() {
@@ -128,6 +212,27 @@ public class ConfigController {
      * GET /api/admin/config/token-expiration
      * Accessible by admins only
      */
+    @Operation(
+        summary = "Get token expiration configuration",
+        description = "Retrieves the current JWT token expiration settings. Shows how long access tokens and refresh tokens " +
+                     "remain valid before requiring re-authentication. Only administrators can view token configuration.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Token expiration configuration retrieved successfully",
+            content = @Content(schema = @Schema(implementation = TokenExpirationResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - Invalid or missing JWT token"
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - User does not have ADMIN role"
+        )
+    })
     @GetMapping("/token-expiration")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TokenExpirationResponse> getTokenExpirationConfig() {
@@ -143,9 +248,40 @@ public class ConfigController {
      * PUT /api/admin/config/token-expiration
      * Accessible by admins only
      */
+    @Operation(
+        summary = "Update token expiration configuration",
+        description = "Updates JWT token expiration settings. Changes affect newly issued tokens only - existing tokens " +
+                     "retain their original expiration times. Shorter expiration times increase security but require " +
+                     "more frequent re-authentication. Only administrators can modify token expiration settings.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Token expiration configuration updated successfully",
+            content = @Content(schema = @Schema(implementation = TokenExpirationResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request - Invalid expiration values (must be positive)"
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - Invalid or missing JWT token"
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - User does not have ADMIN role"
+        )
+    })
     @PutMapping("/token-expiration")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TokenExpirationResponse> updateTokenExpirationConfig(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "New token expiration configuration",
+                required = true,
+                content = @Content(schema = @Schema(implementation = TokenExpirationRequest.class))
+            )
             @Valid @RequestBody TokenExpirationRequest request) {
         
         log.info("Update token expiration configuration request: access={}min, refresh={}days",
@@ -165,6 +301,27 @@ public class ConfigController {
      * GET /api/admin/config/duplicate-detection
      * Accessible by admins only
      */
+    @Operation(
+        summary = "Get duplicate detection configuration",
+        description = "Retrieves the current duplicate report detection settings. Shows the geographic radius and time window " +
+                     "used to identify duplicate incident reports. Only administrators can view duplicate detection configuration.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Duplicate detection configuration retrieved successfully",
+            content = @Content(schema = @Schema(implementation = DuplicateDetectionResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - Invalid or missing JWT token"
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - User does not have ADMIN role"
+        )
+    })
     @GetMapping("/duplicate-detection")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DuplicateDetectionResponse> getDuplicateDetectionConfig() {
@@ -180,9 +337,40 @@ public class ConfigController {
      * PUT /api/admin/config/duplicate-detection
      * Accessible by admins only
      */
+    @Operation(
+        summary = "Update duplicate detection configuration",
+        description = "Updates duplicate report detection parameters. Larger radius and longer time windows catch more duplicates " +
+                     "but may incorrectly flag distinct incidents. Smaller values reduce false positives but may miss duplicates. " +
+                     "Changes take effect immediately for new report submissions. Only administrators can modify duplicate detection settings.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Duplicate detection configuration updated successfully",
+            content = @Content(schema = @Schema(implementation = DuplicateDetectionResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request - Invalid detection parameters (must be positive)"
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized - Invalid or missing JWT token"
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - User does not have ADMIN role"
+        )
+    })
     @PutMapping("/duplicate-detection")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DuplicateDetectionResponse> updateDuplicateDetectionConfig(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "New duplicate detection configuration",
+                required = true,
+                content = @Content(schema = @Schema(implementation = DuplicateDetectionRequest.class))
+            )
             @Valid @RequestBody DuplicateDetectionRequest request) {
         
         log.info("Update duplicate detection configuration request: radius={}m, timeWindow={}h",
