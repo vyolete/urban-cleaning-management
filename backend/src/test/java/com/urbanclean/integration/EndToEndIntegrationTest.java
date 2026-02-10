@@ -201,7 +201,7 @@ public class EndToEndIntegrationTest {
         assertThat(report.getSubmitter().getId()).isEqualTo(citizenId);
 
         // Step 5: Verify citizen can view their reports
-        mockMvc.perform(get("/api/reports")
+        mockMvc.perform(get("/api/reports/my")
                         .header("Authorization", "Bearer " + citizenToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(reportId.toString()))
@@ -286,28 +286,43 @@ public class EndToEndIntegrationTest {
                 .andExpect(jsonPath("$[0].id").value(taskId.toString()))
                 .andExpect(jsonPath("$[0].state").value("PENDIENTE"));
 
-        // Step 3: Assign task to self
+        // Step 3: Assign task to self (PENDIENTE -> ASIGNADO)
         TaskStateUpdateRequest assignRequest = new TaskStateUpdateRequest();
-        assignRequest.setNewState(TaskState.EN_PROGRESO);
+        assignRequest.setNewState(TaskState.ASIGNADO);
 
-        mockMvc.perform(put("/api/tasks/" + taskId + "/state")
+        mockMvc.perform(patch("/api/tasks/" + taskId + "/state")
                         .header("Authorization", "Bearer " + operatorToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(assignRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.state").value("EN_PROGRESO"))
-                .andExpect(jsonPath("$.assignedTo").value(operatorId.toString()));
+                .andExpect(jsonPath("$.state").value("ASIGNADO"))
+                .andExpect(jsonPath("$.assignedOperatorUsername").value("operator_user"));
 
         // Verify task assigned in database
         Task assignedTask = taskRepository.findById(taskId).orElseThrow();
-        assertThat(assignedTask.getState()).isEqualTo(TaskState.EN_PROGRESO);
+        assertThat(assignedTask.getState()).isEqualTo(TaskState.ASIGNADO);
         assertThat(assignedTask.getAssignedOperator().getId()).isEqualTo(operatorId);
 
-        // Step 4: Update task state to resolved
+        // Step 4: Start working on task (ASIGNADO -> EN_PROGRESO)
+        TaskStateUpdateRequest startRequest = new TaskStateUpdateRequest();
+        startRequest.setNewState(TaskState.EN_PROGRESO);
+
+        mockMvc.perform(patch("/api/tasks/" + taskId + "/state")
+                        .header("Authorization", "Bearer " + operatorToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(startRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.state").value("EN_PROGRESO"));
+
+        // Verify task in progress
+        Task inProgressTask = taskRepository.findById(taskId).orElseThrow();
+        assertThat(inProgressTask.getState()).isEqualTo(TaskState.EN_PROGRESO);
+
+        // Step 5: Update task state to resolved (EN_PROGRESO -> RESUELTO)
         TaskStateUpdateRequest resolveRequest = new TaskStateUpdateRequest();
         resolveRequest.setNewState(TaskState.RESUELTO);
 
-        mockMvc.perform(put("/api/tasks/" + taskId + "/state")
+        mockMvc.perform(patch("/api/tasks/" + taskId + "/state")
                         .header("Authorization", "Bearer " + operatorToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(resolveRequest)))
@@ -320,7 +335,7 @@ public class EndToEndIntegrationTest {
         assertThat(resolvedTask.getState()).isEqualTo(TaskState.RESUELTO);
         assertThat(resolvedTask.getResolvedAt()).isNotNull();
 
-        // Step 5: View task history/audit log
+        // Step 6: View task history/audit log
         mockMvc.perform(get("/api/tasks/" + taskId + "/audit-history")
                         .header("Authorization", "Bearer " + operatorToken))
                 .andExpect(status().isOk())
@@ -421,7 +436,10 @@ public class EndToEndIntegrationTest {
         mockMvc.perform(get("/api/admin/metrics/performance")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.metrics").exists());
+                .andExpect(jsonPath("$.timeRange").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.requestCount").exists())
+                .andExpect(jsonPath("$.averageResponseTime").exists());
     }
 
     /**
