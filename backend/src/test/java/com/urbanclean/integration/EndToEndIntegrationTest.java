@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -116,7 +117,8 @@ public class EndToEndIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("User registered successfully"));
+                .andExpect(jsonPath("$.username").value("citizen_user"))
+                .andExpect(jsonPath("$.email").value("citizen@example.com"));
 
         // Verify user created
         User citizen = userRepository.findByUsername("citizen_user").orElseThrow();
@@ -155,12 +157,12 @@ public class EndToEndIntegrationTest {
                 .andExpect(jsonPath("$.reportCreated").value(true))
                 .andExpect(jsonPath("$.taskResolved").value(true));
 
-        // Step 4: Create a report
+        // Step 4: Create a report (using Madrid coordinates for geofencing)
         ReportSubmissionRequest reportRequest = new ReportSubmissionRequest();
         reportRequest.setCategory("BASURA_ACUMULADA");
         reportRequest.setDescription("Large pile of trash on the sidewalk near the park");
-        reportRequest.setLatitude(40.7128);
-        reportRequest.setLongitude(-74.0060);
+        reportRequest.setLatitude(40.4168);  // Madrid latitude
+        reportRequest.setLongitude(-3.7038);  // Madrid longitude
 
         MockMultipartFile photo = new MockMultipartFile(
                 "photo",
@@ -180,6 +182,7 @@ public class EndToEndIntegrationTest {
                         .file(photo)
                         .file(data)
                         .header("Authorization", "Bearer " + citizenToken))
+                .andDo(print())  // Print response for debugging
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.category").value("BASURA_ACUMULADA"))
@@ -234,10 +237,17 @@ public class EndToEndIntegrationTest {
                 .build();
         citizen = userRepository.save(citizen);
 
+        // Create point geometry for report location (Madrid coordinates)
+        org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory(new org.locationtech.jts.geom.PrecisionModel(), 4326);
+        org.locationtech.jts.geom.Coordinate coordinate = new org.locationtech.jts.geom.Coordinate(-3.7038, 40.4168);  // Madrid
+        org.locationtech.jts.geom.Point location = geometryFactory.createPoint(coordinate);
+
         Report report = new Report();
         report.setCategory("BASURA_ACUMULADA");
         report.setDescription("Test report for operator flow");
         report.setSubmitter(citizen);
+        report.setLocation(location);
+        report.setIsDuplicate(false);
         report.setCreatedAt(LocalDateTime.now());
         report = reportRepository.save(report);
 
@@ -246,6 +256,7 @@ public class EndToEndIntegrationTest {
         task.setCategory("BASURA_ACUMULADA");
         task.setState(TaskState.PENDIENTE);
         task.setPriorityScore(java.math.BigDecimal.valueOf(75.5));
+        task.setLocation(location);  // Set location from report
         task.setCreatedAt(LocalDateTime.now());
         task = taskRepository.save(task);
         taskId = task.getId();
@@ -366,6 +377,8 @@ public class EndToEndIntegrationTest {
         weightsRequest.setWeightCategory(java.math.BigDecimal.valueOf(0.5));
         weightsRequest.setWeightZone(java.math.BigDecimal.valueOf(0.3));
         weightsRequest.setWeightTime(java.math.BigDecimal.valueOf(0.2));
+        weightsRequest.setDeduplicationDistanceMeters(java.math.BigDecimal.valueOf(50.0));
+        weightsRequest.setDeduplicationTimeWindowHours(24);
 
         mockMvc.perform(put("/api/admin/config/algorithm-weights")
                         .header("Authorization", "Bearer " + adminToken)
@@ -447,6 +460,9 @@ public class EndToEndIntegrationTest {
 
         String originalAccessToken = loginResponse.getToken();
         String originalRefreshToken = loginResponse.getRefreshToken();
+
+        // Wait 1 second to ensure different timestamp in JWT
+        Thread.sleep(1000);
 
         // Step 2: Refresh token
         RefreshTokenRequest refreshRequest = new RefreshTokenRequest();
@@ -656,12 +672,23 @@ public class EndToEndIntegrationTest {
                 .build();
         operator = userRepository.save(operator);
 
+        // Create geometry factory for locations (Madrid coordinates)
+        org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory(
+            new org.locationtech.jts.geom.PrecisionModel(), 4326);
+
         // Create test reports and tasks
         for (int i = 0; i < 5; i++) {
+            // Create location for each report (Madrid area)
+            org.locationtech.jts.geom.Coordinate coordinate = new org.locationtech.jts.geom.Coordinate(
+                -3.7038 + (i * 0.001), 40.4168 + (i * 0.001));
+            org.locationtech.jts.geom.Point location = geometryFactory.createPoint(coordinate);
+
             Report report = new Report();
             report.setCategory(i % 2 == 0 ? "BASURA_ACUMULADA" : "BACHE");
             report.setDescription("Test report " + i);
             report.setSubmitter(citizen);
+            report.setLocation(location);
+            report.setIsDuplicate(false);
             report.setCreatedAt(LocalDateTime.now().minusDays(i));
             report = reportRepository.save(report);
 
@@ -670,6 +697,7 @@ public class EndToEndIntegrationTest {
             task.setCategory(report.getCategory());
             task.setState(i < 3 ? TaskState.RESUELTO : TaskState.PENDIENTE);
             task.setPriorityScore(java.math.BigDecimal.valueOf(50 + i * 10));
+            task.setLocation(location);  // Set location from report
             task.setCreatedAt(LocalDateTime.now().minusDays(i));
             task.setAssignedOperator(operator);
             

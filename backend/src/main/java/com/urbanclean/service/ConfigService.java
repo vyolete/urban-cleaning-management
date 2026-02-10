@@ -66,6 +66,7 @@ public class ConfigService {
         log.info("Creating default algorithm configuration");
         
         AlgorithmConfig config = AlgorithmConfig.builder()
+                .configType("ALGORITHM_WEIGHTS")
                 .weightCategory(DEFAULT_WEIGHT_CATEGORY)
                 .weightZone(DEFAULT_WEIGHT_ZONE)
                 .weightTime(DEFAULT_WEIGHT_TIME)
@@ -98,6 +99,7 @@ public class ConfigService {
 
         // Create new configuration
         AlgorithmConfig newConfig = AlgorithmConfig.builder()
+                .configType("ALGORITHM_WEIGHTS")
                 .weightCategory(weightCategory)
                 .weightZone(weightZone)
                 .weightTime(weightTime)

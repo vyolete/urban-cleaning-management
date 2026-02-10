@@ -1191,19 +1191,26 @@ This document breaks down the implementation of operational excellence features 
 
 ### Integration and Testing
 
-**Task F.1**: End-to-end integration test
+**Task F.1**: End-to-end integration test ⏳ **IN PROGRESS**
 - [x] Create comprehensive integration test
 - [x] Test database infrastructure created (urbanclean_test with PostGIS)
 - [x] Test configuration files created (application-test.properties, init-test-db.sh, verify-test-db.sh, README.md)
 - [x] EndToEndIntegrationTest.java created with 6 test scenarios
-- [ ] Fix test failures (6/6 tests failing):
-  - testCompleteCitizenFlow: Registration response format mismatch
-  - testCompleteOperatorFlow: Report creation error (500)
-  - testCompleteAdminFlow: Validation error - missing deduplication fields (400)
-  - testTokenRefreshFlow: Access tokens identical after refresh
-  - testMultiDeviceSessionManagement: Rate limiting (429)
-  - testNotificationPreferencesManagement: Rate limiting (429)
+- [x] Fix infrastructure issues:
+  - ScheduledTasks dependency on RateLimitingFilter (made optional with @Autowired(required=false))
+  - AlgorithmConfig.configType NOT NULL constraint (added to builders in ConfigService)
+  - Report.location and Task.location NOT NULL constraints (added to test data)
+  - Geofencing validation (updated test coordinates to Madrid)
+- [ ] Fix remaining test failures (3/6 tests failing):
+  - testCompleteCitizenFlow: 403 error when viewing reports (line 206)
+  - testCompleteOperatorFlow: 500 error on login (line 297)
+  - testCompleteAdminFlow: Performance metrics endpoint missing $.metrics field (line 424)
+  - ✅ testTokenRefreshFlow: PASSING
+  - ✅ testMultiDeviceSessionManagement: PASSING
+  - ✅ testNotificationPreferencesManagement: PASSING
 - [ ] Test with real database and email server
+
+**Status**: 6 test scenarios created, 3 passing (50%), 3 failing. Core infrastructure issues fixed. Remaining failures are endpoint-specific issues that need investigation.
 
 **Task F.2**: Security audit
 - [ ] Review all authentication/authorization logic
