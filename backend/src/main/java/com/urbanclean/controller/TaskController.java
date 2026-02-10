@@ -340,6 +340,7 @@ public class TaskController {
                 .duplicateCount(task.getDuplicateCount())
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
+                .resolvedAt(task.getResolvedAt())
                 .reportId(task.getPrimaryReport().getId())
                 .description(task.getPrimaryReport().getDescription())
                 .photoUrl(task.getPrimaryReport().getPhotoUrl())

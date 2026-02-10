@@ -116,6 +116,7 @@ public class TaskService {
     /**
      * Update task state
      * Validates state transitions according to state machine rules
+     * Auto-assigns operator when transitioning to ASIGNADO
      * Returns the previous state for audit logging
      */
     @Transactional
@@ -127,6 +128,19 @@ public class TaskService {
         validateStateTransition(currentState, newState);
 
         log.info("Updating task {} state: {} -> {}", taskId, currentState, newState);
+        
+        // Auto-assign operator when transitioning to ASIGNADO
+        if (newState == TaskState.ASIGNADO && task.getAssignedOperator() == null) {
+            User currentUser = getCurrentUser();
+            task.setAssignedOperator(currentUser);
+            log.info("Auto-assigned task {} to operator {}", taskId, currentUser.getId());
+        }
+        
+        // Set resolved timestamp when transitioning to RESUELTO
+        if (newState == TaskState.RESUELTO) {
+            task.setResolvedAt(java.time.LocalDateTime.now());
+            log.info("Task {} marked as resolved at {}", taskId, task.getResolvedAt());
+        }
         
         // Update state
         task.setState(newState);
@@ -187,6 +201,17 @@ public class TaskService {
      */
     public TaskState getPreviousState(Task task) {
         return task.getState();
+    }
+
+    /**
+     * Get current authenticated user
+     */
+    private User getCurrentUser() {
+        org.springframework.security.core.Authentication authentication = 
+            org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Current user not found: " + username));
     }
 
     /**

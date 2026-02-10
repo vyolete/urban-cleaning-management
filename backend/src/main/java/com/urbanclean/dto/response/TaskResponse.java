@@ -62,6 +62,9 @@ public class TaskResponse {
     @Schema(description = "Timestamp when the task was last updated", example = "2026-02-09T15:45:00")
     private LocalDateTime updatedAt;
     
+    @Schema(description = "Timestamp when the task was resolved (null if not resolved)", example = "2026-02-09T16:30:00")
+    private LocalDateTime resolvedAt;
+    
     @Schema(description = "ID of the original report that created this task", example = "660e8400-e29b-41d4-a716-446655440000")
     private UUID reportId;
     
