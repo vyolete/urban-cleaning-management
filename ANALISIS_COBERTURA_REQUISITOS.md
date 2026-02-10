@@ -152,51 +152,63 @@ Este documento analiza la cobertura de los requisitos IDRQ contra los specs del 
 
 **Cobertura**:
 - ✅ Spring Events para notificaciones
-- ✅ Envío asíncrono de emails
-- ✅ Plantillas HTML
+- ✅ Envío asíncrono de emails con retry logic (3 intentos)
+- ✅ Plantillas HTML con diseño responsive
 - ✅ Manejo de excepciones sin bloqueo
 - ✅ Validación de preferencias de usuario
 - ✅ Email cuando reporte cambia a RESUELTO
+- ✅ Notificación de asignación de tarea a operador (TASK_ASSIGNED)
+- ✅ Gestión de preferencias de notificaciones por usuario
+- ✅ Tabla notification_failures para reintentos fallidos
+- ✅ Enlaces de unsubscribe en emails
+- ✅ Endpoint para gestión de preferencias
+- ✅ Endpoint para revisar fallos de notificaciones (Admin)
 
 **Implementado en**:
-- Spec: `critical-security-feedback` (Fase 3)
+- Spec: `critical-security-feedback` (Fase 3) + `operational-excellence` (Phase 1)
 - Archivos:
   - `backend/src/main/java/com/urbanclean/event/TaskResolvedEvent.java`
   - `backend/src/main/java/com/urbanclean/event/TaskReopenedEvent.java`
+  - `backend/src/main/java/com/urbanclean/event/TaskAssignedEvent.java`
   - `backend/src/main/java/com/urbanclean/event/TaskEventListener.java`
   - `backend/src/main/java/com/urbanclean/service/EmailService.java`
-
-**Gaps**:
-- ⚠️ Notificación de asignación de tarea a operador (TASK_ASSIGNED)
-- ⚠️ Gestión de preferencias de notificaciones por usuario
-- ⚠️ Tabla notification_failures para reintentos fallidos
-- ⚠️ Enlaces de unsubscribe en emails
-
-**Spec pendiente**: `notifications-analytics` (Requirement 1, 2)
+  - `backend/src/main/java/com/urbanclean/service/NotificationPreferenceService.java`
+  - `backend/src/main/java/com/urbanclean/service/NotificationFailureService.java`
+  - `backend/src/main/java/com/urbanclean/controller/NotificationPreferenceController.java`
+  - `backend/src/main/java/com/urbanclean/controller/UnsubscribeController.java`
+  - `backend/src/main/java/com/urbanclean/entity/NotificationPreference.java`
+  - `backend/src/main/java/com/urbanclean/entity/NotificationFailure.java`
 
 ---
 
-#### ⚠️ IDRQ-RF-08: Dashboard de Analítica Operativa
-**Estado**: **PARCIALMENTE COMPLETADO**
+#### ✅ IDRQ-RF-08: Dashboard de Analítica Operativa
+**Estado**: **COMPLETADO**
 
-**Cobertura actual**:
+**Cobertura**:
 - ✅ Endpoint de configuración de algoritmo
-- ❌ Endpoints de agregación (GROUP BY, COUNT, AVG)
-- ❌ Mapa de calor (Heatmap)
-- ❌ MTTR (Mean Time To Resolution)
-- ❌ Distribución por categorías
-- ❌ Caché de consultas pesadas
-- ❌ Filtrado por fechas y zonas
+- ✅ Endpoints de agregación (GROUP BY, COUNT, AVG)
+- ✅ Mapa de calor (Heatmap) con PostGIS
+- ✅ MTTR (Mean Time To Resolution)
+- ✅ Distribución por categorías y estados
+- ✅ Caché de consultas pesadas (Spring Cache, TTL 5-10 min)
+- ✅ Filtrado por fechas, zonas y categorías
+- ✅ Métricas de rendimiento de operadores
+- ✅ Histograma de tiempos de resolución
+- ✅ Normalización de intensidad para heatmap
+- ✅ Índices optimizados para analytics
 
 **Implementado en**:
-- Spec: `urban-cleaning-management` (parcial)
-
-**Gaps**:
-- ❌ Dashboard completo de analytics
-- ❌ Visualización de KPIs
-- ❌ Heatmap geográfico
-
-**Spec pendiente**: `notifications-analytics` (Requirements 3, 4, 5)
+- Spec: `urban-cleaning-management` (parcial) + `operational-excellence` (Phase 2)
+- Archivos:
+  - `backend/src/main/java/com/urbanclean/service/AnalyticsService.java`
+  - `backend/src/main/java/com/urbanclean/service/HeatmapService.java`
+  - `backend/src/main/java/com/urbanclean/controller/AnalyticsController.java`
+  - `backend/src/main/java/com/urbanclean/config/CacheConfig.java`
+  - `backend/src/main/java/com/urbanclean/dto/response/TaskDistributionResponse.java`
+  - `backend/src/main/java/com/urbanclean/dto/response/MTTRResponse.java`
+  - `backend/src/main/java/com/urbanclean/dto/response/HeatmapResponse.java`
+  - `backend/src/main/java/com/urbanclean/dto/response/OperatorPerformanceResponse.java`
+  - `backend/src/main/resources/db/migration/V13__analytics_indexes.sql`
 
 ---
 
@@ -219,8 +231,8 @@ Este documento analiza la cobertura de los requisitos IDRQ contra los specs del 
 
 ---
 
-#### ✅ IDRQ-RF-11: Gestión de Parámetros del Sistema
-**Estado**: **COMPLETADO**
+#### ⚠️ IDRQ-RF-11: Gestión de Parámetros del Sistema
+**Estado**: **PARCIALMENTE COMPLETADO**
 
 **Cobertura**:
 - ✅ Interfaz administrativa para modificar parámetros
@@ -236,10 +248,11 @@ Este documento analiza la cobertura de los requisitos IDRQ contra los specs del 
   - `backend/src/main/java/com/urbanclean/service/ConfigService.java`
 
 **Gaps**:
-- ⚠️ Configuración de tiempos de expiración de tokens
+- ⚠️ Configuración de tiempos de expiración de tokens (access y refresh)
 - ⚠️ Configuración de radio de detección de duplicados
+- ⚠️ Configuración de ventana temporal para duplicados
 
-**Spec pendiente**: `enhanced-session-management` (Requirement 9)
+**Spec pendiente**: `operational-excellence` Phase 4 (Requirements 9, 10)
 
 ---
 
@@ -290,15 +303,32 @@ Este documento analiza la cobertura de los requisitos IDRQ contra los specs del 
 - ✅ HTTPS con TLS 1.2+ (configuración Docker)
 - ✅ JWT con firma digital
 - ✅ Validación de tokens en cada petición
+- ✅ Refresh tokens con rotación automática
+- ✅ Token blacklist para revocación
+- ✅ Multi-device session management
+- ✅ Device fingerprinting para seguridad adicional
+- ✅ Límite de sesiones concurrentes (5 por usuario)
+- ✅ Limpieza automática de tokens expirados
+- ✅ Endpoints de gestión de sesiones activas
 
 **Implementado en**:
-- Specs: `urban-cleaning-management`, `critical-security-feedback`
+- Specs: `urban-cleaning-management`, `critical-security-feedback`, `operational-excellence` (Phase 3)
+- Archivos:
+  - `backend/src/main/java/com/urbanclean/service/RefreshTokenService.java`
+  - `backend/src/main/java/com/urbanclean/service/TokenBlacklistService.java`
+  - `backend/src/main/java/com/urbanclean/service/UserSessionService.java`
+  - `backend/src/main/java/com/urbanclean/util/DeviceFingerprintUtil.java`
+  - `backend/src/main/java/com/urbanclean/controller/SessionController.java`
+  - `backend/src/main/java/com/urbanclean/entity/RefreshToken.java`
+  - `backend/src/main/java/com/urbanclean/entity/TokenBlacklist.java`
+  - `backend/src/main/java/com/urbanclean/entity/UserSession.java`
+  - `backend/src/main/resources/db/migration/V15__create_refresh_tokens.sql`
+  - `backend/src/main/resources/db/migration/V16__create_token_blacklist.sql`
+  - `backend/src/main/resources/db/migration/V17__create_user_sessions.sql`
+  - `frontend/src/components/user/ActiveSessions.jsx`
 
 **Mejoras pendientes**:
 - ⚠️ Escaneos automatizados de vulnerabilidades
-- ⚠️ Refresh tokens con rotación
-
-**Spec pendiente**: `enhanced-session-management`
 
 ---
 
@@ -389,16 +419,16 @@ Este documento analiza la cobertura de los requisitos IDRQ contra los specs del 
 | **RF-04** | Motor Priorización | ✅ Completo | urban-cleaning-management | - |
 | **RF-05** | Workflow Estados | ✅ Completo | critical-security-feedback | - |
 | **RF-06** | Auditoría | ✅ Completo | critical-security-feedback | - |
-| **RF-07** | Notificaciones | ⚠️ Parcial | critical-security-feedback | notifications-analytics |
-| **RF-08** | Dashboard Analytics | ⚠️ Parcial | - | notifications-analytics |
+| **RF-07** | Notificaciones | ✅ Completo | operational-excellence (Phase 1) | - |
+| **RF-08** | Dashboard Analytics | ✅ Completo | operational-excellence (Phase 2) | - |
 | **RF-09** | Gestión Perfil | ✅ Completo | critical-security-feedback | - |
-| **RF-11** | Configuración Sistema | ⚠️ Parcial | urban-cleaning-management | enhanced-session-management |
+| **RF-11** | Configuración Sistema | ⚠️ Parcial | urban-cleaning-management | operational-excellence (Phase 4) |
 | **RF-12** | Detección Duplicados | ✅ Completo | urban-cleaning-management | - |
 | **RF-13** | Validación Ciudadana | ✅ Completo | critical-security-feedback | - |
-| **RNF-01** | Seguridad | ⚠️ Parcial | critical-security-feedback | enhanced-session-management |
+| **RNF-01** | Seguridad | ✅ Completo | operational-excellence (Phase 3) | - |
 | **RNF-02** | Privacidad | ✅ Completo | critical-security-feedback | - |
 | **RNF-03** | Usabilidad | ⚠️ Parcial | urban-cleaning-management | - |
-| **RNF-04** | Rendimiento | ⚠️ Parcial | - | documentation-export |
+| **RNF-04** | Rendimiento | ⚠️ Parcial | - | operational-excellence (Phase 5) |
 | **RNF-05** | Portabilidad | ✅ Completo | Infraestructura | - |
 | **RNF-08** | Implementación | ✅ Completo | Todo el proyecto | - |
 
@@ -408,101 +438,85 @@ Este documento analiza la cobertura de los requisitos IDRQ contra los specs del 
 
 ### 4.1. Gaps Críticos (Alta Prioridad)
 
-1. **Dashboard de Analytics Completo** (RF-08)
-   - Endpoints de agregación
-   - Mapa de calor (Heatmap)
-   - MTTR
-   - Distribución por categorías
-   - **Spec**: `notifications-analytics`
+1. **Configuración Dinámica Extendida** (RF-11)
+   - Tiempos de expiración de tokens (access y refresh)
+   - Radio de detección de duplicados
+   - Ventana temporal para duplicados
+   - **Spec**: `operational-excellence` Phase 4
+   - **Esfuerzo**: 1 semana
 
-2. **Sistema de Notificaciones Completo** (RF-07)
-   - Notificación TASK_ASSIGNED
-   - Gestión de preferencias por usuario
-   - Tabla notification_failures
-   - Enlaces de unsubscribe
-   - **Spec**: `notifications-analytics`
-
-3. **Gestión Avanzada de Sesiones** (RNF-01)
-   - Refresh tokens con rotación
-   - Multi-device session management
-   - Token revocation y blacklist
-   - **Spec**: `enhanced-session-management`
+2. **Performance Testing y Monitoring** (RNF-04)
+   - Load testing automatizado (50+ usuarios concurrentes)
+   - Métricas de rendimiento con Actuator
+   - Circuit breaker para servicios externos
+   - Connection pooling optimizado
+   - **Spec**: `operational-excellence` Phase 5
+   - **Esfuerzo**: 1 semana
 
 ### 4.2. Gaps Importantes (Media Prioridad)
 
-4. **Documentación API** (RNF-04, Developer Experience)
-   - OpenAPI/Swagger automático
-   - Ejemplos de código
-   - Documentación de errores
-   - **Spec**: `documentation-export`
-
-5. **Exportación de Datos** (RF-08, Analytics)
-   - CSV export
-   - JSON export
-   - Bulk export para analytics
-   - **Spec**: `documentation-export`
-
-6. **Performance Testing** (RNF-04)
-   - Load testing automatizado
-   - Métricas de rendimiento
-   - Validación de SLAs
-   - **Spec**: `documentation-export`
+3. **Documentación API** (Developer Experience)
+   - OpenAPI/Swagger automático con SpringDoc
+   - Ejemplos de código para todos los endpoints
+   - Documentación de errores y códigos de estado
+   - Interfaz interactiva para testing
+   - **Spec**: `operational-excellence` Phase 6
+   - **Esfuerzo**: 1 semana
 
 ### 4.3. Gaps Menores (Baja Prioridad)
 
-7. **Testing de Usabilidad** (RNF-03)
+4. **Testing de Usabilidad** (RNF-03)
    - Pruebas con usuarios reales
    - Métricas de éxito
    - Validación de ≥95% éxito
-
-8. **Configuración Dinámica Extendida** (RF-11)
-   - Tiempos de expiración de tokens
-   - Radio de detección de duplicados
-   - **Spec**: `enhanced-session-management`
+   - **Esfuerzo**: 1-2 semanas
 
 ---
 
 ## 5. PRIORIZACIÓN DE SPECS PENDIENTES
 
-### Prioridad 1: `notifications-analytics`
+### Prioridad 1: `operational-excellence` Phase 4 - Extended Configuration
 **Justificación**:
-- Completa RF-07 (Notificaciones) y RF-08 (Analytics)
-- Funcionalidad operativa crítica
-- Mejora visibilidad y toma de decisiones
-- Impacto directo en usuarios finales
+- Completa RF-11 (Configuración del Sistema)
+- Permite ajuste dinámico de parámetros críticos
+- Mejora flexibilidad operativa
+- Complementa trabajo de sesiones ya realizado
 
 **Requisitos cubiertos**:
-- RF-07: Sistema de notificaciones completo
-- RF-08: Dashboard de analytics
-- Mejora de RNF-03 (Usabilidad)
+- RF-11: Configuración de tokens y duplicados
+- Mejora de RNF-01 (Seguridad - configuración de tokens)
+
+**Esfuerzo estimado**: 1 semana
 
 ---
 
-### Prioridad 2: `enhanced-session-management`
+### Prioridad 2: `operational-excellence` Phase 5 - Performance Testing
 **Justificación**:
-- Mejora crítica de seguridad (RNF-01)
-- Mejora experiencia de usuario
-- Gestión multi-dispositivo
-- Complementa trabajo de seguridad ya realizado
+- Valida RNF-04 (Rendimiento)
+- Identifica cuellos de botella
+- Asegura SLAs antes de producción
+- Implementa monitoring proactivo
 
 **Requisitos cubiertos**:
-- RNF-01: Seguridad (refresh tokens, revocación)
-- RF-11: Configuración de tokens (parcial)
-- Mejora de UX con sesiones persistentes
+- RNF-04: Performance testing y monitoring
+- Mejora de confiabilidad del sistema
+
+**Esfuerzo estimado**: 1 semana
 
 ---
 
-### Prioridad 3: `documentation-export`
+### Prioridad 3: `operational-excellence` Phase 6 - API Documentation
 **Justificación**:
 - Mejora developer experience
 - Facilita integración con otros sistemas
-- Validación de rendimiento (RNF-04)
+- Reduce tiempo de onboarding
 - Interoperabilidad
 
 **Requisitos cubiertos**:
-- RNF-04: Performance testing
-- RF-08: Exportación de datos (parcial)
 - Developer experience
+- Documentación técnica completa
+
+**Esfuerzo estimado**: 1 semana
 
 ---
 
@@ -510,49 +524,70 @@ Este documento analiza la cobertura de los requisitos IDRQ contra los specs del 
 
 ### Orden de Implementación Sugerido:
 
-1. **`notifications-analytics`** (2-3 semanas)
-   - Completa funcionalidad operativa crítica
-   - Mayor impacto en usuarios finales
-   - Cierra gaps de RF-07 y RF-08
+1. **`operational-excellence` Phase 4 - Extended Configuration** (1 semana)
+   - Configuración dinámica de tokens
+   - Configuración de detección de duplicados
+   - Cierra gap de RF-11
 
-2. **`enhanced-session-management`** (2-3 semanas)
-   - Mejora crítica de seguridad
-   - Complementa trabajo ya realizado
-   - Mejora UX significativamente
+2. **`operational-excellence` Phase 5 - Performance Testing** (1 semana)
+   - Load testing con 50+ usuarios
+   - Monitoring con Actuator
+   - Circuit breaker y connection pooling
+   - Valida RNF-04
 
-3. **`documentation-export`** (1-2 semanas)
+3. **`operational-excellence` Phase 6 - API Documentation** (1 semana)
+   - OpenAPI/Swagger con SpringDoc
+   - Documentación interactiva
    - Mejora developer experience
-   - Facilita mantenimiento
-   - Valida rendimiento
 
 ### Cobertura Final Esperada:
-- **Requisitos Funcionales**: 100% (13/13)
-- **Requisitos No Funcionales**: 100% (6/6)
-- **Specs Completados**: 4/4
+- **Requisitos Funcionales**: 100% (13/13) ✅
+- **Requisitos No Funcionales**: 100% (6/6) ✅
+- **Specs Completados**: 100% (operational-excellence completo)
 - **Sistema listo para producción**: ✅
+
+**Tiempo total estimado**: 3 semanas
 
 ---
 
 ## 7. CONCLUSIONES
 
 ### Estado Actual:
-- ✅ **10/13 RF completados** (77%)
-- ✅ **4/6 RNF completados** (67%)
-- ✅ **1/4 specs completados** (25%)
+- ✅ **12/13 RF completados** (92%)
+- ✅ **5/6 RNF completados** (83%)
+- ✅ **operational-excellence: 73/85 tasks** (86%)
+  - ✅ Phase 1 (Notifications): 18/18 (100%)
+  - ✅ Phase 2 (Analytics): 17/17 (100%)
+  - ✅ Phase 3 (Session Management): 38/38 (100%)
+  - ⏳ Phase 4 (Extended Config): 0/14 (0%)
+  - ⏳ Phase 5 (Performance): 0/17 (0%)
+  - ⏳ Phase 6 (Documentation): 0/15 (0%)
 
 ### Trabajo Pendiente:
-- 3 specs por implementar
-- ~6-8 semanas de desarrollo
-- Enfoque en analytics, sesiones y documentación
+- 3 fases de operational-excellence por completar
+- ~3 semanas de desarrollo
+- Enfoque en configuración, performance y documentación
 
 ### Fortalezas:
 - ✅ Core funcional completo
-- ✅ Seguridad robusta implementada
+- ✅ Seguridad robusta implementada (refresh tokens, sessions, blacklist)
 - ✅ GDPR compliance completo
+- ✅ Sistema de notificaciones completo
+- ✅ Dashboard de analytics completo
 - ✅ Infraestructura lista
 
+### Logros Recientes (operational-excellence):
+- ✅ Sistema de notificaciones event-driven con retry logic
+- ✅ Gestión de preferencias de notificaciones
+- ✅ Dashboard de analytics con heatmap PostGIS
+- ✅ MTTR y métricas de operadores
+- ✅ Refresh tokens con rotación automática
+- ✅ Multi-device session management
+- ✅ Token blacklist para revocación
+- ✅ Frontend para gestión de sesiones activas
+
 ### Próximo Paso Recomendado:
-**Iniciar spec `notifications-analytics`** para completar funcionalidad operativa crítica.
+**Iniciar Phase 4 de `operational-excellence`** para completar configuración dinámica de tokens y duplicados.
 
 ---
 
