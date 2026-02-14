@@ -1,0 +1,27 @@
+flowchart TD
+    Start([Start: Submit Report]) --> ValidateInput[Validate Report Request]
+    ValidateInput --> ValidateGeo[Validate Coordinates<br/>GeofencingService]
+    ValidateGeo --> StorePhoto[Store Photo File<br/>FileStorageService]
+    StorePhoto --> GetUser[Get Current User<br/>or Anonymous]
+    GetUser --> CreatePoint[Create Point Geometry<br/>from Lat/Long]
+    CreatePoint --> CreateReportObj[Create Report Entity<br/>NOT saved yet]
+    
+    CreateReportObj --> CheckDup{Check for Duplicates<br/>DeduplicationService}
+    
+    CheckDup -->|Duplicates Found| FindParent[Find Parent Task<br/>from Nearby Reports]
+    FindParent --> MarkDup[Mark Report as Duplicate]
+    MarkDup --> SaveDupReport[Save Report with<br/>Parent Task Reference]
+    SaveDupReport --> IncrementCount[Increment Parent Task<br/>Duplicate Count]
+    IncrementCount --> EndDup([End: Duplicate Report])
+    
+    CheckDup -->|No Duplicates| SaveReport[Save Report to Database]
+    SaveReport --> CalcPriority[Calculate Priority Score<br/>PriorityCalculatorService]
+    CalcPriority --> CreateTask[Create Task Entity<br/>State: PENDIENTE]
+    CreateTask --> SaveTask[Save Task to Database]
+    SaveTask --> EndNew([End: New Task Created])
+    
+    style Start fill:#e1f5ff
+    style EndDup fill:#fff4e1
+    style EndNew fill:#c8e6c9
+    style CheckDup fill:#ffe0b2
+

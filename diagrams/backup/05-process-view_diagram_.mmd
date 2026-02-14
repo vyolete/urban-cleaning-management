@@ -1,0 +1,23 @@
+flowchart TD
+    Start([Citizen submits report]) --> ValidateReq[Validate request fields]
+    ValidateReq -->|Invalid| ErrValidation[Return 400 Bad Request]
+    ValidateReq -->|Valid| ValidateGeo[Validate geofencing]
+    ValidateGeo -->|Outside bounds| ErrGeo[Return 400 Bad Request]
+    ValidateGeo -->|Within bounds| StorePhoto[Store photo file]
+    StorePhoto -->|Failure| ErrStorage[Return 500 Internal Error]
+    StorePhoto -->|Success| GetUser[Get authenticated user]
+    GetUser --> CreatePoint[Create PostGIS Point]
+    CreatePoint --> CheckDup{Check for duplicates}
+    CheckDup -->|Duplicate found| MarkDup[Mark as duplicate]
+    CheckDup -->|No duplicate| SaveReport[Save report]
+    MarkDup --> LinkParent[Link to parent task]
+    LinkParent --> IncrementCount[Increment duplicate count]
+    IncrementCount --> ReturnDup[Return 201 Created]
+    SaveReport --> CreateTask[Create task with priority]
+    CreateTask --> ReturnNew[Return 201 Created]
+    ErrValidation --> End([End])
+    ErrGeo --> End
+    ErrStorage --> End
+    ReturnDup --> End
+    ReturnNew --> End
+

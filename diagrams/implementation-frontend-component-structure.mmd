@@ -1,0 +1,50 @@
+graph TB
+    subgraph "Backend Runtime Dependencies"
+        SpringBoot[Spring Boot 3.2.2]
+        SpringWeb[Spring Web MVC]
+        SpringData[Spring Data JPA]
+        SpringSecurity[Spring Security]
+        Hibernate[Hibernate ORM]
+        HibernateSpatial[Hibernate Spatial 6.4.1]
+        PostgreSQL[PostgreSQL Driver]
+        JJWT[JJWT 0.12.3]
+        Thymeleaf[Thymeleaf]
+        Actuator[Spring Actuator]
+        Prometheus[Micrometer Prometheus]
+        
+        SpringBoot --> SpringWeb
+        SpringBoot --> SpringData
+        SpringBoot --> SpringSecurity
+        SpringData --> Hibernate
+        Hibernate --> HibernateSpatial
+        Hibernate --> PostgreSQL
+        SpringSecurity --> JJWT
+        SpringBoot --> Thymeleaf
+        SpringBoot --> Actuator
+        Actuator --> Prometheus
+    end
+    
+    subgraph "Frontend Runtime Dependencies"
+        React[React 18.2.0]
+        ReactDOM[React DOM]
+        ReactRouter[React Router 6.21.3]
+        Axios[Axios 1.6.5]
+        Leaflet[Leaflet 1.9.4]
+        ReactLeaflet[React Leaflet 4.2.1]
+        
+        React --> ReactDOM
+        React --> ReactRouter
+        React --> Axios
+        Leaflet --> ReactLeaflet
+        React --> ReactLeaflet
+    end
+    
+    subgraph "External Services"
+        DB[(PostgreSQL + PostGIS)]
+        SMTP[SMTP Server]
+    end
+    
+    PostgreSQL -.->|JDBC| DB
+    Thymeleaf -.->|Email Templates| SMTP
+    Axios -.->|HTTP/REST| SpringWeb
+

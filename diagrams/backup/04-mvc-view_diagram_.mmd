@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant User as User
+    participant View as React Component
+    participant Service as API Service
+    participant API as Axios Client
+    participant Controller as REST Controller
+    participant BizService as Business Service
+    participant Entity as Entity/DTO
+    participant DB as PostgreSQL
+    
+    User->>View: Interact (click, submit)
+    View->>Service: Call service method
+    Service->>Service: Validate input
+    Service->>API: HTTP Request (JSON)
+    Note over API: Add JWT token<br/>from localStorage
+    API->>Controller: HTTP Request + Auth Header
+    Controller->>Controller: Validate request (@Valid)
+    Controller->>Controller: Check authorization (@PreAuthorize)
+    Controller->>BizService: Call business method
+    BizService->>Entity: Create/Update entity
+    Entity->>DB: Persist via JPA
+    DB-->>Entity: Confirmation
+    Entity-->>BizService: Entity
+    BizService-->>Controller: Result
+    Controller->>Controller: Map Entity → DTO
+    Controller-->>API: HTTP Response (JSON)
+    API-->>Service: Response data
+    Service-->>View: Update state
+    View->>View: Re-render UI
+    View-->>User: Display result
+

@@ -1,311 +1,138 @@
-# 🚀 Guía de Inicio Rápido
-# Urban Cleaning Management System
+# Guía de Inicio Rápido - URBIX
 
-## ⚡ Inicio Rápido (5 minutos)
+## Requisitos Previos
 
-### Paso 1: Iniciar el Sistema con Docker
+- **Docker** y **Docker Compose** instalados
+- **Git** para clonar el repositorio
+- **Puertos disponibles**: 3000 (frontend), 8080 (backend), 5432 (database)
 
+## Instalación y Ejecución
+
+### 1. Clonar el Repositorio
 ```bash
-# 1. Ir al directorio docker
-cd docker
-
-# 2. Copiar variables de entorno
-cp .env.example .env
-
-# 3. Iniciar todos los servicios
-docker-compose up -d --build
-
-# 4. Esperar a que los servicios estén listos (30-60 segundos)
-# Ver logs en tiempo real:
-docker-compose logs -f
+git clone <repository-url>
+cd URBIX-TFM
 ```
 
-### Paso 2: Verificar que Todo Funciona
-
+### 2. Ejecutar el Sistema Completo
 ```bash
-# Ejecutar script de verificación
-cd ..
-./verify-deployment.sh
+cd src/docker
+docker-compose up -d
 ```
 
-Si todo está bien, verás ✅ en verde para cada servicio.
-
-### Paso 3: Acceder a la Aplicación
-
-Abre tu navegador en:
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8080/api
-- **Health Check**: http://localhost:8080/actuator/health
-
----
-
-## 🧪 Probar el Sistema (Sin Usuarios)
-
-Como el sistema está recién instalado, **NO hay usuarios creados**. Tienes dos opciones:
-
-### Opción A: Crear Usuarios Manualmente (Recomendado)
-
+### 3. Verificar el Despliegue
 ```bash
-# 1. Conectar a PostgreSQL
-docker-compose exec postgres psql -U urbanclean_user -d urbanclean
+# Verificar que todos los contenedores estén ejecutándose
+docker-compose ps
 
-# 2. Copiar y pegar estos comandos en psql:
+# Ver logs si hay problemas
+docker-compose logs
 ```
 
-```sql
--- Usuario Ciudadano (username: ciudadano, password: admin123)
-INSERT INTO users (id, username, password_hash, email, role, created_at, updated_at)
-VALUES (
-    gen_random_uuid(),
-    'ciudadano',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
-    'ciudadano@test.com',
-    'ROLE_CIUDADANO',
-    NOW(),
-    NOW()
-);
+### 4. Acceder al Sistema
 
--- Usuario Técnico (username: tecnico, password: admin123)
-INSERT INTO users (id, username, password_hash, email, role, created_at, updated_at)
-VALUES (
-    gen_random_uuid(),
-    'tecnico',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
-    'tecnico@test.com',
-    'ROLE_TECNICO',
-    NOW(),
-    NOW()
-);
+- **Frontend (Ciudadanos/Operadores)**: http://localhost:3000
+- **API Backend**: http://localhost:8080
+- **Documentación API**: http://localhost:8080/swagger-ui.html
+- **Base de Datos**: localhost:5432 (postgres/postgres)
 
--- Usuario Admin (username: admin, password: admin123)
-INSERT INTO users (id, username, password_hash, email, role, created_at, updated_at)
-VALUES (
-    gen_random_uuid(),
-    'admin',
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
-    'admin@test.com',
-    'ROLE_ADMIN',
-    NOW(),
-    NOW()
-);
+## Usuarios de Prueba
 
--- Salir de psql
-\q
+### Ciudadano
+- **Email**: ciudadano@urbix.com
+- **Password**: password123
+
+### Operador Municipal  
+- **Email**: operador@urbix.com
+- **Password**: password123
+
+### Administrador
+- **Email**: admin@urbix.com
+- **Password**: password123
+
+## Funcionalidades Principales
+
+### Para Ciudadanos
+1. Registrarse en el sistema
+2. Reportar incidentes con geolocalización
+3. Subir fotografías como evidencia
+4. Seguir el estado de sus reportes
+
+### Para Operadores
+1. Ver dashboard de tareas priorizadas
+2. Gestionar estados de tareas
+3. Visualizar incidentes en mapa
+4. Acceder a métricas de rendimiento
+
+### Para Administradores
+1. Configurar algoritmo de priorización
+2. Gestionar usuarios y roles
+3. Ver analítica operacional
+4. Exportar datos del sistema
+
+## Desarrollo Local
+
+### Backend (Spring Boot)
+```bash
+cd src/backend
+./mvnw spring-boot:run
 ```
 
-### Opción B: Usar el Endpoint de Registro
-
+### Frontend (React)
 ```bash
-# Registrar un usuario ciudadano
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "ciudadano",
-    "password": "admin123",
-    "email": "ciudadano@test.com",
-    "role": "ROLE_CIUDADANO"
-  }'
+cd src/frontend
+npm install
+npm start
 ```
 
----
-
-## 🎮 Flujos de Prueba
-
-### 1️⃣ Probar como Ciudadano (Reportar Incidencia)
-
-1. **Ir a la página de reportes**: http://localhost:3000/report
-2. **Permitir geolocalización** cuando el navegador lo solicite
-3. **Completar el formulario**:
-   - Categoría: Selecciona "Basura acumulada"
-   - Descripción: "Contenedor desbordado en la esquina" (mínimo 10 caracteres)
-   - Foto: Sube cualquier imagen JPG o PNG (< 5MB)
-4. **Clic en "Enviar Reporte"**
-5. ✅ Deberías ver un mensaje de éxito
-
-### 2️⃣ Probar como Operador (Gestionar Tareas)
-
-1. **Ir a login**: http://localhost:3000/login
-2. **Credenciales**:
-   - Usuario: `tecnico`
-   - Contraseña: `admin123`
-3. **Explorar el dashboard**:
-   - Ver lista de tareas ordenadas por prioridad
-   - Filtrar por estado (PENDIENTE, ASIGNADO, etc.)
-   - Ver mapa con marcadores
-   - Seleccionar una tarea para ver detalles
-4. **Cambiar estado de una tarea**:
-   - Clic en "Asignar" (PENDIENTE → ASIGNADO)
-   - Clic en "Iniciar" (ASIGNADO → EN_PROGRESO)
-   - Clic en "Resolver" (EN_PROGRESO → RESUELTO)
-5. **Ver historial de auditoría** en el timeline
-
-### 3️⃣ Probar como Admin (Configurar Algoritmo)
-
-1. **Ir a login**: http://localhost:3000/login
-2. **Credenciales**:
-   - Usuario: `admin`
-   - Contraseña: `admin123`
-3. **Ir a configuración**: http://localhost:3000/admin/config
-4. **Modificar pesos del algoritmo**:
-   - Cambiar valores (deben sumar 1.0)
-   - Clic en "Normalizar" si no suman 1.0
-   - Clic en "Guardar Cambios"
-5. ✅ Ver que aparece en el historial
-
----
-
-## 🧪 Pruebas Automatizadas
-
-### Probar API con Script
-
+### Base de Datos (PostgreSQL + PostGIS)
 ```bash
-# Ejecutar pruebas de API
-./test-api-endpoints.sh
+cd src/docker
+docker-compose up -d postgres
 ```
 
-Este script prueba:
-- ✅ Login con credenciales válidas/inválidas
-- ✅ Acceso a endpoints protegidos
-- ✅ Control de acceso por roles
-- ✅ Gestión de tareas
-- ✅ Configuración de admin
-- ✅ Validaciones
+## Testing
 
-### Probar Integración
-
+### Ejecutar Tests Unitarios
 ```bash
-# Ejecutar pruebas de integración
-./test-integration.sh
+cd src/backend
+./mvnw test
 ```
 
----
-
-## 📱 Probar en Diferentes Navegadores
-
-El sistema funciona en:
-- ✅ Chrome/Chromium
-- ✅ Firefox
-- ✅ Safari
-- ✅ Edge
-
-**Nota**: La geolocalización requiere HTTPS en producción, pero funciona en localhost.
-
----
-
-## 🐛 Solución de Problemas Comunes
-
-### Problema 1: "Backend no responde"
-
+### Ejecutar Load Testing
 ```bash
-# Ver logs del backend
+cd scripts/testing
+./test-performance-metrics.sh
+```
+
+## Troubleshooting
+
+### Problemas Comunes
+
+1. **Puerto ocupado**: Cambiar puertos en docker-compose.yml
+2. **Permisos de Docker**: Ejecutar con sudo o añadir usuario a grupo docker
+3. **Base de datos no conecta**: Verificar que PostgreSQL esté ejecutándose
+
+### Logs Útiles
+```bash
+# Logs del backend
 docker-compose logs backend
 
-# Reiniciar backend
-docker-compose restart backend
-
-# Verificar que PostgreSQL está listo
-docker-compose exec postgres pg_isready -U urbanclean_user
-```
-
-### Problema 2: "Frontend no carga"
-
-```bash
-# Ver logs del frontend
+# Logs del frontend  
 docker-compose logs frontend
 
-# Reiniciar frontend
-docker-compose restart frontend
-
-# Verificar que Nginx está sirviendo
-curl http://localhost:3000/health
+# Logs de la base de datos
+docker-compose logs postgres
 ```
 
-### Problema 3: "No puedo hacer login"
-
+### Reiniciar Sistema
 ```bash
-# Verificar que los usuarios existen
-docker-compose exec postgres psql -U urbanclean_user -d urbanclean -c "SELECT username, role FROM users;"
-
-# Si no hay usuarios, crearlos con los comandos SQL de arriba
+docker-compose down
+docker-compose up -d
 ```
 
-### Problema 4: "Error de CORS"
+## Más Información
 
-```bash
-# Verificar configuración CORS en backend
-# El backend debe permitir: http://localhost:3000
-
-# Reiniciar backend después de cambios
-docker-compose restart backend
-```
-
-### Problema 5: "Geolocalización no funciona"
-
-- Asegúrate de permitir el acceso cuando el navegador lo solicite
-- En Chrome: Clic en el candado → Permisos del sitio → Ubicación → Permitir
-- Si estás en HTTPS, debe funcionar automáticamente
-
----
-
-## 🔄 Reiniciar Todo desde Cero
-
-Si algo sale mal y quieres empezar de nuevo:
-
-```bash
-# 1. Detener y eliminar todo (⚠️ ELIMINA DATOS)
-cd docker
-docker-compose down -v
-
-# 2. Reconstruir e iniciar
-docker-compose up -d --build
-
-# 3. Esperar 30-60 segundos
-
-# 4. Crear usuarios de nuevo (ver Opción A arriba)
-```
-
----
-
-## 📊 Verificar que Todo Funciona
-
-### Checklist Rápido
-
-- [ ] Backend responde en http://localhost:8080/actuator/health
-- [ ] Frontend carga en http://localhost:3000
-- [ ] PostgreSQL acepta conexiones
-- [ ] Puedo hacer login con `admin` / `admin123`
-- [ ] Puedo crear un reporte como ciudadano
-- [ ] Puedo ver tareas como técnico
-- [ ] Puedo cambiar configuración como admin
-
-Si todos tienen ✅, ¡el sistema funciona perfectamente!
-
----
-
-## 📚 Documentación Adicional
-
-Para pruebas más detalladas, consulta:
-- `E2E_TESTING_GUIDE.md` - Guía completa de pruebas E2E
-- `INTEGRATION_CHECKLIST.md` - Checklist de integración
-- `docker/README.md` - Guía completa de Docker
-
----
-
-## 🆘 ¿Necesitas Ayuda?
-
-1. Revisa los logs: `docker-compose logs -f`
-2. Verifica el estado: `docker-compose ps`
-3. Consulta `E2E_TESTING_GUIDE.md` para más detalles
-4. Revisa `SYSTEM_VALIDATION.md` para entender el sistema
-
----
-
-## 🎉 ¡Listo!
-
-Si llegaste hasta aquí y todo funciona, ¡felicidades! El sistema está completamente operativo.
-
-**Próximos pasos**:
-- Explorar todas las funcionalidades
-- Probar diferentes flujos de usuario
-- Revisar el código fuente
-- Personalizar según tus necesidades
+- **Documentación completa**: [docs/](docs/)
+- **Arquitectura del sistema**: [docs/architecture/](docs/architecture/)
+- **Troubleshooting avanzado**: [docs/operations/troubleshooting.md](docs/operations/troubleshooting.md)

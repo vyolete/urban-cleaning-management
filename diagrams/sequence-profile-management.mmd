@@ -1,0 +1,29 @@
+graph TB
+    TC[TaskController]
+    TS[TaskService]
+    AS[AuditService]
+    ES[EmailService]
+    EP[EventPublisher]
+    TR[TaskRepository]
+    AR[AuditLogRepository]
+    
+    TC -->|1: assignTask| TS
+    TS -->|2: validateTransition| TS
+    TS -->|3: save| TR
+    TS -->|4: publishEvent| EP
+    EP -->|5: notify| ES
+    TC -->|6: logStateChange| AS
+    AS -->|7: save| AR
+    
+    TC -->|8: updateState| TS
+    TS -->|9: validateTransition| TS
+    TS -->|10: save| TR
+    TC -->|11: logStateChange| AS
+    AS -->|12: save| AR
+    
+    style TC fill:#e1f5ff
+    style TS fill:#fff4e1
+    style AS fill:#fff4e1
+    style TR fill:#e8f5e9
+    style AR fill:#e8f5e9
+

@@ -1,0 +1,47 @@
+graph TB
+    subgraph "View Layer (Frontend - React)"
+        Pages[Pages<br/>LoginPage, CitizenReportPage,<br/>OperatorDashboard, AdminConfigPage]
+        Components[Components<br/>ReportForm, TaskList, TaskDetail,<br/>ConfigPanel, MapView]
+        Services[API Services<br/>authService, reportService,<br/>taskService, configService]
+        APIClient[Axios Client<br/>JWT Token Management,<br/>Error Handling]
+    end
+    
+    subgraph "Controller Layer (Backend - Spring Boot)"
+        Security[Security Filter<br/>JWT Authentication,<br/>Role-Based Authorization]
+        Controllers[REST Controllers<br/>AuthController, ReportController,<br/>TaskController, ConfigController,<br/>AnalyticsController]
+        ExceptionHandler[Global Exception Handler<br/>Error Response Formatting]
+    end
+    
+    subgraph "Model Layer (Backend - Spring Boot)"
+        Services2[Business Services<br/>AuthService, ReportService,<br/>TaskService, ConfigService,<br/>DeduplicationService]
+        Entities[JPA Entities<br/>User, Report, Task,<br/>AlgorithmConfig, AuditLog]
+        DTOs[DTOs<br/>Request DTOs,<br/>Response DTOs]
+        Repositories[JPA Repositories<br/>UserRepository, ReportRepository,<br/>TaskRepository, ConfigRepository]
+        Database[(PostgreSQL + PostGIS<br/>Persistent Data Storage)]
+    end
+    
+    Pages --> Components
+    Components --> Services
+    Services --> APIClient
+    APIClient -->|HTTP/JSON<br/>+ JWT Token| Security
+    Security --> Controllers
+    Controllers --> ExceptionHandler
+    Controllers --> Services2
+    Services2 --> Entities
+    Services2 --> DTOs
+    Entities --> Repositories
+    Repositories --> Database
+    
+    style Pages fill:#e3f2fd
+    style Components fill:#e3f2fd
+    style Services fill:#e3f2fd
+    style APIClient fill:#e3f2fd
+    style Security fill:#fff3e0
+    style Controllers fill:#fff3e0
+    style ExceptionHandler fill:#fff3e0
+    style Services2 fill:#f3e5f5
+    style Entities fill:#f3e5f5
+    style DTOs fill:#f3e5f5
+    style Repositories fill:#f3e5f5
+    style Database fill:#e8f5e9
+

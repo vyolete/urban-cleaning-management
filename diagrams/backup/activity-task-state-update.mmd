@@ -1,0 +1,39 @@
+flowchart TD
+    Start([Start: Update Task State]) --> GetTask[Retrieve Task by ID]
+    GetTask --> GetCurrentState[Get Current State]
+    GetCurrentState --> ValidateTrans{Validate State Transition<br/>State Machine Rules}
+    
+    ValidateTrans -->|Invalid| ThrowError[Throw InvalidStateTransitionException]
+    ThrowError --> ErrorEnd([End: Error])
+    
+    ValidateTrans -->|Valid| CheckResolved{New State = RESUELTO?}
+    
+    CheckResolved -->|Yes| ValidateEvidence{Evidence Provided?}
+    ValidateEvidence -->|No| ThrowEvidenceError[Throw IllegalArgumentException<br/>Evidence Required]
+    ThrowEvidenceError --> ErrorEnd
+    
+    ValidateEvidence -->|Yes| SetEvidence[Set Resolution Evidence]
+    SetEvidence --> SetResolvedTime[Set Resolved Timestamp<br/>for MTTR Calculation]
+    SetResolvedTime --> UpdateState[Update Task State]
+    
+    CheckResolved -->|No| UpdateState
+    
+    UpdateState --> SaveTask[Save Task to Database]
+    SaveTask --> CreateAudit[Create Audit Log Entry<br/>AuditService]
+    
+    CreateAudit --> CheckEvent{State = RESUELTO?}
+    CheckEvent -->|Yes| CheckCitizen{Report has Citizen?}
+    CheckCitizen -->|Yes| PublishEvent[Publish TaskResolvedEvent<br/>ApplicationEventPublisher]
+    PublishEvent --> SendNotif[Send Email Notification<br/>Async via EventListener]
+    SendNotif --> End([End: State Updated])
+    
+    CheckEvent -->|No| End
+    CheckCitizen -->|No| End
+    
+    style Start fill:#e1f5ff
+    style End fill:#c8e6c9
+    style ErrorEnd fill:#ffcdd2
+    style ValidateTrans fill:#ffe0b2
+    style CheckResolved fill:#ffe0b2
+    style CheckEvent fill:#ffe0b2
+

@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant User
+    participant LoginPage
+    participant authService
+    participant API
+    participant AuthController
+    participant AuthService
+    participant DB
+    
+    User->>LoginPage: Enter credentials
+    LoginPage->>authService: login(username, password)
+    authService->>API: POST /api/auth/login
+    API->>AuthController: HTTP Request
+    AuthController->>AuthService: authenticate()
+    AuthService->>DB: Find user by username
+    DB-->>AuthService: User entity
+    AuthService->>AuthService: Verify password (BCrypt)
+    AuthService->>AuthService: Generate JWT tokens
+    AuthService-->>AuthController: LoginResponse (tokens + user)
+    AuthController-->>API: HTTP 200 + JSON
+    API-->>authService: Response data
+    authService->>authService: Store tokens in localStorage
+    authService->>authService: Start token refresh timer
+    authService-->>LoginPage: Success
+    LoginPage->>LoginPage: Navigate to dashboard
+

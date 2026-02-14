@@ -1,0 +1,44 @@
+sequenceDiagram
+    participant Client
+    participant AuthController
+    participant AuthService
+    participant AuthenticationManager
+    participant UserRepository
+    participant JwtTokenProvider
+    participant RefreshTokenService
+    participant UserSessionService
+    participant DeviceFingerprintUtil
+    
+    Client->>AuthController: POST /api/auth/login(username, password)
+    AuthController->>AuthService: login(username, password, request)
+    
+    AuthService->>AuthenticationManager: authenticate(credentials)
+    AuthenticationManager-->>AuthService: Authentication
+    
+    AuthService->>UserRepository: findByUsername(username)
+    UserRepository-->>AuthService: User
+    
+    AuthService->>DeviceFingerprintUtil: generateFingerprint(request)
+    DeviceFingerprintUtil-->>AuthService: deviceFingerprint
+    
+    AuthService->>DeviceFingerprintUtil: getClientIpAddress(request)
+    DeviceFingerprintUtil-->>AuthService: ipAddress
+    
+    AuthService->>JwtTokenProvider: generateToken(username, userId, role, tokenVersion)
+    JwtTokenProvider-->>AuthService: accessToken
+    
+    AuthService->>RefreshTokenService: createRefreshToken(userId, fingerprint, ip, userAgent)
+    RefreshTokenService-->>AuthService: refreshToken
+    
+    AuthService->>RefreshTokenService: validateRefreshToken(refreshToken)
+    RefreshTokenService-->>AuthService: RefreshToken entity
+    
+    AuthService->>UserSessionService: createSession(userId, tokenId, fingerprint, ip, userAgent)
+    UserSessionService-->>AuthService: UserSession
+    
+    AuthService-->>AuthController: LoginResponse(accessToken, refreshToken)
+    AuthController-->>Client: 200 OK LoginResponse
+    
+    Note over AuthService,SecurityMonitoringService: On authentication failure
+    AuthService->>SecurityMonitoringService: logFailedLoginAttempt(username, request)
+

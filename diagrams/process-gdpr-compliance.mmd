@@ -1,0 +1,22 @@
+flowchart TD
+    Start([Task event published]) --> EventType{Event type?}
+    EventType -->|TaskAssignedEvent| CheckPref[Check notification preferences]
+    EventType -->|TaskResolvedEvent| GetCitizen[Get citizen email]
+    EventType -->|TaskReopenedEvent| GetOperator[Get operator email]
+    CheckPref -->|Disabled| SkipNotif[Skip notification]
+    CheckPref -->|Enabled| GetOpDetails[Get operator details]
+    GetOpDetails -->|Not found| LogWarn[Log warning]
+    GetOpDetails -->|Found| SendAssigned[Send assignment email]
+    GetCitizen --> SendResolved[Send resolved email]
+    GetOperator --> SendReopened[Send reopened email]
+    SendAssigned -->|Success| LogSuccess[Log success]
+    SendAssigned -->|Failure| LogFailure[Log to NotificationFailure]
+    SendResolved -->|Success| LogSuccess
+    SendResolved -->|Failure| LogFailure
+    SendReopened -->|Success| LogSuccess
+    SendReopened -->|Failure| LogFailure
+    SkipNotif --> End([End])
+    LogWarn --> End
+    LogSuccess --> End
+    LogFailure --> End
+

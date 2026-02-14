@@ -1,0 +1,61 @@
+sequenceDiagram
+    participant Client
+    participant PasswordResetController
+    participant PasswordResetService
+    participant UserRepository
+    participant PasswordResetTokenRepository
+    participant EmailService
+    participant PasswordEncoder
+    
+    Note over Client,EmailService: Phase 1: Initiate Reset
+    Client->>PasswordResetController: POST /api/auth/password-reset/initiate(email)
+    PasswordResetController->>PasswordResetService: initiatePasswordReset(email, ipAddress)
+    
+    PasswordResetService->>UserRepository: findByEmail(email)
+    UserRepository-->>PasswordResetService: Optional<User>
+    
+    alt User Found
+        PasswordResetService->>PasswordResetTokenRepository: findByUserAndUsedFalse(user)
+        PasswordResetTokenRepository-->>PasswordResetService: List<PasswordResetToken>
+        
+        PasswordResetService->>PasswordResetService: invalidateExistingTokens()
+        PasswordResetService->>PasswordResetService: generateSecureToken()
+        
+        PasswordResetService->>PasswordResetTokenRepository: save(resetToken)
+        PasswordResetTokenRepository-->>PasswordResetService: saved token
+        
+        PasswordResetService->>EmailService: sendPasswordResetEmail(email, token)
+        EmailService-->>PasswordResetService: email sent
+    end
+    
+    PasswordResetService-->>PasswordResetController: true (always)
+    PasswordResetController-->>Client: 200 OK (generic message)
+    
+    Note over Client,EmailService: Phase 2: Validate Token
+    Client->>PasswordResetController: GET /api/auth/password-reset/validate/{token}
+    PasswordResetController->>PasswordResetService: validateToken(token)
+    
+    PasswordResetService->>PasswordResetTokenRepository: findByToken(token)
+    PasswordResetTokenRepository-->>PasswordResetService: Optional<PasswordResetToken>
+    
+    PasswordResetService->>PasswordResetService: check expiration and used status
+    PasswordResetService-->>PasswordResetController: PasswordResetToken or null
+    PasswordResetController-->>Client: 200 OK or 400 Bad Request
+    
+    Note over Client,EmailService: Phase 3: Complete Reset
+    Client->>PasswordResetController: POST /api/auth/password-reset/complete(token, newPassword)
+    PasswordResetController->>PasswordResetService: resetPassword(token, newPassword, ipAddress)
+    
+    PasswordResetService->>PasswordResetService: validateToken(token)
+    PasswordResetService->>PasswordEncoder: encode(newPassword)
+    PasswordEncoder-->>PasswordResetService: hashedPassword
+    
+    PasswordResetService->>UserRepository: save(user with new password and incremented tokenVersion)
+    UserRepository-->>PasswordResetService: updated User
+    
+    PasswordResetService->>PasswordResetTokenRepository: save(token marked as used)
+    PasswordResetTokenRepository-->>PasswordResetService: updated token
+    
+    PasswordResetService-->>PasswordResetController: true
+    PasswordResetController-->>Client: 200 OK
+

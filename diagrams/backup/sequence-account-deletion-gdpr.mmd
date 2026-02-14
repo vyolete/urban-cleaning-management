@@ -1,0 +1,25 @@
+graph TB
+    AC[AuthController]
+    AS[AuthService]
+    AM[AuthenticationManager]
+    JP[JwtTokenProvider]
+    RS[RefreshTokenService]
+    US[UserSessionService]
+    SM[SecurityMonitoringService]
+    UR[UserRepository]
+    
+    AC -->|1: login| AS
+    AS -->|2: authenticate| AM
+    AS -->|3: findByUsername| UR
+    AS -->|4: generateToken| JP
+    AS -->|5: createRefreshToken| RS
+    AS -->|6: createSession| US
+    AS -->|7: logFailedAttempt| SM
+    
+    style AC fill:#e1f5ff
+    style AS fill:#fff4e1
+    style RS fill:#fff4e1
+    style US fill:#fff4e1
+    style SM fill:#fff4e1
+    style UR fill:#e8f5e9
+

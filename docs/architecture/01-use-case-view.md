@@ -687,82 +687,82 @@ This section contains Mermaid use case diagrams showing actors and their use cas
 graph TB
     subgraph System["Urban Cleaning Management System"]
         subgraph Auth["Authentication & Authorization"]
-            UC001[UC-001: Register User]
-            UC002[UC-002: Login]
-            UC003[UC-003: Refresh Access Token]
-            UC005[UC-005: Initiate Password Reset]
-            UC006[UC-006: Validate Reset Token]
-            UC007[UC-007: Complete Password Reset]
-            UC022[UC-022: Logout]
-            UC023[UC-023: Logout from All Devices]
+            UC001((UC-001: Register User))
+            UC002((UC-002: Login))
+            UC003((UC-003: Refresh Access Token))
+            UC005((UC-005: Initiate Password Reset))
+            UC006((UC-006: Validate Reset Token))
+            UC007((UC-007: Complete Password Reset))
+            UC022((UC-022: Logout))
+            UC023((UC-023: Logout from All Devices))
         end
         
         subgraph Reports["Report Management"]
-            UC004[UC-004: Submit Report]
-            UC009[UC-009: Get My Reports]
-            UC028[UC-028: Get All Reports]
-            UC029[UC-029: Get Report by ID]
+            UC004((UC-004: Submit Report))
+            UC009((UC-009: Get My Reports))
+            UC028((UC-028: Get All Reports))
+            UC029((UC-029: Get Report by ID))
         end
         
         subgraph Tasks["Task Management"]
-            UC030[UC-030: Get All Tasks]
-            UC031[UC-031: Get Task by ID]
-            UC032[UC-032: Update Task State]
-            UC033[UC-033: Get Task Audit History]
-            UC038[UC-038: Assign Task to Operator]
+            UC030((UC-030: Get All Tasks))
+            UC031((UC-031: Get Task by ID))
+            UC032((UC-032: Update Task State))
+            UC033((UC-033: Get Task Audit History))
+            UC038((UC-038: Assign Task to Operator))
         end
         
         subgraph Feedback["Feedback Management"]
-            UC017[UC-017: Confirm Task Resolution]
-            UC018[UC-018: Reject Task Resolution]
-            UC019[UC-019: Get Task Feedback]
+            UC017((UC-017: Confirm Task Resolution))
+            UC018((UC-018: Reject Task Resolution))
+            UC019((UC-019: Get Task Feedback))
         end
         
         subgraph Profile["User Profile & Account"]
-            UC010[UC-010: Get User Profile]
-            UC011[UC-011: Update User Profile]
-            UC012[UC-012: Change Password]
-            UC014[UC-014: Request Account Deletion]
-            UC015[UC-015: Cancel Account Deletion]
-            UC016[UC-016: Export User Data]
+            UC010((UC-010: Get User Profile))
+            UC011((UC-011: Update User Profile))
+            UC012((UC-012: Change Password))
+            UC014((UC-014: Request Account Deletion))
+            UC015((UC-015: Cancel Account Deletion))
+            UC016((UC-016: Export User Data))
         end
         
         subgraph Sessions["Session Management"]
-            UC024[UC-024: Get Active Sessions]
-            UC025[UC-025: Get All Sessions]
-            UC026[UC-026: Revoke Specific Session]
-            UC027[UC-027: Revoke Other Sessions]
+            UC024((UC-024: Get Active Sessions))
+            UC025((UC-025: Get All Sessions))
+            UC026((UC-026: Revoke Specific Session))
+            UC027((UC-027: Revoke Other Sessions))
         end
         
         subgraph Notifications["Notification Management"]
-            UC008[UC-008: Unsubscribe from Notifications]
-            UC020[UC-020: Get Notification Preferences]
-            UC021[UC-021: Update Notification Preferences]
-            UC046[UC-046: Get Notification Failures]
-            UC047[UC-047: Retry Failed Notification]
+            UC008((UC-008: Unsubscribe from Notifications))
+            UC020((UC-020: Get Notification Preferences))
+            UC021((UC-021: Update Notification Preferences))
+            UC046((UC-046: Get Notification Failures))
+            UC047((UC-047: Retry Failed Notification))
         end
         
         subgraph Analytics["Analytics & Reporting"]
-            UC034[UC-034: Get Task Distribution]
-            UC035[UC-035: Get Heatmap]
-            UC036[UC-036: Get MTTR]
-            UC037[UC-037: Get Operator Performance]
+            UC034((UC-034: Get Task Distribution))
+            UC035((UC-035: Get Heatmap))
+            UC036((UC-036: Get MTTR))
+            UC037((UC-037: Get Operator Performance))
         end
         
         subgraph Config["System Configuration"]
-            UC039[UC-039: Get Algorithm Weights]
-            UC040[UC-040: Update Algorithm Weights]
-            UC041[UC-041: Get Configuration History]
-            UC042[UC-042: Get Token Expiration Config]
-            UC043[UC-043: Update Token Expiration Config]
-            UC044[UC-044: Get Duplicate Detection Config]
-            UC045[UC-045: Update Duplicate Detection Config]
-            UC048[UC-048: Get Performance Metrics]
-            UC049[UC-049: Get Performance Alerts]
+            UC039((UC-039: Get Algorithm Weights))
+            UC040((UC-040: Update Algorithm Weights))
+            UC041((UC-041: Get Configuration History))
+            UC042((UC-042: Get Token Expiration Config))
+            UC043((UC-043: Update Token Expiration Config))
+            UC044((UC-044: Get Duplicate Detection Config))
+            UC045((UC-045: Update Duplicate Detection Config))
+            UC048((UC-048: Get Performance Metrics))
+            UC049((UC-049: Get Performance Alerts))
         end
     end
     
-    Anonymous[Anonymous User] --> UC001
+    Anonymous[👤 Anonymous User] --> UC001
     Anonymous --> UC002
     Anonymous --> UC003
     Anonymous --> UC004
@@ -771,7 +771,7 @@ graph TB
     Anonymous --> UC007
     Anonymous --> UC008
     
-    Citizen[Citizen<br/>ROLE_CIUDADANO] --> UC009
+    Citizen[👤 Citizen<br/>ROLE_CIUDADANO] --> UC009
     Citizen --> UC010
     Citizen --> UC011
     Citizen --> UC012
@@ -790,7 +790,7 @@ graph TB
     Citizen --> UC026
     Citizen --> UC027
     
-    Operator[Operator<br/>ROLE_TECNICO] --> UC028
+    Operator[👤 Operator<br/>ROLE_TECNICO] --> UC028
     Operator --> UC029
     Operator --> UC030
     Operator --> UC031
@@ -801,7 +801,7 @@ graph TB
     Operator --> UC036
     Operator --> UC037
     
-    Admin[Administrator<br/>ROLE_ADMIN] --> UC038
+    Admin[👤 Administrator<br/>ROLE_ADMIN] --> UC038
     Admin --> UC039
     Admin --> UC040
     Admin --> UC041
@@ -843,26 +843,38 @@ The functional groupings show clear separation of concerns:
 ### Use Case Diagram - Authentication Flow
 
 ```mermaid
-graph LR
-    Anonymous[Anonymous User]
-    Citizen[Authenticated User]
+graph TB
+    subgraph System["Urban Cleaning Management System"]
+        Register((UC-001: Register User))
+        Login((UC-002: Login))
+        ResetInit((UC-005: Initiate Password Reset))
+        ResetValidate((UC-006: Validate Reset Token))
+        ResetComplete((UC-007: Complete Password Reset))
+        Refresh((UC-003: Refresh Access Token))
+        Logout((UC-022: Logout))
+        LogoutAll((UC-023: Logout from All Devices))
+        ChangePass((UC-012: Change Password))
+    end
     
-    Anonymous --> Register[UC-001: Register User]
-    Anonymous --> Login[UC-002: Login]
-    Anonymous --> ResetInit[UC-005: Initiate Password Reset]
-    Anonymous --> ResetValidate[UC-006: Validate Reset Token]
-    Anonymous --> ResetComplete[UC-007: Complete Password Reset]
+    Anonymous[👤 Anonymous User]
+    Citizen[👤 Authenticated User]
     
-    Register --> Login
-    Login --> Citizen
+    Anonymous --> Register
+    Anonymous --> Login
+    Anonymous --> ResetInit
+    Anonymous --> ResetValidate
+    Anonymous --> ResetComplete
     
-    Citizen --> Refresh[UC-003: Refresh Access Token]
-    Citizen --> Logout[UC-022: Logout]
-    Citizen --> LogoutAll[UC-023: Logout from All Devices]
-    Citizen --> ChangePass[UC-012: Change Password]
+    Register -.-> Login
+    Login -.-> Citizen
     
-    Logout --> Anonymous
-    LogoutAll --> Anonymous
+    Citizen --> Refresh
+    Citizen --> Logout
+    Citizen --> LogoutAll
+    Citizen --> ChangePass
+    
+    Logout -.-> Anonymous
+    LogoutAll -.-> Anonymous
     
     style Anonymous fill:#e1f5ff
     style Citizen fill:#fff4e1
@@ -872,32 +884,40 @@ graph LR
 
 **Description**: This diagram shows the authentication lifecycle, from anonymous user registration through login, token management, and logout. It illustrates the state transitions between anonymous and authenticated states.
 
-### Use Case Diagram - Report and Task Lifecycle
+### Use Case Diagram - Report and Task Management
 
 ```mermaid
 graph TB
-    Citizen[Citizen]
-    Operator[Operator]
-    Admin[Administrator]
+    subgraph System["Urban Cleaning Management System"]
+        Submit((UC-004: Submit Report))
+        MyReports((UC-009: Get My Reports))
+        GetTasks((UC-030: Get All Tasks))
+        Assign((UC-038: Assign Task to Operator))
+        UpdateState((UC-032: Update Task State))
+        Confirm((UC-017: Confirm Resolution))
+        Reject((UC-018: Reject Resolution))
+        Audit((UC-033: Get Task Audit History))
+    end
     
-    Citizen --> Submit[UC-004: Submit Report]
-    Citizen --> MyReports[UC-009: Get My Reports]
+    Citizen[👤 Citizen]
+    Operator[👤 Operator]
+    Admin[👤 Administrator]
     
-    Submit --> CreateTask[System Creates Task]
-    
-    CreateTask --> GetTasks[UC-030: Get All Tasks]
-    Operator --> GetTasks
-    
-    Admin --> Assign[UC-038: Assign Task to Operator]
-    Assign --> UpdateState[UC-032: Update Task State]
-    Operator --> UpdateState
-    
-    UpdateState --> Resolved{Task Resolved?}
-    Resolved -->|Yes| Confirm[UC-017: Confirm Resolution]
-    Resolved -->|Yes| Reject[UC-018: Reject Resolution]
-    
+    Citizen --> Submit
+    Citizen --> MyReports
     Citizen --> Confirm
     Citizen --> Reject
+    
+    Operator --> GetTasks
+    Operator --> UpdateState
+    Operator --> Audit
+    
+    Admin --> Assign
+    
+    style Citizen fill:#fff4e1
+    style Operator fill:#e8f5e9
+    style Admin fill:#fce4ec
+```
     
     Reject --> Reopen[System Reopens Task]
     Reopen --> UpdateState
@@ -917,38 +937,134 @@ graph TB
 
 ```mermaid
 graph TB
-    Admin[Administrator]
+    subgraph System["Urban Cleaning Management System"]
+        AlgoWeights((UC-040: Update Algorithm Weights))
+        TokenExp((UC-043: Update Token Expiration Config))
+        DupDetect((UC-045: Update Duplicate Detection Config))
+        ViewWeights((UC-039: Get Algorithm Weights))
+        ViewHistory((UC-041: Get Configuration History))
+        ViewToken((UC-042: Get Token Expiration Config))
+        ViewDup((UC-044: Get Duplicate Detection Config))
+        NotifFail((UC-046: Get Notification Failures))
+        Retry((UC-047: Retry Failed Notification))
+        Metrics((UC-048: Get Performance Metrics))
+        Alerts((UC-049: Get Performance Alerts))
+    end
     
-    Admin --> AlgoWeights[UC-040: Update Algorithm Weights]
-    Admin --> TokenExp[UC-043: Update Token Expiration Config]
-    Admin --> DupDetect[UC-045: Update Duplicate Detection Config]
+    Admin[👤 Administrator]
     
-    AlgoWeights --> Recalc[System Recalculates All Task Priorities]
-    
-    Admin --> ViewWeights[UC-039: Get Algorithm Weights]
-    Admin --> ViewHistory[UC-041: Get Configuration History]
-    Admin --> ViewToken[UC-042: Get Token Expiration Config]
-    Admin --> ViewDup[UC-044: Get Duplicate Detection Config]
-    
-    Admin --> NotifFail[UC-046: Get Notification Failures]
-    Admin --> Retry[UC-047: Retry Failed Notification]
-    
-    Admin --> Metrics[UC-048: Get Performance Metrics]
-    Admin --> Alerts[UC-049: Get Performance Alerts]
+    Admin --> AlgoWeights
+    Admin --> TokenExp
+    Admin --> DupDetect
+    Admin --> ViewWeights
+    Admin --> ViewHistory
+    Admin --> ViewToken
+    Admin --> ViewDup
+    Admin --> NotifFail
+    Admin --> Retry
+    Admin --> Metrics
+    Admin --> Alerts
     
     style Admin fill:#fce4ec
-    style Recalc fill:#e0e0e0
 ```
 
-**Description**: This diagram shows administrative configuration capabilities, including algorithm tuning, system settings, notification management, and performance monitoring. The diagram highlights that updating algorithm weights triggers automatic priority recalculation for all pending tasks.
+**Description**: This diagram shows administrative configuration capabilities, including algorithm tuning, system settings, notification management, and performance monitoring.
+
+### Use Case Diagram - User Profile and Session Management
+
+```mermaid
+graph TB
+    subgraph System["Urban Cleaning Management System"]
+        subgraph ProfileGroup["Profile Management"]
+            UC010((UC-010: Get User Profile))
+            UC011((UC-011: Update User Profile))
+            UC012((UC-012: Change Password))
+            UC014((UC-014: Request Account Deletion))
+            UC015((UC-015: Cancel Account Deletion))
+            UC016((UC-016: Export User Data))
+        end
+        
+        subgraph SessionGroup["Session Management"]
+            UC024((UC-024: Get Active Sessions))
+            UC025((UC-025: Get All Sessions))
+            UC026((UC-026: Revoke Specific Session))
+            UC027((UC-027: Revoke Other Sessions))
+        end
+    end
+    
+    Citizen[👤 Citizen]
+    
+    Citizen --> UC010
+    Citizen --> UC011
+    Citizen --> UC012
+    Citizen --> UC014
+    Citizen --> UC015
+    Citizen --> UC016
+    Citizen --> UC024
+    Citizen --> UC025
+    Citizen --> UC026
+    Citizen --> UC027
+    
+    style Citizen fill:#fff4e1
+```
+
+**Description**: This diagram shows citizen capabilities for managing their personal profile and controlling active sessions across multiple devices. It includes GDPR compliance features like data export and account deletion.
+
+### Use Case Diagram - Analytics and Notifications
+
+```mermaid
+graph TB
+    subgraph System["Urban Cleaning Management System"]
+        subgraph AnalyticsGroup["Analytics"]
+            UC034((UC-034: Get Task Distribution))
+            UC035((UC-035: Get Heatmap))
+            UC036((UC-036: Get MTTR))
+            UC037((UC-037: Get Operator Performance))
+        end
+        
+        subgraph NotificationGroup["Notifications"]
+            UC008((UC-008: Unsubscribe from Notifications))
+            UC020((UC-020: Get Notification Preferences))
+            UC021((UC-021: Update Notification Preferences))
+            UC046((UC-046: Get Notification Failures))
+            UC047((UC-047: Retry Failed Notification))
+        end
+    end
+    
+    Anonymous[👤 Anonymous User]
+    Citizen[👤 Citizen]
+    Operator[👤 Operator]
+    Admin[👤 Administrator]
+    
+    Anonymous --> UC008
+    
+    Citizen --> UC020
+    Citizen --> UC021
+    
+    Operator --> UC034
+    Operator --> UC035
+    Operator --> UC036
+    Operator --> UC037
+    
+    Admin --> UC046
+    Admin --> UC047
+    
+    style Anonymous fill:#e1f5ff
+    style Citizen fill:#fff4e1
+    Operator fill:#e8f5e9
+    style Admin fill:#fce4ec
+```
+
+**Description**: This diagram shows analytics capabilities for operators and notification management across different user types. Analytics help operators understand system performance and workload distribution.
 
 ### Legend
 
-- **Blue Actors**: Anonymous/Unauthenticated users
-- **Yellow Actors**: Citizens (ROLE_CIUDADANO)
-- **Green Actors**: Operators (ROLE_TECNICO)
-- **Pink Actors**: Administrators (ROLE_ADMIN)
-- **Gray Boxes**: System-triggered actions (not direct user actions)
+- **Blue Actors (👤)**: Anonymous/Unauthenticated users
+- **Yellow Actors (👤)**: Citizens (ROLE_CIUDADANO)
+- **Green Actors (👤)**: Operators (ROLE_TECNICO)
+- **Pink Actors (👤)**: Administrators (ROLE_ADMIN)
+- **Oval Shapes**: Use cases following UML standard notation
+- **System Boundary**: Clearly defined with subgraph containers
 - **Arrows**: Actor-to-use-case relationships (actor can perform use case)
 
 ---

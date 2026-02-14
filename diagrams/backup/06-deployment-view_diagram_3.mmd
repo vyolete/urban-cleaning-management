@@ -1,0 +1,38 @@
+flowchart TD
+    Start([Developer pushes code]) --> BuildFE[Build Frontend Image]
+    Start --> BuildBE[Build Backend Image]
+    
+    BuildFE --> FEStage1[Stage 1: node:18-alpine<br/>npm install & build]
+    FEStage1 --> FEStage2[Stage 2: nginx:1.25-alpine<br/>Copy dist/ files]
+    FEStage2 --> FEImage[Frontend Image<br/>~50 MB]
+    
+    BuildBE --> BEStage1[Stage 1: maven:3.9-temurin-17<br/>mvn package]
+    BEStage1 --> BEStage2[Stage 2: temurin:17-jre<br/>Copy app.jar]
+    BEStage2 --> BEImage[Backend Image<br/>~200 MB]
+    
+    FEImage --> Compose[docker-compose up]
+    BEImage --> Compose
+    DBImage[Pull: postgis/postgis:15-3.3<br/>~400 MB] --> Compose
+    
+    Compose --> StartDB[Start PostgreSQL]
+    StartDB --> HealthDB{Health Check<br/>pg_isready}
+    HealthDB -->|Pass| StartBE[Start Backend]
+    HealthDB -->|Fail| WaitDB[Wait 10s]
+    WaitDB --> HealthDB
+    
+    StartBE --> HealthBE{Health Check<br/>/actuator/health}
+    HealthBE -->|Pass| StartFE[Start Frontend]
+    HealthBE -->|Fail| WaitBE[Wait 30s]
+    WaitBE --> HealthBE
+    
+    StartFE --> HealthFE{Health Check<br/>HTTP /}
+    HealthFE -->|Pass| Ready([System Ready])
+    HealthFE -->|Fail| WaitFE[Wait 30s]
+    WaitFE --> HealthFE
+    
+    style Start fill:#90EE90,stroke:#333,stroke-width:2px
+    style Ready fill:#90EE90,stroke:#333,stroke-width:2px
+    style FEImage fill:#61DAFB,stroke:#333,stroke-width:2px
+    style BEImage fill:#6DB33F,stroke:#333,stroke-width:2px
+    style DBImage fill:#4DB33D,stroke:#333,stroke-width:2px,color:#fff
+

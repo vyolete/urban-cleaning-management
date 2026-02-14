@@ -1,0 +1,12 @@
+graph TD
+    Postgres[PostgreSQL Container<br/>postgis/postgis:15-3.3<br/>Port: 5432]
+    Backend[Backend Container<br/>Spring Boot + JRE 17<br/>Port: 8080]
+    Frontend[Frontend Container<br/>Nginx + React<br/>Port: 80]
+    
+    Backend -->|depends_on<br/>service_healthy| Postgres
+    Frontend -->|depends_on<br/>service_healthy| Backend
+    
+    style Postgres fill:#4DB33D,stroke:#333,stroke-width:2px,color:#fff
+    style Backend fill:#6DB33F,stroke:#333,stroke-width:2px,color:#fff
+    style Frontend fill:#61DAFB,stroke:#333,stroke-width:2px,color:#000
+

@@ -1,0 +1,31 @@
+graph TB
+    subgraph System["Urban Cleaning Management System"]
+        Submit((UC-004: Submit Report))
+        MyReports((UC-009: Get My Reports))
+        GetTasks((UC-030: Get All Tasks))
+        Assign((UC-038: Assign Task to Operator))
+        UpdateState((UC-032: Update Task State))
+        Confirm((UC-017: Confirm Resolution))
+        Reject((UC-018: Reject Resolution))
+        Audit((UC-033: Get Task Audit History))
+    end
+    
+    Citizen[👤 Citizen]
+    Operator[👤 Operator]
+    Admin[👤 Administrator]
+    
+    Citizen --> Submit
+    Citizen --> MyReports
+    Citizen --> Confirm
+    Citizen --> Reject
+    
+    Operator --> GetTasks
+    Operator --> UpdateState
+    Operator --> Audit
+    
+    Admin --> Assign
+    
+    style Citizen fill:#fff4e1
+    style Operator fill:#e8f5e9
+    style Admin fill:#fce4ec
+

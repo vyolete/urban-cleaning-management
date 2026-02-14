@@ -1,0 +1,28 @@
+flowchart TD
+    Start([Assignment request]) --> GetTask[Get task by ID]
+    GetTask -->|Not found| Err404[Return 404 Not Found]
+    GetTask -->|Found| GetOp[Get operator by ID]
+    GetOp -->|Not found| Err404Op[Return 404 Not Found]
+    GetOp -->|Found| ValidateRole{Validate operator role}
+    ValidateRole -->|Invalid| ErrRole[Return 400 Bad Request]
+    ValidateRole -->|Valid TECNICO/ADMIN| ValidateState{Validate state transition}
+    ValidateState -->|Invalid| ErrState[Return 400 Bad Request]
+    ValidateState -->|Valid| UpdateTask[Update task]
+    UpdateTask --> SetOperator[Set assigned operator]
+    SetOperator --> SetState[Set state to ASIGNADO]
+    SetState --> SetTimestamp[Set assignedAt timestamp]
+    SetTimestamp --> SaveTask[Save task]
+    SaveTask --> PublishEvent[Publish TaskAssignedEvent]
+    PublishEvent --> LogAssignment[Log assignment]
+    LogAssignment --> Success[Return 200 OK]
+    PublishEvent -.->|Async| CheckPref{Check notification preferences}
+    CheckPref -->|Enabled| SendEmail[Send assignment email]
+    CheckPref -->|Disabled| SkipEmail[Skip notification]
+    SendEmail --> EmailDone([Email sent])
+    SkipEmail --> EmailDone
+    Err404 --> End([End])
+    Err404Op --> End
+    ErrRole --> End
+    ErrState --> End
+    Success --> End
+

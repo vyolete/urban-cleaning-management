@@ -1,0 +1,17 @@
+flowchart TD
+    Start([Login request]) --> Authenticate[Authenticate credentials]
+    Authenticate -->|Invalid| LogFailed[Log failed attempt]
+    Authenticate -->|Valid| GetUser[Get user details]
+    LogFailed --> Err401[Return 401 Unauthorized]
+    GetUser -->|Not found| Err401User[Return 401 Unauthorized]
+    GetUser -->|Found| GenFingerprint[Generate device fingerprint]
+    GenFingerprint --> ExtractMeta[Extract IP and User-Agent]
+    ExtractMeta --> GenAccess[Generate JWT access token]
+    GenAccess --> GenRefresh[Generate refresh token]
+    GenRefresh --> CreateSession[Create user session]
+    CreateSession --> LogSuccess[Log successful login]
+    LogSuccess --> ReturnTokens[Return LoginResponse]
+    ReturnTokens --> End([End])
+    Err401 --> End
+    Err401User --> End
+

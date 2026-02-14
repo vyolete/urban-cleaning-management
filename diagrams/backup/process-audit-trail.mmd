@@ -1,0 +1,14 @@
+flowchart TD
+    Start([Check for duplicates]) --> GetConfig[Get deduplication config]
+    GetConfig -->|Not found| ErrConfig[Throw RuntimeException]
+    GetConfig -->|Found| BuildSpatial[Build spatial query]
+    BuildSpatial --> BuildTemporal[Build temporal query]
+    BuildTemporal --> ExecuteQuery[Execute PostGIS query]
+    ExecuteQuery --> CheckResults{Results found?}
+    CheckResults -->|No results| ReturnEmpty[Return Optional.empty]
+    CheckResults -->|Results found| GetFirstTask[Get first matching task]
+    GetFirstTask --> ReturnTask[Return Optional with task]
+    ErrConfig --> End([End with error])
+    ReturnEmpty --> End
+    ReturnTask --> End([End with parent task])
+

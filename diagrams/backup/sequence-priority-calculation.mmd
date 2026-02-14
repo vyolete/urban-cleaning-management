@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant TaskService
+    participant PriorityCalculatorService
+    participant ConfigService
+    participant AlgorithmConfigRepository
+    
+    TaskService->>PriorityCalculatorService: calculatePriority(report)
+    
+    PriorityCalculatorService->>ConfigService: getCurrentConfig()
+    ConfigService->>AlgorithmConfigRepository: findTopByOrderByCreatedAtDesc()
+    AlgorithmConfigRepository-->>ConfigService: AlgorithmConfig
+    ConfigService-->>PriorityCalculatorService: AlgorithmConfig
+    
+    PriorityCalculatorService->>PriorityCalculatorService: mapCategoryToValue(category)
+    PriorityCalculatorService->>PriorityCalculatorService: calculateZoneRiskIndex(location)
+    PriorityCalculatorService->>PriorityCalculatorService: calculateHoursElapsed(createdAt)
+    
+    Note over PriorityCalculatorService: Formula: priority = (weightCategory * categoryValue) + (weightZone * zoneRisk) + (weightTime * hoursElapsed)
+    
+    PriorityCalculatorService->>PriorityCalculatorService: categoryComponent = weightCategory * categoryValue
+    PriorityCalculatorService->>PriorityCalculatorService: zoneComponent = weightZone * zoneRisk
+    PriorityCalculatorService->>PriorityCalculatorService: timeComponent = weightTime * hoursElapsed
+    
+    PriorityCalculatorService->>PriorityCalculatorService: totalPriority = sum(components)
+    
+    PriorityCalculatorService-->>TaskService: BigDecimal priorityScore
+

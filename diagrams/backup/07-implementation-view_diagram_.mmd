@@ -1,0 +1,63 @@
+graph TB
+    subgraph "Frontend Application"
+        UI[UI Components<br/>frontend/src/components]
+        Pages[Pages<br/>frontend/src/pages]
+        APIClient[API Client Layer<br/>frontend/src/services]
+        StateManagement[State Management<br/>frontend/src/context]
+        Hooks[Custom Hooks<br/>frontend/src/hooks]
+        
+        Pages --> UI
+        Pages --> APIClient
+        Pages --> StateManagement
+        Pages --> Hooks
+        UI --> Hooks
+        UI --> StateManagement
+    end
+    
+    subgraph "Backend Application"
+        RestAPI[REST API Layer<br/>com.urbanclean.controller]
+        BusinessLogic[Business Logic Layer<br/>com.urbanclean.service]
+        DataAccess[Data Access Layer<br/>com.urbanclean.repository]
+        DomainModel[Domain Model<br/>com.urbanclean.entity]
+        Security[Security Infrastructure<br/>com.urbanclean.security]
+        Config[Configuration<br/>com.urbanclean.config]
+        DTOs[Data Transfer Objects<br/>com.urbanclean.dto]
+        Events[Event System<br/>com.urbanclean.event]
+        Validation[Validation<br/>com.urbanclean.validation]
+        
+        RestAPI --> BusinessLogic
+        RestAPI --> DTOs
+        RestAPI --> Security
+        BusinessLogic --> DataAccess
+        BusinessLogic --> DomainModel
+        BusinessLogic --> Events
+        BusinessLogic --> Validation
+        DataAccess --> DomainModel
+        Security --> BusinessLogic
+        Config --> BusinessLogic
+        Config --> Security
+    end
+    
+    subgraph "External Systems"
+        Database[(PostgreSQL + PostGIS)]
+        EmailService[Email Service<br/>SMTP]
+    end
+    
+    APIClient -->|HTTP/REST| RestAPI
+    DataAccess -->|JDBC| Database
+    BusinessLogic -->|SMTP| EmailService
+    
+    style UI fill:#e1f5ff
+    style Pages fill:#e1f5ff
+    style APIClient fill:#e1f5ff
+    style StateManagement fill:#e1f5ff
+    style Hooks fill:#e1f5ff
+    style RestAPI fill:#fff4e1
+    style BusinessLogic fill:#fff4e1
+    style DataAccess fill:#fff4e1
+    style DomainModel fill:#fff4e1
+    style Security fill:#ffe1e1
+    style Config fill:#e1ffe1
+    style Database fill:#f0f0f0
+    style EmailService fill:#f0f0f0
+

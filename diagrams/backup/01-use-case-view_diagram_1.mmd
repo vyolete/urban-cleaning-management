@@ -1,0 +1,38 @@
+graph TB
+    subgraph System["Urban Cleaning Management System"]
+        Register((UC-001: Register User))
+        Login((UC-002: Login))
+        ResetInit((UC-005: Initiate Password Reset))
+        ResetValidate((UC-006: Validate Reset Token))
+        ResetComplete((UC-007: Complete Password Reset))
+        Refresh((UC-003: Refresh Access Token))
+        Logout((UC-022: Logout))
+        LogoutAll((UC-023: Logout from All Devices))
+        ChangePass((UC-012: Change Password))
+    end
+    
+    Anonymous[👤 Anonymous User]
+    Citizen[👤 Authenticated User]
+    
+    Anonymous --> Register
+    Anonymous --> Login
+    Anonymous --> ResetInit
+    Anonymous --> ResetValidate
+    Anonymous --> ResetComplete
+    
+    Register -.-> Login
+    Login -.-> Citizen
+    
+    Citizen --> Refresh
+    Citizen --> Logout
+    Citizen --> LogoutAll
+    Citizen --> ChangePass
+    
+    Logout -.-> Anonymous
+    LogoutAll -.-> Anonymous
+    
+    style Anonymous fill:#e1f5ff
+    style Citizen fill:#fff4e1
+    style Register fill:#c8e6c9
+    style Login fill:#c8e6c9
+

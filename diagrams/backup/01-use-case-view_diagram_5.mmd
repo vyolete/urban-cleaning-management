@@ -1,0 +1,41 @@
+graph TB
+    subgraph System["Urban Cleaning Management System"]
+        subgraph AnalyticsGroup["Analytics"]
+            UC034((UC-034: Get Task Distribution))
+            UC035((UC-035: Get Heatmap))
+            UC036((UC-036: Get MTTR))
+            UC037((UC-037: Get Operator Performance))
+        end
+        
+        subgraph NotificationGroup["Notifications"]
+            UC008((UC-008: Unsubscribe from Notifications))
+            UC020((UC-020: Get Notification Preferences))
+            UC021((UC-021: Update Notification Preferences))
+            UC046((UC-046: Get Notification Failures))
+            UC047((UC-047: Retry Failed Notification))
+        end
+    end
+    
+    Anonymous[👤 Anonymous User]
+    Citizen[👤 Citizen]
+    Operator[👤 Operator]
+    Admin[👤 Administrator]
+    
+    Anonymous --> UC008
+    
+    Citizen --> UC020
+    Citizen --> UC021
+    
+    Operator --> UC034
+    Operator --> UC035
+    Operator --> UC036
+    Operator --> UC037
+    
+    Admin --> UC046
+    Admin --> UC047
+    
+    style Anonymous fill:#e1f5ff
+    style Citizen fill:#fff4e1
+    Operator fill:#e8f5e9
+    style Admin fill:#fce4ec
+

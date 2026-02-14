@@ -1,0 +1,15 @@
+graph LR
+    A[ConfigPanel<br/>View] -->|PUT Request| B[ConfigController<br/>Controller]
+    B --> C[ConfigService<br/>Model]
+    C --> D[AlgorithmConfig Entity<br/>Model]
+    D --> E[ConfigRepository<br/>Model]
+    E --> F[(Database)]
+    F --> E
+    E --> D
+    D --> G[AlgorithmWeightsResponse DTO<br/>Model]
+    G --> B
+    B -->|JSON| A
+    
+    B --> H[TaskService<br/>Model]
+    H --> I[Recalculate Priorities]
+

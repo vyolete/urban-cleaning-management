@@ -1,0 +1,46 @@
+graph LR
+    subgraph "View (React)"
+        V1[ReportForm]
+        V2[TaskList]
+        V3[ConfigPanel]
+        V4[LoginPage]
+    end
+    
+    subgraph "Controller (Spring)"
+        C1[ReportController<br/>/api/reports]
+        C2[TaskController<br/>/api/tasks]
+        C3[ConfigController<br/>/api/admin/config]
+        C4[AuthController<br/>/api/auth]
+    end
+    
+    subgraph "Model (Spring)"
+        M1[Report Entity]
+        M2[Task Entity]
+        M3[AlgorithmConfig Entity]
+        M4[User Entity]
+        D1[ReportResponse DTO]
+        D2[TaskResponse DTO]
+        D3[AlgorithmWeightsResponse DTO]
+        D4[LoginResponse DTO]
+    end
+    
+    V1 -->|POST /api/reports<br/>multipart/form-data| C1
+    C1 --> M1
+    M1 --> D1
+    D1 -->|JSON| V1
+    
+    V2 -->|GET /api/tasks| C2
+    C2 --> M2
+    M2 --> D2
+    D2 -->|JSON| V2
+    
+    V3 -->|PUT /api/admin/config/algorithm-weights| C3
+    C3 --> M3
+    M3 --> D3
+    D3 -->|JSON| V3
+    
+    V4 -->|POST /api/auth/login| C4
+    C4 --> M4
+    M4 --> D4
+    D4 -->|JSON + JWT| V4
+

@@ -1,0 +1,43 @@
+graph TB
+    subgraph "Docker Host Machine"
+        subgraph "urbanclean-network<br/>(Bridge Network: 172.20.0.0/16)"
+            subgraph "Frontend Container<br/>(urbanclean-frontend)"
+                Nginx[Nginx 1.25<br/>Web Server]
+                StaticFiles[React Build<br/>HTML/JS/CSS]
+            end
+            
+            subgraph "Backend Container<br/>(urbanclean-backend)"
+                SpringBoot[Spring Boot 3.2.2<br/>Application Server]
+                JAR[app.jar<br/>~50-80 MB]
+                Uploads[/uploads<br/>Volume Mount]
+            end
+            
+            subgraph "Database Container<br/>(urbanclean-postgres)"
+                PostgreSQL[PostgreSQL 15<br/>+ PostGIS 3.3]
+                Data[(Database Files<br/>Volume)]
+            end
+        end
+        
+        subgraph "Docker Volumes"
+            Vol1[postgres_data]
+            Vol2[backend_uploads]
+        end
+    end
+    
+    Client[Web Browser<br/>External Client] -->|HTTP :3000| Nginx
+    Nginx -->|Proxy<br/>HTTP :8080| SpringBoot
+    SpringBoot -->|JDBC<br/>:5432| PostgreSQL
+    
+    StaticFiles -.->|serves| Nginx
+    JAR -.->|runs| SpringBoot
+    Data -.->|persists| PostgreSQL
+    Uploads -.->|mounts| Vol2
+    Data -.->|mounts| Vol1
+    
+    style Client fill:#FFE4B5,stroke:#333,stroke-width:2px
+    style Nginx fill:#61DAFB,stroke:#333,stroke-width:2px
+    style SpringBoot fill:#6DB33F,stroke:#333,stroke-width:2px
+    style PostgreSQL fill:#4DB33D,stroke:#333,stroke-width:2px,color:#fff
+    style Vol1 fill:#FFA500,stroke:#333,stroke-width:2px
+    style Vol2 fill:#FFA500,stroke:#333,stroke-width:2px
+

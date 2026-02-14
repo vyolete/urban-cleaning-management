@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant Timer
+    participant authService
+    participant API
+    participant AuthController
+    participant RefreshTokenService
+    participant DB
+    
+    Timer->>authService: Check token expiry (every minute)
+    authService->>authService: Token expires in < 5 min?
+    alt Token needs refresh
+        authService->>API: POST /api/auth/refresh
+        API->>AuthController: HTTP Request
+        AuthController->>RefreshTokenService: refreshAccessToken()
+        RefreshTokenService->>DB: Find refresh token
+        RefreshTokenService->>RefreshTokenService: Validate token
+        RefreshTokenService->>RefreshTokenService: Generate new token pair
+        RefreshTokenService->>DB: Save new refresh token
+        RefreshTokenService->>DB: Revoke old refresh token
+        RefreshTokenService-->>AuthController: New tokens
+        AuthController-->>API: HTTP 200 + JSON
+        API-->>authService: New tokens
+        authService->>authService: Update localStorage
+        authService->>authService: Update expiry time
+    end
+

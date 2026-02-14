@@ -1,0 +1,17 @@
+graph LR
+    A[TaskList<br/>View] -->|GET Request| B[TaskController<br/>Controller]
+    B --> C[TaskService<br/>Model]
+    C --> D[Task Entity<br/>Model]
+    D --> E[TaskRepository<br/>Model]
+    E --> F[(Database)]
+    F --> E
+    E --> D
+    D --> G[TaskResponse DTO<br/>Model]
+    G --> B
+    B -->|JSON| A
+    
+    A2[TaskDetail<br/>View] -->|PATCH Request| B
+    B --> C
+    C --> H[AuditService<br/>Model]
+    H --> I[AuditLog Entity<br/>Model]
+
