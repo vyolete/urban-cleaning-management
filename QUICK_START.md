@@ -39,16 +39,16 @@ docker-compose logs
 ## Usuarios de Prueba
 
 ### Ciudadano
-- **Email**: ciudadano@urbix.com
-- **Password**: password123
+- **Email**: ciudadano@urbanclean.com
+- **Password**: Ciudadano123!@#
 
-### Operador Municipal  
-- **Email**: operador@urbix.com
-- **Password**: password123
+### Operador Municipal (Técnico)
+- **Email**: tecnico@urbanclean.com
+- **Password**: Tecnico123!@#
 
 ### Administrador
-- **Email**: admin@urbix.com
-- **Password**: password123
+- **Email**: admin@urbanclean.com
+- **Password**: Admin123!@#
 
 ## Funcionalidades Principales
 
