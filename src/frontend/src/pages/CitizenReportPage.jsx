@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import ReportForm from '../components/citizen/ReportForm';
 import MapView from '../components/citizen/MapView';
 import useGeolocation from '../hooks/useGeolocation';
+import urbixRobot from '../assets/urbix-robot.png';
 import './CitizenReportPage.css';
 
 /**
@@ -82,14 +83,21 @@ function CitizenReportPage() {
       <div className="page-header">
         <div className="header-content">
           <div className="header-title">
-            <h1>Sistema de Gestión de Limpieza Urbana</h1>
-            <p className="subtitle">Reporte de Incidencias</p>
+            <img 
+              src={urbixRobot} 
+              alt="Robot Urbix" 
+              className="header-robot"
+            />
+            <div className="title-text">
+              <h1>Urbix</h1>
+              <p className="subtitle">Reporte de Incidencias</p>
+            </div>
           </div>
           <div className="header-actions">
             {isAuthenticated() ? (
               <>
                 <span className="user-greeting">
-                  Hola, {user?.username || 'Usuario'}
+                  👋 {user?.username || 'Usuario'}
                 </span>
                 {(user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_TECNICO') && (
                   <button
@@ -127,17 +135,19 @@ function CitizenReportPage() {
       {/* Success Message */}
       {successMessage && (
         <div className="success-banner">
-          <div className="success-content">
-            <span className="success-icon">✓</span>
-            <p>{successMessage}</p>
+          <div>
+            <div className="success-content">
+              <span className="success-icon">✓</span>
+              <p>{successMessage}</p>
+            </div>
+            <button
+              onClick={() => setSuccessMessage(null)}
+              className="close-btn"
+              aria-label="Cerrar"
+            >
+              ×
+            </button>
           </div>
-          <button
-            onClick={() => setSuccessMessage(null)}
-            className="close-btn"
-            aria-label="Cerrar"
-          >
-            ×
-          </button>
         </div>
       )}
 
@@ -187,21 +197,23 @@ function CitizenReportPage() {
 
       {/* Info Section */}
       <div className="info-section">
-        <h3>Información Importante</h3>
-        <ul>
-          <li>
-            <strong>Ubicación:</strong> Asegúrese de que la ubicación sea precisa antes de enviar el reporte.
-          </li>
-          <li>
-            <strong>Fotografía:</strong> La foto debe mostrar claramente la incidencia reportada.
-          </li>
-          <li>
-            <strong>Descripción:</strong> Proporcione detalles específicos que ayuden a los técnicos a resolver el problema.
-          </li>
-          <li>
-            <strong>Seguimiento:</strong> Recibirá una notificación cuando su reporte sea procesado.
-          </li>
-        </ul>
+        <div>
+          <h3>Información Importante</h3>
+          <ul>
+            <li>
+              <strong>Ubicación:</strong> Asegúrese de que la ubicación sea precisa antes de enviar el reporte.
+            </li>
+            <li>
+              <strong>Fotografía:</strong> La foto debe mostrar claramente la incidencia reportada.
+            </li>
+            <li>
+              <strong>Descripción:</strong> Proporcione detalles específicos que ayuden a los técnicos a resolver el problema.
+            </li>
+            <li>
+              <strong>Seguimiento:</strong> Recibirá una notificación cuando su reporte sea procesado.
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
