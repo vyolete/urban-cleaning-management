@@ -18,7 +18,7 @@ function UserInfo() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   if (!isAuthenticated()) {

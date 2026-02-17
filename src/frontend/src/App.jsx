@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import CitizenReportPage from './pages/CitizenReportPage';
 import OperatorDashboard from './pages/OperatorDashboard';
@@ -17,6 +18,9 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
+            {/* Home Route */}
+            <Route path="/" element={<HomePage />} />
+            
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
             
@@ -42,9 +46,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            
-            {/* Default Route - Redirect to report page */}
-            <Route path="/" element={<Navigate to="/report" replace />} />
             
             {/* 404 - Not Found */}
             <Route path="*" element={<NotFoundPage />} />

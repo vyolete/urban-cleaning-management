@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import useGeolocation from '../../hooks/useGeolocation';
 import reportService from '../../services/reportService';
 import './ReportForm.css';
 
 /**
  * Report form component for citizens to submit incident reports
  */
-function ReportForm({ onSuccess, onError }) {
-  const { location, error: locationError, loading: locationLoading, getCurrentLocation } = useGeolocation();
-  
+function ReportForm({ location: externalLocation, onSuccess, onError }) {
   const [formData, setFormData] = useState({
     category: '',
     description: '',
@@ -24,6 +21,7 @@ function ReportForm({ onSuccess, onError }) {
     latitude: '',
     longitude: '',
   });
+  const [location, setLocation] = useState(externalLocation);
 
   // Categories available for selection
   const categories = [
@@ -35,12 +33,12 @@ function ReportForm({ onSuccess, onError }) {
     { value: 'OTRO', label: 'Otro' },
   ];
 
-  // Get location on component mount
+  // Update location when external location changes
   useEffect(() => {
-    if (!useManualLocation) {
-      getCurrentLocation();
+    if (externalLocation && !useManualLocation) {
+      setLocation(externalLocation);
     }
-  }, [getCurrentLocation, useManualLocation]);
+  }, [externalLocation, useManualLocation]);
 
   /**
    * Handle form field changes
@@ -130,9 +128,6 @@ function ReportForm({ onSuccess, onError }) {
           return newErrors;
         });
       }
-    } else {
-      // Switching to auto, get location
-      getCurrentLocation();
     }
   };
 
@@ -212,8 +207,7 @@ function ReportForm({ onSuccess, onError }) {
 
           {!useManualLocation ? (
             <div className="auto-location">
-              {locationLoading && <p className="info">Obteniendo ubicación...</p>}
-              {locationError && <p className="error">{locationError}</p>}
+              {!location && <p className="info">Obteniendo ubicación...</p>}
               {location && (
                 <div className="location-info">
                   <p>
@@ -222,9 +216,11 @@ function ReportForm({ onSuccess, onError }) {
                   <p>
                     <strong>Longitud:</strong> {location.longitude.toFixed(6)}
                   </p>
-                  <p className="accuracy">
-                    Precisión: ±{Math.round(location.accuracy)}m
-                  </p>
+                  {location.accuracy && (
+                    <p className="accuracy">
+                      Precisión: ±{Math.round(location.accuracy)}m
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -361,7 +357,7 @@ function ReportForm({ onSuccess, onError }) {
           <button
             type="submit"
             className="btn-primary"
-            disabled={submitting || locationLoading || (!location && !useManualLocation)}
+            disabled={submitting || (!location && !useManualLocation)}
           >
             {submitting ? 'Enviando...' : 'Enviar Reporte'}
           </button>
@@ -372,6 +368,11 @@ function ReportForm({ onSuccess, onError }) {
 }
 
 ReportForm.propTypes = {
+  location: PropTypes.shape({
+    latitude: PropTypes.number,
+    longitude: PropTypes.number,
+    accuracy: PropTypes.number,
+  }),
   onSuccess: PropTypes.func,
   onError: PropTypes.func,
 };

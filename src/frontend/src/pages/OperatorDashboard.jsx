@@ -6,6 +6,7 @@ import TaskDetail from '../components/operator/TaskDetail';
 import AuditTimeline from '../components/operator/AuditTimeline';
 import UserInfo from '../components/common/UserInfo';
 import taskService from '../services/taskService';
+import urbixRobot from '../assets/urbix-robot.png';
 import './OperatorDashboard.css';
 
 /**
@@ -75,6 +76,11 @@ function OperatorDashboard() {
     <div className="operator-dashboard">
       {/* Header */}
       <div className="dashboard-header">
+        <img 
+          src={urbixRobot} 
+          alt="Robot Urbix" 
+          className="dashboard-robot"
+        />
         <div className="header-content">
           <h1>Dashboard de Operadores</h1>
           <p className="subtitle">Gestión de Tareas de Limpieza Urbana</p>

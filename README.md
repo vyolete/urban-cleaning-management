@@ -1,6 +1,11 @@
 # URBIX - Sistema de Gestión de Limpieza Urbana
 ## Trabajo de Fin de Máster - Ingeniería del Software
 
+<div align="center">
+  <img src="src/frontend/src/assets/urbix-robot.png" alt="Robot Urbix" width="200"/>
+  <p><em>Urbix - Sistema inteligente de gestión de incidencias urbanas</em></p>
+</div>
+
 ### 📋 Descripción del Proyecto
 
 URBIX es un sistema integral de gestión de limpieza urbana desarrollado como Trabajo de Fin de Máster. El sistema implementa una plataforma colaborativa que conecta ciudadanos, operadores municipales y administradores a través de algoritmos inteligentes de priorización automática y capacidades geoespaciales avanzadas.

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import urbixRobot from '../assets/urbix-robot.png';
 import './LoginPage.css';
 
 /**
@@ -131,11 +132,18 @@ function LoginPage() {
       <div className="login-container">
         {/* Logo/Brand Section */}
         <div className="login-header">
+          <Link to="/" className="back-to-home">
+            ← Volver al inicio
+          </Link>
+          <img 
+            src={urbixRobot} 
+            alt="Robot Urbix" 
+            className="login-robot"
+          />
           <div className="logo">
-            <span className="logo-icon">🏙️</span>
-            <h1>Urban Clean</h1>
+            <h1>Urbix</h1>
           </div>
-          <p className="tagline">Sistema de Gestión de Limpieza Urbana</p>
+          <p className="tagline">Sistema inteligente de gestión de incidencias urbanas</p>
         </div>
 
         {/* Login Form */}
