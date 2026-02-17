@@ -7,8 +7,8 @@ import './ReportForm.css';
 /**
  * Report form component for citizens to submit incident reports
  */
-function ReportForm({ onSuccess, onError }) {
-  const { location, error: locationError, loading: locationLoading, getCurrentLocation } = useGeolocation();
+function ReportForm({ location: externalLocation, onSuccess, onError }) {
+  const { getCurrentLocation } = useGeolocation();
   
   const [formData, setFormData] = useState({
     category: '',
@@ -24,6 +24,7 @@ function ReportForm({ onSuccess, onError }) {
     latitude: '',
     longitude: '',
   });
+  const [location, setLocation] = useState(externalLocation);
 
   // Categories available for selection
   const categories = [
@@ -35,12 +36,19 @@ function ReportForm({ onSuccess, onError }) {
     { value: 'OTRO', label: 'Otro' },
   ];
 
-  // Get location on component mount
+  // Update location when external location changes
   useEffect(() => {
-    if (!useManualLocation) {
+    if (externalLocation && !useManualLocation) {
+      setLocation(externalLocation);
+    }
+  }, [externalLocation, useManualLocation]);
+
+  // Get location on component mount only if not provided externally
+  useEffect(() => {
+    if (!externalLocation && !useManualLocation) {
       getCurrentLocation();
     }
-  }, [getCurrentLocation, useManualLocation]);
+  }, [getCurrentLocation, useManualLocation, externalLocation]);
 
   /**
    * Handle form field changes
@@ -372,6 +380,11 @@ function ReportForm({ onSuccess, onError }) {
 }
 
 ReportForm.propTypes = {
+  location: PropTypes.shape({
+    latitude: PropTypes.number,
+    longitude: PropTypes.number,
+    accuracy: PropTypes.number,
+  }),
   onSuccess: PropTypes.func,
   onError: PropTypes.func,
 };

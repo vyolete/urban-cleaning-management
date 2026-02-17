@@ -194,6 +194,7 @@ function CitizenReportPage() {
         {/* Form Section */}
         <div className="form-section">
           <ReportForm
+            location={location}
             onSuccess={handleSuccess}
             onError={handleError}
           />
