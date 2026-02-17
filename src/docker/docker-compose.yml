@@ -48,7 +48,7 @@ services:
       SPRING_JPA_SHOW_SQL: ${SHOW_SQL:-false}
       
       # JWT configuration
-      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key_change_this_in_production}
+      JWT_SECRET: ${JWT_SECRET:-dGhpc2lzYXZlcnlzZWN1cmVqd3RzZWNyZXRrZXl0aGF0aXNiYXNlNjRlbmNvZGVk}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
       
       # File upload configuration

@@ -39,14 +39,17 @@ docker-compose logs
 ## Usuarios de Prueba
 
 ### Ciudadano
+- **Username**: ciudadano
 - **Email**: ciudadano@urbanclean.com
 - **Password**: Ciudadano123!@#
 
 ### Operador Municipal (Técnico)
+- **Username**: tecnico
 - **Email**: tecnico@urbanclean.com
 - **Password**: Tecnico123!@#
 
 ### Administrador
+- **Username**: admin
 - **Email**: admin@urbanclean.com
 - **Password**: Admin123!@#
 
