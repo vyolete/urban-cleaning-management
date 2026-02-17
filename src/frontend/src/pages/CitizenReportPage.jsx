@@ -11,7 +11,7 @@ import './CitizenReportPage.css';
  */
 function CitizenReportPage() {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const { location } = useGeolocation();
   const [successMessage, setSuccessMessage] = useState(null);
   const [showMap, setShowMap] = useState(true);
@@ -32,6 +32,17 @@ function CitizenReportPage() {
     } else if (user?.role === 'ROLE_ADMIN') {
       navigate('/admin/config');
     }
+  };
+
+  /**
+   * Handle logout
+   */
+  const handleLogout = () => {
+    logout();
+    setSuccessMessage('Sesión cerrada exitosamente');
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000);
   };
 
   /**
@@ -90,6 +101,14 @@ function CitizenReportPage() {
                     Dashboard
                   </button>
                 )}
+                <button
+                  onClick={handleLogout}
+                  className="btn-logout"
+                  aria-label="Cerrar Sesión"
+                >
+                  <span className="btn-icon">🚪</span>
+                  Cerrar Sesión
+                </button>
               </>
             ) : (
               <button

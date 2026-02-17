@@ -44,7 +44,8 @@
 }
 
 .btn-login-header,
-.btn-dashboard {
+.btn-dashboard,
+.btn-logout {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -76,6 +77,17 @@
 
 .btn-dashboard:hover {
   background-color: var(--secondary-hover);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.btn-logout {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-logout:hover {
+  background-color: #c82333;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   transform: translateY(-1px);
 }
@@ -316,7 +328,8 @@
   }
 
   .btn-login-header,
-  .btn-dashboard {
+  .btn-dashboard,
+  .btn-logout {
     padding: 0.6rem 1.2rem;
     font-size: 0.9rem;
   }
