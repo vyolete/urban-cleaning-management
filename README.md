@@ -41,10 +41,12 @@ URBIX-TFM/
 
 ### 🚀 Inicio Rápido
 
+**Ver la [Guía de Inicio Rápido Completa](QUICK_START.md) para instrucciones detalladas.**
+
 1. **Clonar el repositorio**
    ```bash
    git clone <repository-url>
-   cd URBIX-TFM
+   cd urban-cleaning-management
    ```
 
 2. **Ejecutar con Docker**
@@ -52,11 +54,21 @@ URBIX-TFM/
    cd src/docker
    docker-compose up -d
    ```
+   
+   Espera 2-3 minutos mientras se construyen las imágenes y se inician los servicios.
 
 3. **Acceder al sistema**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8080
-   - Documentación API: http://localhost:8080/swagger-ui.html
+   - **Aplicación Web**: http://localhost:3000
+   - **Login**: http://localhost:3000/login
+   - **Backend API**: http://localhost:8080
+   - **Documentación API**: http://localhost:8080/swagger-ui.html
+
+4. **Credenciales de prueba**
+   - **Admin**: username=`admin`, password=`Admin123!@#`
+   - **Técnico**: username=`tecnico`, password=`Tecnico123!@#`
+   - **Ciudadano**: username=`ciudadano`, password=`Ciudadano123!@#`
+
+**Nota**: Los usuarios se crean automáticamente al iniciar el sistema por primera vez.
 
 ### 📚 Documentación TFM
 
