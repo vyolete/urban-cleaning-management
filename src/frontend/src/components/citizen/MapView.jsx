@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -20,16 +20,29 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
   const markerRef = useRef(null);
   const geofenceRef = useRef(null);
 
-  // Get map center from env or use default
-  const defaultCenter = [
+  // Get map center from env or use default - memoized to prevent re-renders
+  const defaultCenter = useMemo(() => [
     parseFloat(import.meta.env.VITE_MAP_CENTER_LAT) || 40.416775,
     parseFloat(import.meta.env.VITE_MAP_CENTER_LON) || -3.703790,
-  ];
+  ], []);
 
+  // Initialize map once on mount
   useEffect(() => {
-    // Initialize map if not already initialized
-    if (!mapInstanceRef.current && mapRef.current) {
+    console.log('[MapView] Initializing map...');
+    
+    if (!mapRef.current) {
+      console.log('[MapView] mapRef.current is null, skipping initialization');
+      return;
+    }
+
+    if (mapInstanceRef.current) {
+      console.log('[MapView] Map already initialized');
+      return;
+    }
+
+    try {
       const center = location ? [location.latitude, location.longitude] : defaultCenter;
+      console.log('[MapView] Creating map with center:', center);
       
       mapInstanceRef.current = L.map(mapRef.current).setView(center, zoom);
 
@@ -38,13 +51,26 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19,
       }).addTo(mapInstanceRef.current);
+
+      console.log('[MapView] Map initialized successfully');
+    } catch (error) {
+      console.error('[MapView] Error initializing map:', error);
+    }
+  }, [defaultCenter, zoom]); // Only re-initialize if these change
+
+  // Update marker when location changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !location) {
+      console.log('[MapView] Skipping marker update - map or location not ready');
+      return;
     }
 
-    // Update marker position
-    if (mapInstanceRef.current && location) {
-      const { latitude, longitude } = location;
-      const position = [latitude, longitude];
+    console.log('[MapView] Updating marker with location:', location);
 
+    const { latitude, longitude } = location;
+    const position = [latitude, longitude];
+
+    try {
       // Remove existing marker
       if (markerRef.current) {
         mapInstanceRef.current.removeLayer(markerRef.current);
@@ -58,37 +84,56 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
 
       // Center map on location
       mapInstanceRef.current.setView(position, zoom);
+      
+      console.log('[MapView] Marker updated successfully');
+    } catch (error) {
+      console.error('[MapView] Error updating marker:', error);
+    }
+  }, [location, zoom]);
+
+  // Update geofence when showGeofence changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !showGeofence) {
+      return;
     }
 
-    // Show geofence boundaries if requested
-    if (mapInstanceRef.current && showGeofence) {
-      const minLat = parseFloat(import.meta.env.VITE_GEOFENCE_MIN_LAT);
-      const maxLat = parseFloat(import.meta.env.VITE_GEOFENCE_MAX_LAT);
-      const minLon = parseFloat(import.meta.env.VITE_GEOFENCE_MIN_LON);
-      const maxLon = parseFloat(import.meta.env.VITE_GEOFENCE_MAX_LON);
+    console.log('[MapView] Updating geofence...');
 
-      if (!isNaN(minLat) && !isNaN(maxLat) && !isNaN(minLon) && !isNaN(maxLon)) {
-        // Remove existing geofence
-        if (geofenceRef.current) {
-          mapInstanceRef.current.removeLayer(geofenceRef.current);
-        }
+    const minLat = parseFloat(import.meta.env.VITE_GEOFENCE_MIN_LAT);
+    const maxLat = parseFloat(import.meta.env.VITE_GEOFENCE_MAX_LAT);
+    const minLon = parseFloat(import.meta.env.VITE_GEOFENCE_MIN_LON);
+    const maxLon = parseFloat(import.meta.env.VITE_GEOFENCE_MAX_LON);
 
-        // Add geofence rectangle
-        const bounds = [
-          [minLat, minLon],
-          [maxLat, maxLon],
-        ];
+    if (isNaN(minLat) || isNaN(maxLat) || isNaN(minLon) || isNaN(maxLon)) {
+      console.log('[MapView] Geofence coordinates not configured');
+      return;
+    }
 
-        geofenceRef.current = L.rectangle(bounds, {
-          color: '#3388ff',
-          weight: 2,
-          fillOpacity: 0.1,
-        })
-          .addTo(mapInstanceRef.current)
-          .bindPopup('Área de servicio');
+    try {
+      // Remove existing geofence
+      if (geofenceRef.current) {
+        mapInstanceRef.current.removeLayer(geofenceRef.current);
       }
+
+      // Add geofence rectangle
+      const bounds = [
+        [minLat, minLon],
+        [maxLat, maxLon],
+      ];
+
+      geofenceRef.current = L.rectangle(bounds, {
+        color: '#3388ff',
+        weight: 2,
+        fillOpacity: 0.1,
+      })
+        .addTo(mapInstanceRef.current)
+        .bindPopup('Área de servicio');
+
+      console.log('[MapView] Geofence updated successfully');
+    } catch (error) {
+      console.error('[MapView] Error updating geofence:', error);
     }
-  }, [location, showGeofence, zoom, defaultCenter]);
+  }, [showGeofence]);
 
   // Cleanup on unmount only
   useEffect(() => {
@@ -109,8 +154,10 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
         style={{
           width: '100%',
           height: height,
+          minHeight: '400px',
           borderRadius: '8px',
           border: '1px solid var(--border-color)',
+          backgroundColor: '#f0f0f0',
         }}
       />
       {location && (
