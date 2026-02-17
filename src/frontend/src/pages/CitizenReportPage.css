@@ -26,13 +26,14 @@
 .header-title {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .header-robot {
-  width: 60px;
+  width: 80px;
   height: auto;
   display: block;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
 }
 
 .title-text {
@@ -43,16 +44,16 @@
 .page-header h1 {
   color: #2c3e50;
   margin: 0;
-  font-size: 1.875rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.75px;
 }
 
 .page-header .subtitle {
-  color: #64748b;
-  font-size: 1rem;
+  color: #94a3b8;
+  font-size: 0.9375rem;
   font-weight: 500;
-  margin: 0.25rem 0 0 0;
+  margin: 0.375rem 0 0 0;
 }
 
 /* Header Actions */
@@ -388,14 +389,15 @@
 
   .header-title {
     width: 100%;
+    gap: 1rem;
   }
 
   .header-robot {
-    width: 50px;
+    width: 70px;
   }
 
   .page-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.875rem;
   }
 
   .page-header .subtitle {
@@ -445,11 +447,15 @@
 
 @media (max-width: 480px) {
   .header-robot {
-    width: 45px;
+    width: 60px;
   }
 
   .page-header h1 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+  }
+
+  .page-header .subtitle {
+    font-size: 0.8125rem;
   }
 
   .map-section,
