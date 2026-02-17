@@ -1,0 +1,38 @@
+sequenceDiagram
+    participant Client
+    participant FeedbackController
+    participant FeedbackService
+    participant TaskService
+    participant TaskRepository
+    participant CitizenFeedbackRepository
+    
+    Client->>FeedbackController: POST /api/feedback(taskId, feedbackType, comment)
+    FeedbackController->>FeedbackService: submitFeedback(taskId, feedbackType, comment)
+    
+    FeedbackService->>TaskService: getTaskById(taskId)
+    TaskService->>TaskRepository: findById(taskId)
+    TaskRepository-->>TaskService: Task
+    TaskService-->>FeedbackService: Task
+    
+    FeedbackService->>FeedbackService: validateTaskState(task)
+    
+    alt Task Not Resolved
+        FeedbackService-->>FeedbackController: ValidationException
+        FeedbackController-->>Client: 400 Bad Request
+    else Task Resolved
+        FeedbackService->>FeedbackService: getCurrentUser()
+        
+        FeedbackService->>CitizenFeedbackRepository: save(feedback)
+        CitizenFeedbackRepository-->>FeedbackService: saved CitizenFeedback
+        
+        alt Feedback Type == NEGATIVO
+            FeedbackService->>TaskService: updateState(taskId, REABIERTO)
+            TaskService->>TaskRepository: save(task with state REABIERTO)
+            TaskRepository-->>TaskService: updated Task
+            TaskService-->>FeedbackService: reopened Task
+        end
+        
+        FeedbackService-->>FeedbackController: FeedbackResponse
+        FeedbackController-->>Client: 201 Created FeedbackResponse
+    end
+

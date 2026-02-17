@@ -1,0 +1,50 @@
+sequenceDiagram
+    participant Client
+    participant ReportController
+    participant ReportService
+    participant FileStorageService
+    participant GeofencingService
+    participant DeduplicationService
+    participant TaskService
+    participant ReportRepository
+    participant TaskRepository
+    
+    Client->>ReportController: POST /api/reports(data, photo)
+    ReportController->>ReportService: createReport(request, photo)
+    
+    ReportService->>ReportService: validateReportRequest(request)
+    
+    ReportService->>GeofencingService: validateCoordinates(lat, lon)
+    GeofencingService-->>ReportService: validation result
+    
+    ReportService->>FileStorageService: storeFile(photo)
+    FileStorageService-->>ReportService: photoUrl
+    
+    ReportService->>GeofencingService: createPoint(lat, lon)
+    GeofencingService-->>ReportService: Point geometry
+    
+    ReportService->>ReportService: getCurrentUser()
+    
+    Note over ReportService,DeduplicationService: Check for duplicates BEFORE saving
+    ReportService->>DeduplicationService: checkForDuplicatesBeforeSave(report)
+    DeduplicationService-->>ReportService: Optional<Task> parentTask
+    
+    alt Duplicate Found
+        ReportService->>ReportService: report.setIsDuplicate(true)
+        ReportService->>ReportService: report.setParentTask(parentTask)
+        ReportService->>ReportRepository: save(report)
+        ReportRepository-->>ReportService: savedReport
+        
+        ReportService->>TaskRepository: save(task with incremented duplicateCount)
+        TaskRepository-->>ReportService: updated task
+    else No Duplicate
+        ReportService->>ReportRepository: save(report)
+        ReportRepository-->>ReportService: savedReport
+        
+        ReportService->>TaskService: createTask(savedReport)
+        TaskService-->>ReportService: Task
+    end
+    
+    ReportService-->>ReportController: Report
+    ReportController-->>Client: 201 Created ReportResponse
+

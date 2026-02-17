@@ -1,0 +1,43 @@
+sequenceDiagram
+    participant Client
+    participant AuthController
+    participant AuthService
+    participant RefreshTokenService
+    participant RefreshTokenRepository
+    participant UserRepository
+    participant JwtTokenProvider
+    participant DeviceFingerprintUtil
+    
+    Client->>AuthController: POST /api/auth/refresh(refreshToken)
+    AuthController->>AuthService: refreshAccessToken(refreshToken, request)
+    
+    AuthService->>RefreshTokenService: validateRefreshToken(refreshToken)
+    RefreshTokenService->>RefreshTokenRepository: findByToken(refreshToken)
+    RefreshTokenRepository-->>RefreshTokenService: Optional<RefreshToken>
+    
+    RefreshTokenService->>RefreshTokenService: check expiration and revocation
+    RefreshTokenService-->>AuthService: RefreshToken entity
+    
+    AuthService->>UserRepository: findById(userId)
+    UserRepository-->>AuthService: User
+    
+    AuthService->>DeviceFingerprintUtil: generateFingerprint(request)
+    DeviceFingerprintUtil-->>AuthService: deviceFingerprint
+    
+    AuthService->>JwtTokenProvider: generateToken(username, userId, role, tokenVersion)
+    JwtTokenProvider-->>AuthService: newAccessToken
+    
+    AuthService->>RefreshTokenService: rotateRefreshToken(oldToken, fingerprint, ip, userAgent)
+    
+    RefreshTokenService->>RefreshTokenService: revoke old token
+    RefreshTokenService->>RefreshTokenRepository: save(old token marked revoked)
+    
+    RefreshTokenService->>RefreshTokenService: generate new token
+    RefreshTokenService->>RefreshTokenRepository: save(new refresh token)
+    RefreshTokenRepository-->>RefreshTokenService: new RefreshToken
+    
+    RefreshTokenService-->>AuthService: newRefreshToken
+    
+    AuthService-->>AuthController: RefreshTokenResponse(newAccessToken, newRefreshToken)
+    AuthController-->>Client: 200 OK RefreshTokenResponse
+

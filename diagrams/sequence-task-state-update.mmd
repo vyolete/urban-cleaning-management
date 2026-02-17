@@ -1,0 +1,46 @@
+sequenceDiagram
+    participant Client
+    participant TaskController
+    participant TaskService
+    participant TaskRepository
+    participant AuditService
+    participant AuditLogRepository
+    
+    Client->>TaskController: PATCH /api/tasks/{id}/state(newState)
+    
+    TaskController->>TaskService: getTaskById(id)
+    TaskService->>TaskRepository: findById(id)
+    TaskRepository-->>TaskService: Task
+    TaskService-->>TaskController: Task (previousState)
+    
+    TaskController->>TaskService: updateState(id, newState)
+    
+    TaskService->>TaskRepository: findById(id)
+    TaskRepository-->>TaskService: Task
+    
+    TaskService->>TaskService: validateStateTransition(currentState, newState)
+    
+    alt Valid Transition
+        TaskService->>TaskService: task.setState(newState)
+        
+        alt newState == RESUELTO
+            TaskService->>TaskService: task.setResolvedAt(now)
+        end
+        
+        TaskService->>TaskRepository: save(task)
+        TaskRepository-->>TaskService: updated Task
+        
+        TaskService-->>TaskController: updated Task
+        
+        TaskController->>AuditService: logStateChange(task, previousState, newState)
+        AuditService->>AuditService: getCurrentUser()
+        AuditService->>AuditLogRepository: save(auditLog)
+        AuditLogRepository-->>AuditService: saved AuditLog
+        AuditService-->>TaskController: audit log created
+        
+        TaskController-->>Client: 200 OK TaskResponse
+    else Invalid Transition
+        TaskService-->>TaskController: InvalidStateTransitionException
+        TaskController-->>Client: 400 Bad Request
+    end
+

@@ -1,0 +1,54 @@
+This is ApacheBench, Version 2.3 <$Revision: 1913912 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+Completed 2000 requests
+Completed 4000 requests
+Completed 6000 requests
+Completed 8000 requests
+Completed 10000 requests
+Completed 12000 requests
+Completed 14000 requests
+Completed 16000 requests
+Completed 18000 requests
+Completed 20000 requests
+Finished 20000 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            8080
+
+Document Path:          /actuator/health
+Document Length:        521 bytes
+
+Concurrency Level:      200
+Time taken for tests:   81.671 seconds
+Complete requests:      20000
+Failed requests:        0
+Non-2xx responses:      20000
+Total transferred:      18380000 bytes
+HTML transferred:       10420000 bytes
+Requests per second:    244.89 [#/sec] (mean)
+Time per request:       816.709 [ms] (mean)
+Time per request:       4.084 [ms] (mean, across all concurrent requests)
+Transfer rate:          219.77 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.7      0      39
+Processing:     3  813 385.5    762    4097
+Waiting:        3  812 385.5    762    4097
+Total:          3  813 385.5    762    4097
+
+Percentage of the requests served within a certain time (ms)
+  50%    762
+  66%    851
+  75%    938
+  80%    995
+  90%   1145
+  95%   1388
+  98%   2080
+  99%   2590
+ 100%   4097 (longest request)

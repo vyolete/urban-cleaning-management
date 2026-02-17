@@ -1,0 +1,25 @@
+flowchart TD
+    Start([Start: Calculate Priority]) --> GetConfig[Get Current Algorithm Config<br/>ConfigService]
+    GetConfig --> MapCategory[Map Category to Severity<br/>1-10 scale]
+    
+    MapCategory --> CalcCat[Calculate Category Component<br/>Wc × Category Value]
+    
+    GetConfig --> DetermineZone[Determine Zone from Coordinates<br/>Spatial Logic]
+    DetermineZone --> GetZoneRisk[Get Zone Risk Index<br/>1-10 scale]
+    GetZoneRisk --> CalcZone[Calculate Zone Component<br/>Wz × Zone Risk]
+    
+    GetConfig --> CalcHours[Calculate Hours Elapsed<br/>since Report Creation]
+    CalcHours --> NormalizeTime[Normalize Time to 1-10<br/>Logarithmic Scale]
+    NormalizeTime --> CalcTime[Calculate Time Component<br/>Wt × Normalized Hours]
+    
+    CalcCat --> Sum[Sum All Components<br/>P = Category + Zone + Time]
+    CalcZone --> Sum
+    CalcTime --> Sum
+    
+    Sum --> Round[Round to 2 Decimal Places]
+    Round --> End([End: Return Priority Score])
+    
+    style Start fill:#e1f5ff
+    style End fill:#c8e6c9
+    style Sum fill:#ffe0b2
+

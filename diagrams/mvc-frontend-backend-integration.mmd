@@ -1,0 +1,9 @@
+graph TB
+    Request[HTTP Request] --> Filter[JWT Authentication Filter]
+    Filter -->|Valid Token| Controller[REST Controller]
+    Filter -->|Invalid Token| Reject[401 Unauthorized]
+    Controller --> PreAuth[@PreAuthorize Check]
+    PreAuth -->|Authorized| Service[Business Service]
+    PreAuth -->|Not Authorized| Forbidden[403 Forbidden]
+    Service --> Response[HTTP Response]
+

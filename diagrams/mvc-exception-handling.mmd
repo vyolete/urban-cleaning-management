@@ -1,0 +1,12 @@
+graph LR
+    A[ReportForm<br/>View] -->|FormData| B[ReportController<br/>Controller]
+    B --> C[ReportService<br/>Model]
+    C --> D[Report Entity<br/>Model]
+    D --> E[ReportRepository<br/>Model]
+    E --> F[(Database)]
+    F --> E
+    E --> D
+    D --> G[ReportResponse DTO<br/>Model]
+    G --> B
+    B -->|JSON| A
+

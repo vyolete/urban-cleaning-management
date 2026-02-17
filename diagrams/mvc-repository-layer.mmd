@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant Operator
+    participant TaskDetail
+    participant taskService
+    participant API
+    participant TaskController
+    participant TaskService
+    participant AuditService
+    participant EventPublisher
+    participant DB
+    
+    Operator->>TaskDetail: Click state transition button
+    TaskDetail->>taskService: updateTaskState(id, newState)
+    taskService->>API: PATCH /api/tasks/{id}/state
+    API->>TaskController: HTTP Request
+    TaskController->>TaskController: Validate @Valid
+    TaskController->>TaskService: updateState(id, newState)
+    TaskService->>TaskService: Validate state transition
+    TaskService->>DB: Update task state
+    TaskService->>EventPublisher: Publish TaskStateChangedEvent
+    EventPublisher->>EventPublisher: Notify listeners (async)
+    TaskService-->>TaskController: Updated task
+    TaskController->>AuditService: logStateChange()
+    AuditService->>DB: Save audit log
+    TaskController->>TaskController: Map to TaskResponse DTO
+    TaskController-->>API: HTTP 200 + JSON
+    API-->>taskService: Response data
+    taskService-->>TaskDetail: Updated task
+    TaskDetail->>TaskDetail: Update UI
+    TaskDetail->>TaskDetail: Refresh audit timeline
+

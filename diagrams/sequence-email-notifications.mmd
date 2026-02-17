@@ -1,0 +1,41 @@
+stateDiagram-v2
+    [*] --> PENDIENTE : Task created from report
+    
+    PENDIENTE --> ASIGNADO : assignTask(operatorId)
+    
+    ASIGNADO --> EN_PROGRESO : Operator starts work
+    ASIGNADO --> PENDIENTE : Unassign (admin only)
+    
+    EN_PROGRESO --> RESUELTO : Operator completes task
+    EN_PROGRESO --> ASIGNADO : Operator pauses work
+    
+    RESUELTO --> REABIERTO : Citizen submits negative feedback
+    RESUELTO --> [*] : Task completed successfully
+    
+    REABIERTO --> EN_PROGRESO : Operator resumes work
+    
+    note right of PENDIENTE
+        Initial state
+        Task awaiting assignment
+    end note
+    
+    note right of ASIGNADO
+        Task assigned to operator
+        Operator notified via email
+    end note
+    
+    note right of EN_PROGRESO
+        Operator actively working
+        Can upload evidence
+    end note
+    
+    note right of RESUELTO
+        Task marked complete
+        Awaiting citizen feedback
+    end note
+    
+    note right of REABIERTO
+        Citizen rejected resolution
+        Requires rework
+    end note
+

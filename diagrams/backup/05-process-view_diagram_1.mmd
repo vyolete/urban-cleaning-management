@@ -1,0 +1,16 @@
+flowchart TD
+    Start([Task creation triggered]) --> GetConfig[Get algorithm configuration]
+    GetConfig -->|Not found| ErrConfig[Throw RuntimeException]
+    GetConfig -->|Found| MapCategory[Map category to value]
+    MapCategory --> CalcZone[Calculate zone risk index]
+    CalcZone --> CalcTime[Calculate hours elapsed]
+    CalcTime --> ApplyFormula[Apply weighted formula]
+    ApplyFormula --> CreateTask[Create task entity]
+    CreateTask --> SetPriority[Set priority score]
+    SetPriority --> SetState[Set state to PENDIENTE]
+    SetState --> SaveTask[Save task]
+    SaveTask --> LogCreation[Log task creation]
+    LogCreation --> Success([Return task])
+    ErrConfig --> End([End with error])
+    Success --> End
+

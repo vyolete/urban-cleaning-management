@@ -1,0 +1,46 @@
+sequenceDiagram
+    participant Client
+    participant TaskController
+    participant TaskService
+    participant UserRepository
+    participant TaskRepository
+    participant AuditService
+    participant ApplicationEventPublisher
+    participant TaskEventListener
+    participant EmailService
+    
+    Client->>TaskController: POST /api/tasks/{id}/assign?operatorId={operatorId}
+    TaskController->>TaskService: getTaskById(id)
+    TaskService->>TaskRepository: findById(id)
+    TaskRepository-->>TaskService: Task
+    TaskService-->>TaskController: Task (current state)
+    
+    TaskController->>TaskService: assignTask(id, operatorId)
+    
+    TaskService->>UserRepository: findById(operatorId)
+    UserRepository-->>TaskService: User (operator)
+    
+    TaskService->>TaskRepository: findById(id)
+    TaskRepository-->>TaskService: Task
+    
+    TaskService->>TaskService: validateStateTransition(currentState, ASIGNADO)
+    
+    TaskService->>TaskService: task.setAssignedOperator(operator)
+    TaskService->>TaskService: task.setState(ASIGNADO)
+    
+    TaskService->>TaskRepository: save(task)
+    TaskRepository-->>TaskService: updated Task
+    
+    TaskService->>ApplicationEventPublisher: publishEvent(TaskAssignedEvent)
+    ApplicationEventPublisher-->>TaskEventListener: TaskAssignedEvent
+    
+    TaskEventListener->>EmailService: sendTaskAssignedEmail(operator, task)
+    EmailService-->>TaskEventListener: email sent
+    
+    TaskService-->>TaskController: assigned Task
+    
+    TaskController->>AuditService: logStateChange(task, previousState, ASIGNADO)
+    AuditService-->>TaskController: audit log created
+    
+    TaskController-->>Client: 200 OK TaskResponse
+

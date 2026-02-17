@@ -1,0 +1,30 @@
+flowchart TD
+    Start([State update request]) --> GetTask[Get task by ID]
+    GetTask -->|Not found| Err404[Return 404 Not Found]
+    GetTask -->|Found| ValidateTrans{Validate state transition}
+    ValidateTrans -->|Invalid| ErrTrans[Return 400 Bad Request]
+    ValidateTrans -->|Valid| CheckResolved{New state = RESUELTO?}
+    CheckResolved -->|Yes| ValidateEvidence{Evidence provided?}
+    CheckResolved -->|No| UpdateState[Update task state]
+    ValidateEvidence -->|No| ErrEvidence[Return 400 Bad Request]
+    ValidateEvidence -->|Yes| UpdateState
+    UpdateState --> SetTimestamp{State = RESUELTO?}
+    SetTimestamp -->|Yes| SetResolved[Set resolvedAt timestamp]
+    SetTimestamp -->|No| SaveTask[Save task]
+    SetResolved --> SaveTask
+    SaveTask --> LogAudit[Log state change to audit]
+    LogAudit --> CheckEvent{State = RESUELTO or REABIERTO?}
+    CheckEvent -->|RESUELTO| PublishResolved[Publish TaskResolvedEvent]
+    CheckEvent -->|REABIERTO| PublishReopened[Publish TaskReopenedEvent]
+    CheckEvent -->|Other| Success[Return 200 OK]
+    PublishResolved -.->|Async| SendCitizen[Send email to citizen]
+    PublishReopened -.->|Async| SendOperator[Send email to operator]
+    PublishResolved --> Success
+    PublishReopened --> Success
+    SendCitizen --> EmailDone([Email sent])
+    SendOperator --> EmailDone
+    Err404 --> End([End])
+    ErrTrans --> End
+    ErrEvidence --> End
+    Success --> End
+

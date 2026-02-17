@@ -1,0 +1,37 @@
+flowchart TD
+    Start([Start: Assign Task]) --> ValidateAdmin{User has ADMIN role?}
+    ValidateAdmin -->|No| Forbidden[Return 403 Forbidden]
+    Forbidden --> ErrorEnd([End: Error])
+    
+    ValidateAdmin -->|Yes| GetTask[Retrieve Task by ID]
+    GetTask --> CheckTaskState{Task State = PENDIENTE?}
+    
+    CheckTaskState -->|No| ThrowStateError[Throw InvalidStateTransitionException<br/>Must be PENDIENTE]
+    ThrowStateError --> ErrorEnd
+    
+    CheckTaskState -->|Yes| GetOperator[Retrieve Operator User by ID]
+    GetOperator --> CheckOperatorExists{Operator Exists?}
+    CheckOperatorExists -->|No| ThrowNotFound[Throw ResourceNotFoundException]
+    ThrowNotFound --> ErrorEnd
+    
+    CheckOperatorExists -->|Yes| ValidateRole{Operator has<br/>TECNICO role?}
+    ValidateRole -->|No| ThrowRoleError[Throw ValidationException<br/>Invalid Role]
+    ThrowRoleError --> ErrorEnd
+    
+    ValidateRole -->|Yes| AssignOp[Set Assigned Operator]
+    AssignOp --> UpdateState[Update State to ASIGNADO]
+    UpdateState --> SaveTask[Save Task to Database]
+    SaveTask --> CreateAudit[Create Audit Log Entry]
+    
+    CreateAudit --> FormatLocation[Format Location String<br/>lat, lon]
+    FormatLocation --> PublishEvent[Publish TaskAssignedEvent<br/>with Task Details]
+    PublishEvent --> SendEmail[Send Email to Operator<br/>Async via EventListener]
+    SendEmail --> End([End: Task Assigned])
+    
+    style Start fill:#e1f5ff
+    style End fill:#c8e6c9
+    style ErrorEnd fill:#ffcdd2
+    style ValidateAdmin fill:#ffe0b2
+    style CheckTaskState fill:#ffe0b2
+    style ValidateRole fill:#ffe0b2
+

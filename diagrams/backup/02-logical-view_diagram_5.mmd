@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant ReportService
+    participant DeduplicationService
+    participant ConfigService
+    participant AlgorithmConfigRepository
+    participant TaskRepository
+    
+    ReportService->>DeduplicationService: checkForDuplicatesBeforeSave(report)
+    
+    DeduplicationService->>ConfigService: getCurrentConfig()
+    ConfigService->>AlgorithmConfigRepository: findTopByOrderByCreatedAtDesc()
+    AlgorithmConfigRepository-->>ConfigService: AlgorithmConfig
+    ConfigService-->>DeduplicationService: config(duplicateRadius, duplicateTimeWindow)
+    
+    DeduplicationService->>DeduplicationService: calculateTimeThreshold(timeWindow)
+    
+    DeduplicationService->>TaskRepository: findNearbyTasksInTimeWindow(location, radius, timeThreshold)
+    TaskRepository-->>DeduplicationService: List<Task> nearbyTasks
+    
+    alt Nearby Tasks Found
+        DeduplicationService->>DeduplicationService: filterByCategory(nearbyTasks, report.category)
+        DeduplicationService->>DeduplicationService: selectClosestTask(filteredTasks)
+        DeduplicationService-->>ReportService: Optional<Task> parentTask
+    else No Nearby Tasks
+        DeduplicationService-->>ReportService: Optional.empty()
+    end
+

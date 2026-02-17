@@ -1,0 +1,41 @@
+sequenceDiagram
+    participant User
+    participant ReportForm
+    participant reportService
+    participant API
+    participant ReportController
+    participant ReportService
+    participant DeduplicationService
+    participant TaskService
+    participant DB
+    
+    User->>ReportForm: Fill form + upload photo
+    ReportForm->>reportService: submitReport(data, photo)
+    reportService->>reportService: Validate data
+    reportService->>reportService: Create FormData (multipart)
+    reportService->>API: POST /api/reports (multipart)
+    API->>ReportController: HTTP Request
+    ReportController->>ReportController: Validate @Valid
+    ReportController->>ReportService: createReport()
+    ReportService->>ReportService: Save photo to disk
+    ReportService->>ReportService: Create Report entity
+    ReportService->>DB: Save report
+    ReportService->>DeduplicationService: checkDuplicates()
+    DeduplicationService->>DB: Query nearby reports (PostGIS)
+    DeduplicationService-->>ReportService: Duplicate status
+    alt No duplicates
+        ReportService->>TaskService: createTask()
+        TaskService->>TaskService: Calculate priority
+        TaskService->>DB: Save task
+    else Duplicates found
+        ReportService->>TaskService: mergeWithExistingTask()
+        TaskService->>DB: Update task duplicate count
+    end
+    ReportService-->>ReportController: Report entity
+    ReportController->>ReportController: Map to ReportResponse DTO
+    ReportController-->>API: HTTP 201 + JSON
+    API-->>reportService: Response data
+    reportService-->>ReportForm: Success
+    ReportForm->>ReportForm: Show success message
+    ReportForm->>ReportForm: Reset form
+

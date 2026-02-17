@@ -1,0 +1,42 @@
+graph LR
+    subgraph "External"
+        Browser[Web Browser]
+    end
+    
+    subgraph "Docker Host"
+        subgraph "Frontend :3000→:80"
+            N[Nginx<br/>nginx:1.25-alpine]
+            R[React SPA<br/>Vite Build]
+        end
+        
+        subgraph "Backend :8080→:8080"
+            SB[Spring Boot<br/>JRE 17]
+            J[app.jar]
+            U[/uploads]
+        end
+        
+        subgraph "Database :5432→:5432"
+            PG[PostgreSQL 15]
+            PS[PostGIS 3.3]
+            DB[(Data)]
+        end
+        
+        V1[Volume:<br/>postgres_data]
+        V2[Volume:<br/>backend_uploads]
+    end
+    
+    Browser -->|HTTP GET /| N
+    Browser -->|HTTP POST /api/*| N
+    N -->|Proxy /api/*| SB
+    R -.->|Served by| N
+    J -.->|Executed by| SB
+    SB -->|JDBC| PG
+    PS -.->|Extension of| PG
+    DB -.->|Stored in| V1
+    U -.->|Mounted from| V2
+    
+    style Browser fill:#FFE4B5,stroke:#333,stroke-width:2px
+    style N fill:#61DAFB,stroke:#333,stroke-width:2px
+    style SB fill:#6DB33F,stroke:#333,stroke-width:2px
+    style PG fill:#4DB33D,stroke:#333,stroke-width:2px,color:#fff
+

@@ -1,0 +1,31 @@
+graph TB
+    subgraph System["Urban Cleaning Management System"]
+        AlgoWeights((UC-040: Update Algorithm Weights))
+        TokenExp((UC-043: Update Token Expiration Config))
+        DupDetect((UC-045: Update Duplicate Detection Config))
+        ViewWeights((UC-039: Get Algorithm Weights))
+        ViewHistory((UC-041: Get Configuration History))
+        ViewToken((UC-042: Get Token Expiration Config))
+        ViewDup((UC-044: Get Duplicate Detection Config))
+        NotifFail((UC-046: Get Notification Failures))
+        Retry((UC-047: Retry Failed Notification))
+        Metrics((UC-048: Get Performance Metrics))
+        Alerts((UC-049: Get Performance Alerts))
+    end
+    
+    Admin[👤 Administrator]
+    
+    Admin --> AlgoWeights
+    Admin --> TokenExp
+    Admin --> DupDetect
+    Admin --> ViewWeights
+    Admin --> ViewHistory
+    Admin --> ViewToken
+    Admin --> ViewDup
+    Admin --> NotifFail
+    Admin --> Retry
+    Admin --> Metrics
+    Admin --> Alerts
+    
+    style Admin fill:#fce4ec
+

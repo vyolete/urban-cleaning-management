@@ -1,0 +1,135 @@
+graph TB
+    subgraph System["Urban Cleaning Management System"]
+        subgraph Auth["Authentication & Authorization"]
+            UC001((UC-001: Register User))
+            UC002((UC-002: Login))
+            UC003((UC-003: Refresh Access Token))
+            UC005((UC-005: Initiate Password Reset))
+            UC006((UC-006: Validate Reset Token))
+            UC007((UC-007: Complete Password Reset))
+            UC022((UC-022: Logout))
+            UC023((UC-023: Logout from All Devices))
+        end
+        
+        subgraph Reports["Report Management"]
+            UC004((UC-004: Submit Report))
+            UC009((UC-009: Get My Reports))
+            UC028((UC-028: Get All Reports))
+            UC029((UC-029: Get Report by ID))
+        end
+        
+        subgraph Tasks["Task Management"]
+            UC030((UC-030: Get All Tasks))
+            UC031((UC-031: Get Task by ID))
+            UC032((UC-032: Update Task State))
+            UC033((UC-033: Get Task Audit History))
+            UC038((UC-038: Assign Task to Operator))
+        end
+        
+        subgraph Feedback["Feedback Management"]
+            UC017((UC-017: Confirm Task Resolution))
+            UC018((UC-018: Reject Task Resolution))
+            UC019((UC-019: Get Task Feedback))
+        end
+        
+        subgraph Profile["User Profile & Account"]
+            UC010((UC-010: Get User Profile))
+            UC011((UC-011: Update User Profile))
+            UC012((UC-012: Change Password))
+            UC014((UC-014: Request Account Deletion))
+            UC015((UC-015: Cancel Account Deletion))
+            UC016((UC-016: Export User Data))
+        end
+        
+        subgraph Sessions["Session Management"]
+            UC024((UC-024: Get Active Sessions))
+            UC025((UC-025: Get All Sessions))
+            UC026((UC-026: Revoke Specific Session))
+            UC027((UC-027: Revoke Other Sessions))
+        end
+        
+        subgraph Notifications["Notification Management"]
+            UC008((UC-008: Unsubscribe from Notifications))
+            UC020((UC-020: Get Notification Preferences))
+            UC021((UC-021: Update Notification Preferences))
+            UC046((UC-046: Get Notification Failures))
+            UC047((UC-047: Retry Failed Notification))
+        end
+        
+        subgraph Analytics["Analytics & Reporting"]
+            UC034((UC-034: Get Task Distribution))
+            UC035((UC-035: Get Heatmap))
+            UC036((UC-036: Get MTTR))
+            UC037((UC-037: Get Operator Performance))
+        end
+        
+        subgraph Config["System Configuration"]
+            UC039((UC-039: Get Algorithm Weights))
+            UC040((UC-040: Update Algorithm Weights))
+            UC041((UC-041: Get Configuration History))
+            UC042((UC-042: Get Token Expiration Config))
+            UC043((UC-043: Update Token Expiration Config))
+            UC044((UC-044: Get Duplicate Detection Config))
+            UC045((UC-045: Update Duplicate Detection Config))
+            UC048((UC-048: Get Performance Metrics))
+            UC049((UC-049: Get Performance Alerts))
+        end
+    end
+    
+    Anonymous[👤 Anonymous User] --> UC001
+    Anonymous --> UC002
+    Anonymous --> UC003
+    Anonymous --> UC004
+    Anonymous --> UC005
+    Anonymous --> UC006
+    Anonymous --> UC007
+    Anonymous --> UC008
+    
+    Citizen[👤 Citizen<br/>ROLE_CIUDADANO] --> UC009
+    Citizen --> UC010
+    Citizen --> UC011
+    Citizen --> UC012
+    Citizen --> UC014
+    Citizen --> UC015
+    Citizen --> UC016
+    Citizen --> UC017
+    Citizen --> UC018
+    Citizen --> UC019
+    Citizen --> UC020
+    Citizen --> UC021
+    Citizen --> UC022
+    Citizen --> UC023
+    Citizen --> UC024
+    Citizen --> UC025
+    Citizen --> UC026
+    Citizen --> UC027
+    
+    Operator[👤 Operator<br/>ROLE_TECNICO] --> UC028
+    Operator --> UC029
+    Operator --> UC030
+    Operator --> UC031
+    Operator --> UC032
+    Operator --> UC033
+    Operator --> UC034
+    Operator --> UC035
+    Operator --> UC036
+    Operator --> UC037
+    
+    Admin[👤 Administrator<br/>ROLE_ADMIN] --> UC038
+    Admin --> UC039
+    Admin --> UC040
+    Admin --> UC041
+    Admin --> UC042
+    Admin --> UC043
+    Admin --> UC044
+    Admin --> UC045
+    Admin --> UC046
+    Admin --> UC047
+    Admin --> UC048
+    Admin --> UC049
+    
+    style Anonymous fill:#e1f5ff
+    style Citizen fill:#fff4e1
+    style Operator fill:#e8f5e9
+    style Admin fill:#fce4ec
+

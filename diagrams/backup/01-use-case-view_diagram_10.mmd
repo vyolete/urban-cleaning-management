@@ -1,0 +1,39 @@
+flowchart TD
+    Start([Start: Update Weights]) --> ValidateAdmin{User has ADMIN role?}
+    ValidateAdmin -->|No| Forbidden[Return 403 Forbidden]
+    Forbidden --> ErrorEnd([End: Error])
+    
+    ValidateAdmin -->|Yes| ValidateWeights{All Weights > 0?}
+    ValidateWeights -->|No| ThrowValidation[Throw ValidationException<br/>Weights must be positive]
+    ThrowValidation --> ErrorEnd
+    
+    ValidateWeights -->|Yes| GetCurrentConfig[Get Current Active Config]
+    GetCurrentConfig --> MarkInactive[Mark Current Config<br/>as Inactive]
+    
+    MarkInactive --> CreateNewConfig[Create New AlgorithmConfig<br/>with New Weights]
+    CreateNewConfig --> SaveConfig[Save New Config<br/>as Active]
+    SaveConfig --> CreateAudit[Create Audit Log Entry<br/>Configuration Change]
+    
+    CreateAudit --> GetPendingTasks[Query All Tasks<br/>with State = PENDIENTE]
+    GetPendingTasks --> CheckTasks{Tasks Found?}
+    
+    CheckTasks -->|No| End([End: Config Updated])
+    
+    CheckTasks -->|Yes| LoopStart[For Each Pending Task]
+    LoopStart --> GetReport[Get Primary Report]
+    GetReport --> RecalcPriority[Recalculate Priority<br/>PriorityCalculatorService]
+    RecalcPriority --> UpdateTaskPriority[Update Task Priority Score]
+    UpdateTaskPriority --> SaveTaskUpdate[Save Task]
+    SaveTaskUpdate --> MoreTasks{More Tasks?}
+    
+    MoreTasks -->|Yes| LoopStart
+    MoreTasks -->|No| LogComplete[Log Recalculation Complete]
+    LogComplete --> End
+    
+    style Start fill:#e1f5ff
+    style End fill:#c8e6c9
+    style ErrorEnd fill:#ffcdd2
+    style ValidateAdmin fill:#ffe0b2
+    style ValidateWeights fill:#ffe0b2
+    style LoopStart fill:#e1bee7
+

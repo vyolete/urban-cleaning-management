@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant Client
+    participant AnalyticsController
+    participant AnalyticsService
+    participant TaskRepository
+    
+    Client->>AnalyticsController: GET /api/analytics/task-distribution(filters)
+    AnalyticsController->>AnalyticsService: getTaskDistribution(filters)
+    
+    AnalyticsService->>AnalyticsService: buildQueryFromFilters(filters)
+    
+    alt No Filters
+        AnalyticsService->>TaskRepository: findAll()
+    else State Filter Only
+        AnalyticsService->>TaskRepository: findByState(state)
+    else Date Range Filter
+        AnalyticsService->>TaskRepository: findByCreatedAtBetween(startDate, endDate)
+    else Multiple Filters
+        AnalyticsService->>TaskRepository: findByStateAndCreatedAtBetween(state, startDate, endDate)
+    end
+    
+    TaskRepository-->>AnalyticsService: List<Task>
+    
+    AnalyticsService->>AnalyticsService: groupByCategory(tasks)
+    AnalyticsService->>AnalyticsService: calculateStatistics(groupedTasks)
+    
+    AnalyticsService-->>AnalyticsController: TaskDistributionResponse
+    AnalyticsController-->>Client: 200 OK TaskDistributionResponse
+

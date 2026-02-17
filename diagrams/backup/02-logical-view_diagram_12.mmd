@@ -1,0 +1,29 @@
+graph TB
+    RC[ReportController]
+    RS[ReportService]
+    FS[FileStorageService]
+    GS[GeofencingService]
+    DS[DeduplicationService]
+    TS[TaskService]
+    PC[PriorityCalculatorService]
+    RR[ReportRepository]
+    TR[TaskRepository]
+    
+    RC -->|1: createReport| RS
+    RS -->|2: validateCoordinates| GS
+    RS -->|3: storeFile| FS
+    RS -->|4: checkForDuplicates| DS
+    DS -->|5: findNearbyTasks| TR
+    RS -->|6: save| RR
+    RS -->|7: createTask| TS
+    TS -->|8: calculatePriority| PC
+    TS -->|9: save| TR
+    
+    style RC fill:#e1f5ff
+    style RS fill:#fff4e1
+    style TS fill:#fff4e1
+    style DS fill:#fff4e1
+    style PC fill:#fff4e1
+    style RR fill:#e8f5e9
+    style TR fill:#e8f5e9
+

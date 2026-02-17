@@ -1,0 +1,184 @@
+erDiagram
+    User ||--o{ Report : "submits"
+    User ||--o{ Task : "assigned_to"
+    User ||--o{ AuditLog : "performs"
+    User ||--o{ AlgorithmConfig : "creates/updates"
+    User ||--o{ RefreshToken : "owns"
+    User ||--o{ UserSession : "has"
+    User ||--o{ TokenBlacklist : "owns"
+    User ||--o{ PasswordResetToken : "requests"
+    User ||--o{ CitizenFeedback : "submits"
+    User ||--o{ NotificationPreference : "configures"
+    User ||--o{ NotificationFailure : "receives"
+    
+    Report ||--|| Task : "primary_report"
+    Report }o--|| Task : "duplicate_of"
+    
+    Task ||--o{ Report : "has_duplicates"
+    Task ||--o{ AuditLog : "tracked_by"
+    Task ||--|| CitizenFeedback : "receives"
+    
+    RefreshToken ||--|| UserSession : "associated_with"
+    
+    User {
+        UUID id PK
+        VARCHAR username UK
+        VARCHAR password_hash
+        VARCHAR email UK
+        VARCHAR role
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+        TIMESTAMP deleted_at
+        BOOLEAN anonymized
+        VARCHAR original_email_hash
+        INTEGER token_version
+    }
+    
+    Report {
+        UUID id PK
+        UUID user_id FK
+        GEOMETRY location
+        VARCHAR category
+        VARCHAR description
+        VARCHAR photo_url
+        TIMESTAMP created_at
+        UUID parent_task_id FK
+        BOOLEAN is_duplicate
+    }
+    
+    Task {
+        UUID id PK
+        UUID primary_report_id FK
+        GEOMETRY location
+        VARCHAR category
+        VARCHAR state
+        DECIMAL priority_score
+        INTEGER duplicate_count
+        VARCHAR resolution_evidence
+        INTEGER reopen_count
+        BOOLEAN citizen_approved
+        UUID assigned_to FK
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+        TIMESTAMP resolved_at
+    }
+    
+    AlgorithmConfig {
+        UUID id PK
+        VARCHAR config_type
+        DECIMAL weight_category
+        DECIMAL weight_zone
+        DECIMAL weight_time
+        DOUBLE distance_threshold_meters
+        INTEGER time_window_hours
+        INTEGER access_token_expiration_minutes
+        INTEGER refresh_token_expiration_days
+        TIMESTAMP effective_from
+        TIMESTAMP effective_to
+        UUID created_by FK
+        UUID updated_by FK
+    }
+    
+    AuditLog {
+        UUID id PK
+        UUID task_id FK
+        UUID user_id FK
+        VARCHAR previous_state
+        VARCHAR new_state
+        TIMESTAMP changed_at
+        VARCHAR ip_address
+    }
+    
+    RefreshToken {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR token_hash UK
+        VARCHAR device_fingerprint
+        VARCHAR ip_address
+        TEXT user_agent
+        TIMESTAMP expires_at
+        TIMESTAMP created_at
+        TIMESTAMP last_used_at
+        BOOLEAN revoked
+        TIMESTAMP revoked_at
+    }
+    
+    TokenBlacklist {
+        UUID id PK
+        VARCHAR token_hash UK
+        VARCHAR token_type
+        UUID user_id FK
+        TIMESTAMP expires_at
+        TIMESTAMP revoked_at
+        UUID revoked_by FK
+        VARCHAR reason
+    }
+    
+    UserSession {
+        UUID id PK
+        UUID user_id FK
+        UUID refresh_token_id FK
+        VARCHAR device_fingerprint
+        VARCHAR device_type
+        VARCHAR browser
+        VARCHAR os
+        VARCHAR ip_address
+        VARCHAR city
+        VARCHAR country
+        TIMESTAMP created_at
+        TIMESTAMP last_activity
+        BOOLEAN active
+    }
+    
+    PasswordResetToken {
+        UUID id PK
+        VARCHAR token UK
+        UUID user_id FK
+        TIMESTAMP expires_at
+        BOOLEAN used
+        TIMESTAMP used_at
+        TIMESTAMP created_at
+        VARCHAR ip_address
+    }
+    
+    FailedLoginAttempt {
+        UUID id PK
+        VARCHAR username
+        VARCHAR ip_address
+        VARCHAR user_agent
+        TIMESTAMP attempted_at
+        BOOLEAN flagged
+    }
+    
+    CitizenFeedback {
+        UUID id PK
+        UUID task_id FK "UK"
+        UUID citizen_id FK
+        VARCHAR type
+        VARCHAR justification
+        TIMESTAMP submitted_at
+        TIMESTAMP feedback_deadline
+    }
+    
+    NotificationPreference {
+        UUID id PK
+        UUID user_id FK "UK"
+        BOOLEAN task_assigned
+        BOOLEAN task_resolved
+        BOOLEAN task_reopened
+        BOOLEAN report_created
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    NotificationFailure {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR notification_type
+        VARCHAR email_address
+        TEXT failure_reason
+        INTEGER retry_count
+        TIMESTAMP attempted_at
+        TIMESTAMP created_at
+    }
+

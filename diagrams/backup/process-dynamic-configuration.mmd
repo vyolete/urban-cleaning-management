@@ -1,0 +1,22 @@
+flowchart TD
+    Start([Password reset request]) --> Phase{Phase?}
+    Phase -->|Initiate| FindUser[Find user by email]
+    Phase -->|Complete| ValidateToken[Validate reset token]
+    FindUser -->|Not found| ReturnSuccess[Return success anyway]
+    FindUser -->|Found| InvalidateOld[Invalidate old tokens]
+    InvalidateOld --> GenToken[Generate secure token]
+    GenToken --> SaveToken[Save token entity]
+    SaveToken --> SendEmail[Send reset email async]
+    SendEmail --> ReturnSuccess
+    ValidateToken -->|Invalid| ErrToken[Return 400 Bad Request]
+    ValidateToken -->|Valid| GetUser[Get user from token]
+    GetUser --> HashPassword[Hash new password]
+    HashPassword --> IncrementVersion[Increment token version]
+    IncrementVersion --> SaveUser[Save user]
+    SaveUser --> MarkUsed[Mark token as used]
+    MarkUsed --> LogReset[Log password reset]
+    LogReset --> ReturnComplete[Return 200 OK]
+    ReturnSuccess --> End([End])
+    ErrToken --> End
+    ReturnComplete --> End
+
