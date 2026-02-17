@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import ReportForm from '../components/citizen/ReportForm';
 import MapView from '../components/citizen/MapView';
 import useGeolocation from '../hooks/useGeolocation';
@@ -10,9 +11,28 @@ import './CitizenReportPage.css';
  */
 function CitizenReportPage() {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const { location } = useGeolocation();
   const [successMessage, setSuccessMessage] = useState(null);
   const [showMap, setShowMap] = useState(true);
+
+  /**
+   * Navigate to login page
+   */
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
+
+  /**
+   * Navigate to dashboard (for authenticated users)
+   */
+  const handleDashboardClick = () => {
+    if (user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_TECNICO') {
+      navigate('/dashboard');
+    } else if (user?.role === 'ROLE_ADMIN') {
+      navigate('/admin/config');
+    }
+  };
 
   /**
    * Handle successful report submission
@@ -49,8 +69,40 @@ function CitizenReportPage() {
   return (
     <div className="citizen-report-page">
       <div className="page-header">
-        <h1>Sistema de Gestión de Limpieza Urbana</h1>
-        <p className="subtitle">Reporte de Incidencias</p>
+        <div className="header-content">
+          <div className="header-title">
+            <h1>Sistema de Gestión de Limpieza Urbana</h1>
+            <p className="subtitle">Reporte de Incidencias</p>
+          </div>
+          <div className="header-actions">
+            {isAuthenticated() ? (
+              <>
+                <span className="user-greeting">
+                  Hola, {user?.username || 'Usuario'}
+                </span>
+                {(user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_TECNICO') && (
+                  <button
+                    onClick={handleDashboardClick}
+                    className="btn-dashboard"
+                    aria-label="Ir al Dashboard"
+                  >
+                    <span className="btn-icon">📊</span>
+                    Dashboard
+                  </button>
+                )}
+              </>
+            ) : (
+              <button
+                onClick={handleLoginClick}
+                className="btn-login-header"
+                aria-label="Iniciar Sesión"
+              >
+                <span className="btn-icon">🔐</span>
+                Iniciar Sesión
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Success Message */}
