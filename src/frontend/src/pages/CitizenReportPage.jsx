@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ReportForm from '../components/citizen/ReportForm';
@@ -13,9 +13,14 @@ import './CitizenReportPage.css';
 function CitizenReportPage() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
-  const { location } = useGeolocation();
+  const { location, getCurrentLocation } = useGeolocation();
   const [successMessage, setSuccessMessage] = useState(null);
   const [showMap, setShowMap] = useState(true);
+
+  // Get location on component mount
+  useEffect(() => {
+    getCurrentLocation();
+  }, [getCurrentLocation]);
 
   /**
    * Navigate to login page
