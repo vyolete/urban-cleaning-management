@@ -98,13 +98,13 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-http://localhost:8080/api}
+        - VITE_API_URL=${VITE_API_URL:-/api}
     container_name: urbanclean-frontend
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api}
+      VITE_API_URL: ${VITE_API_URL:-/api}
       VITE_MAP_CENTER_LAT: ${VITE_MAP_CENTER_LAT:-40.4168}
       VITE_MAP_CENTER_LON: ${VITE_MAP_CENTER_LON:--3.7038}
       VITE_MAP_ZOOM: ${VITE_MAP_ZOOM:-13}
