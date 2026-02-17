@@ -26,9 +26,9 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
     parseFloat(import.meta.env.VITE_MAP_CENTER_LON) || -3.703790,
   ], []);
 
-  // Initialize map once on mount
+  // Initialize map once when component mounts and location is available
   useEffect(() => {
-    console.log('[MapView] Initializing map...');
+    console.log('[MapView] Mount effect - mapRef.current:', !!mapRef.current, 'location:', location);
     
     if (!mapRef.current) {
       console.log('[MapView] mapRef.current is null, skipping initialization');
@@ -40,8 +40,14 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
       return;
     }
 
+    // Wait for location before initializing
+    if (!location) {
+      console.log('[MapView] Waiting for location before initializing map');
+      return;
+    }
+
     try {
-      const center = location ? [location.latitude, location.longitude] : defaultCenter;
+      const center = [location.latitude, location.longitude];
       console.log('[MapView] Creating map with center:', center);
       
       mapInstanceRef.current = L.map(mapRef.current).setView(center, zoom);
@@ -56,12 +62,12 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
     } catch (error) {
       console.error('[MapView] Error initializing map:', error);
     }
-  }, [defaultCenter, zoom]); // Only re-initialize if these change
+  }, [location, zoom]); // Initialize when location becomes available
 
-  // Update marker when location changes
+  // Update marker when location changes (after map is initialized)
   useEffect(() => {
     if (!mapInstanceRef.current || !location) {
-      console.log('[MapView] Skipping marker update - map or location not ready');
+      console.log('[MapView] Skipping marker update - map:', !!mapInstanceRef.current, 'location:', !!location);
       return;
     }
 
