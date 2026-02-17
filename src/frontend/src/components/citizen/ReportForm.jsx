@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import useGeolocation from '../../hooks/useGeolocation';
 import reportService from '../../services/reportService';
 import './ReportForm.css';
 
@@ -8,8 +7,6 @@ import './ReportForm.css';
  * Report form component for citizens to submit incident reports
  */
 function ReportForm({ location: externalLocation, onSuccess, onError }) {
-  const { getCurrentLocation } = useGeolocation();
-  
   const [formData, setFormData] = useState({
     category: '',
     description: '',
@@ -42,13 +39,6 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
       setLocation(externalLocation);
     }
   }, [externalLocation, useManualLocation]);
-
-  // Get location on component mount only if not provided externally
-  useEffect(() => {
-    if (!externalLocation && !useManualLocation) {
-      getCurrentLocation();
-    }
-  }, [getCurrentLocation, useManualLocation, externalLocation]);
 
   /**
    * Handle form field changes
@@ -138,9 +128,6 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
           return newErrors;
         });
       }
-    } else {
-      // Switching to auto, get location
-      getCurrentLocation();
     }
   };
 
@@ -220,8 +207,7 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
 
           {!useManualLocation ? (
             <div className="auto-location">
-              {locationLoading && <p className="info">Obteniendo ubicación...</p>}
-              {locationError && <p className="error">{locationError}</p>}
+              {!location && <p className="info">Obteniendo ubicación...</p>}
               {location && (
                 <div className="location-info">
                   <p>
@@ -230,9 +216,11 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
                   <p>
                     <strong>Longitud:</strong> {location.longitude.toFixed(6)}
                   </p>
-                  <p className="accuracy">
-                    Precisión: ±{Math.round(location.accuracy)}m
-                  </p>
+                  {location.accuracy && (
+                    <p className="accuracy">
+                      Precisión: ±{Math.round(location.accuracy)}m
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -369,7 +357,7 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
           <button
             type="submit"
             className="btn-primary"
-            disabled={submitting || locationLoading || (!location && !useManualLocation)}
+            disabled={submitting || (!location && !useManualLocation)}
           >
             {submitting ? 'Enviando...' : 'Enviar Reporte'}
           </button>

@@ -19,8 +19,15 @@ function CitizenReportPage() {
 
   // Get location on component mount
   useEffect(() => {
+    console.log('[CitizenReportPage] Calling getCurrentLocation...');
     getCurrentLocation();
   }, [getCurrentLocation]);
+
+  // Debug location state
+  useEffect(() => {
+    console.log('[CitizenReportPage] location state:', location);
+    console.log('[CitizenReportPage] showMap state:', showMap);
+  }, [location, showMap]);
 
   /**
    * Navigate to login page

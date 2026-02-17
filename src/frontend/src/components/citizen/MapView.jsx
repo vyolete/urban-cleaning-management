@@ -88,8 +88,10 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
           .bindPopup('Área de servicio');
       }
     }
+  }, [location, showGeofence, zoom, defaultCenter]);
 
-    // Cleanup function
+  // Cleanup on unmount only
+  useEffect(() => {
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
@@ -98,7 +100,7 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
         geofenceRef.current = null;
       }
     };
-  }, [location, showGeofence, zoom, defaultCenter]);
+  }, []);
 
   return (
     <div className="map-view">
