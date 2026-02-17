@@ -4,12 +4,28 @@ import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 
 /**
+ * Get default route based on user role
+ */
+const getDefaultRoute = (role) => {
+  switch (role) {
+    case 'ROLE_ADMIN':
+      return '/dashboard';
+    case 'ROLE_TECNICO':
+      return '/dashboard';
+    case 'ROLE_CIUDADANO':
+      return '/report';
+    default:
+      return '/report';
+  }
+};
+
+/**
  * Login page component
  */
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, error: authError, clearError } = useAuth();
+  const { login, isAuthenticated, error: authError, clearError, user } = useAuth();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -21,11 +37,11 @@ function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated()) {
-      const from = location.state?.from?.pathname || '/dashboard';
+    if (isAuthenticated() && user) {
+      const from = location.state?.from?.pathname || getDefaultRoute(user.role);
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, location]);
+  }, [isAuthenticated, navigate, location, user]);
 
   // Clear auth error when component unmounts
   useEffect(() => {
@@ -88,10 +104,11 @@ function LoginPage() {
     setErrors({});
 
     try {
-      await login(formData.username, formData.password);
+      const userData = await login(formData.username, formData.password);
       
-      // Redirect to intended page or dashboard
-      const from = location.state?.from?.pathname || '/dashboard';
+      // Redirect based on user role
+      const defaultRoute = getDefaultRoute(userData.role);
+      const from = location.state?.from?.pathname || defaultRoute;
       navigate(from, { replace: true });
     } catch (error) {
       setErrors({
