@@ -5,6 +5,9 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 
+# Build argument for API URL (injected during build)
+ARG VITE_API_URL
+
 # Copy package files and install dependencies (cached layer)
 COPY package*.json ./
 RUN npm install && npm cache clean --force

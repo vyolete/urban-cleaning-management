@@ -20,8 +20,11 @@ WORKDIR /app
 # Create non-root user for security (Debian/Ubuntu commands)
 RUN groupadd -r spring && useradd -r -g spring spring
 
-# Create uploads directory with proper permissions
-RUN mkdir -p /uploads && chown -R spring:spring /uploads
+# Create uploads directory and set ownership to 'spring' user
+# IMPORTANTE: Esto asegura que el usuario 'spring' pueda escribir en el volumen montado
+RUN mkdir -p /uploads && \
+    chown -R spring:spring /uploads && \
+    chmod 755 /uploads
 
 # Copy jar from build stage
 COPY --from=build /app/target/*.jar app.jar
