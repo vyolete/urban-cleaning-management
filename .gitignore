@@ -50,3 +50,7 @@ tmp/
 # Archivos específicos del proyecto
 uploads/
 .kiro/
+
+# Documentos del TFM (no subir a Git)
+tfm-documentos/
+*-with-images.md
