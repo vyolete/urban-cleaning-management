@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { Icon } from '../common';
 import taskService from '../../services/taskService';
-import './TaskDetail.css';
 
 /**
  * Task detail component showing full task information and state transitions
@@ -134,7 +134,7 @@ function TaskDetail({ task, onTaskUpdate }) {
       {/* Success Message */}
       {success && (
         <div className="success-message">
-          <span className="success-icon">✓</span>
+          <span className="success-icon"><Icon name="check" size="small" /></span>
           {success}
         </div>
       )}
@@ -142,7 +142,7 @@ function TaskDetail({ task, onTaskUpdate }) {
       {/* Error Message */}
       {error && (
         <div className="error-message">
-          <span className="error-icon">✕</span>
+          <span className="error-icon"><Icon name="close" size="small" /></span>
           {error}
         </div>
       )}
@@ -259,7 +259,7 @@ function TaskDetail({ task, onTaskUpdate }) {
       {availableTransitions.length === 0 && task.state === 'RESUELTO' && (
         <div className="detail-section">
           <div className="resolved-message">
-            <span className="resolved-icon">✓</span>
+            <span className="resolved-icon"><Icon name="check" size="medium" /></span>
             <p>Esta tarea ha sido resuelta</p>
           </div>
         </div>

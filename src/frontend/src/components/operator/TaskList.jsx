@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import taskService from '../../services/taskService';
-import './TaskList.css';
 
 /**
  * Task list component for operators to view and filter tasks
@@ -136,6 +135,7 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
         <div className="filter-group">
           <label htmlFor="state-filter">Estado:</label>
           <select
+            className="form-control"
             id="state-filter"
             name="state"
             value={filters.state}
@@ -152,6 +152,7 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
         <div className="filter-group">
           <label htmlFor="zone-filter">Zona:</label>
           <select
+            className="form-control"
             id="zone-filter"
             name="zone"
             value={filters.zone}

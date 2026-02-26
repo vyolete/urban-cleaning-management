@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { Icon } from '../components/common';
 import ConfigPanel from '../components/admin/ConfigPanel';
 import UserInfo from '../components/common/UserInfo';
-import './AdminConfigPage.css';
 
 /**
  * Admin configuration page - main interface for administrators to manage system configuration
@@ -53,7 +53,7 @@ function AdminConfigPage() {
         <h3>Información Importante</h3>
         <div className="info-grid">
           <div className="info-card">
-            <div className="info-icon">⚖️</div>
+            <div className="info-icon"><Icon name="scale" size="small" ariaLabel="Algorithm weights" /></div>
             <h4>Pesos del Algoritmo</h4>
             <p>
               Los pesos determinan la importancia relativa de cada factor en el cálculo de prioridad.
@@ -62,7 +62,7 @@ function AdminConfigPage() {
           </div>
 
           <div className="info-card">
-            <div className="info-icon">🔄</div>
+            <div className="info-icon"><Icon name="refresh" size="small" ariaLabel="Refresh configuration" /></div>
             <h4>Recalculación Automática</h4>
             <p>
               Al actualizar los pesos, todas las tareas pendientes serán recalculadas automáticamente
@@ -71,7 +71,7 @@ function AdminConfigPage() {
           </div>
 
           <div className="info-card">
-            <div className="info-icon">📍</div>
+            <div className="info-icon"><Icon name="location" size="large" /></div>
             <h4>Deduplicación Espacial</h4>
             <p>
               La distancia define el radio en metros para considerar reportes como duplicados.
@@ -80,7 +80,7 @@ function AdminConfigPage() {
           </div>
 
           <div className="info-card">
-            <div className="info-icon">⏱️</div>
+            <div className="info-icon"><Icon name="timer" size="small" ariaLabel="Time window" /></div>
             <h4>Deduplicación Temporal</h4>
             <p>
               La ventana de tiempo define cuántas horas deben transcurrir para considerar reportes

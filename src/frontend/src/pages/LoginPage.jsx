@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Icon } from '../components/common';
 import urbixRobot from '../assets/urbix-robot.png';
-import './LoginPage.css';
 
 /**
  * Get default route based on user role
@@ -154,7 +154,7 @@ function LoginPage() {
           {/* Error Message */}
           {(errors.submit || authError) && (
             <div className="error-banner">
-              <span className="error-icon">✕</span>
+              <span className="error-icon"><Icon name="close" size="small" /></span>
               <p>{errors.submit || authError}</p>
             </div>
           )}
@@ -163,7 +163,7 @@ function LoginPage() {
             {/* Username Field */}
             <div className="form-group">
               <label htmlFor="username">
-                <span className="label-icon">👤</span>
+                <span className="label-icon"><Icon name="user" size="small" /></span>
                 Nombre de Usuario
               </label>
               <input
@@ -185,7 +185,7 @@ function LoginPage() {
             {/* Password Field */}
             <div className="form-group">
               <label htmlFor="password">
-                <span className="label-icon">🔒</span>
+                <span className="label-icon"><Icon name="lock" size="small" /></span>
                 Contraseña
               </label>
               <div className="password-input-wrapper">
@@ -206,7 +206,7 @@ function LoginPage() {
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   disabled={loading}
                 >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                  <Icon name={showPassword ? 'eye-off' : 'eye'} size="small" />
                 </button>
               </div>
               {errors.password && (
@@ -240,17 +240,17 @@ function LoginPage() {
           <h3>Acceso por Rol</h3>
           <div className="role-info">
             <div className="role-card">
-              <span className="role-icon">👥</span>
+              <span className="role-icon"><Icon name="user" size="large" /></span>
               <h4>Ciudadano</h4>
               <p>Reportar incidencias de limpieza urbana</p>
             </div>
             <div className="role-card">
-              <span className="role-icon">🔧</span>
+              <span className="role-icon"><Icon name="wrench" size="large" /></span>
               <h4>Técnico</h4>
               <p>Gestionar y resolver tareas asignadas</p>
             </div>
             <div className="role-card">
-              <span className="role-icon">⚙️</span>
+              <span className="role-icon"><Icon name="settings" size="large" /></span>
               <h4>Administrador</h4>
               <p>Configurar sistema y algoritmo de priorización</p>
             </div>

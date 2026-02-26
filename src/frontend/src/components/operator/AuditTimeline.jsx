@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { Icon } from '../common';
 import taskService from '../../services/taskService';
-import './AuditTimeline.css';
 
 /**
  * Audit timeline component displaying state change history
@@ -210,7 +210,7 @@ function AuditTimeline({ taskId }) {
 
                       {log.user && (
                         <div className="timeline-user">
-                          <span className="user-icon">👤</span>
+                          <span className="user-icon"><Icon name="user" size="small" /></span>
                           <span className="user-name">
                             {log.user.username || log.user.email || 'Usuario'}
                           </span>

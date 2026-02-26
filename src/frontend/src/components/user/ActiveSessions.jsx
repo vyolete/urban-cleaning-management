@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Icon } from '../common';
 import api from '../../services/api';
 import authService from '../../services/authService';
-import './ActiveSessions.css';
 
 /**
  * ActiveSessions component
@@ -100,13 +100,13 @@ const ActiveSessions = () => {
   const getDeviceIcon = (deviceType) => {
     switch (deviceType) {
       case 'MOBILE':
-        return '📱';
+        return <Icon name="mobile" size="small" ariaLabel="Mobile device" />;
       case 'TABLET':
-        return '📱';
+        return <Icon name="mobile" size="small" ariaLabel="Mobile device" />;
       case 'DESKTOP':
-        return '💻';
+        return <Icon name="laptop" size="small" ariaLabel="Laptop" />;
       default:
-        return '🖥️';
+        return <Icon name="desktop" size="small" ariaLabel="Desktop computer" />;
     }
   };
 
@@ -171,13 +171,13 @@ const ActiveSessions = () => {
                 
                 <div className="session-details">
                   <div className="session-location">
-                    📍 {session.city && session.country 
+                    <Icon name="location" size="small" /> {session.city && session.country 
                       ? `${session.city}, ${session.country}` 
                       : session.ipAddress}
                   </div>
                   
                   <div className="session-time">
-                    🕐 Last active: {formatDate(session.lastActivity)}
+                    <Icon name="clock" size="small" ariaLabel="Last active time" /> Last active: {formatDate(session.lastActivity)}
                   </div>
                   
                   <div className="session-created">

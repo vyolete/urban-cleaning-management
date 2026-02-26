@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Icon } from '../components/common';
 import ReportForm from '../components/citizen/ReportForm';
 import MapView from '../components/citizen/MapView';
 import useGeolocation from '../hooks/useGeolocation';
 import urbixRobot from '../assets/urbix-robot.png';
-import './CitizenReportPage.css';
 
 /**
  * Citizen report page - main page for citizens to submit incident reports
@@ -109,7 +109,7 @@ function CitizenReportPage() {
             {isAuthenticated() ? (
               <>
                 <span className="user-greeting">
-                  👋 {user?.username || 'Usuario'}
+                  <Icon name="wave" size="medium" ariaLabel="Welcome" /> {user?.username || 'Usuario'}
                 </span>
                 {(user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_TECNICO') && (
                   <button
@@ -117,7 +117,7 @@ function CitizenReportPage() {
                     className="btn-dashboard"
                     aria-label="Ir al Dashboard"
                   >
-                    <span className="btn-icon">📊</span>
+                    <span className="btn-icon"><Icon name="chart" size="small" /></span>
                     Dashboard
                   </button>
                 )}
@@ -126,7 +126,7 @@ function CitizenReportPage() {
                   className="btn-logout"
                   aria-label="Cerrar Sesión"
                 >
-                  <span className="btn-icon">🚪</span>
+                  <span className="btn-icon"><Icon name="door" size="small" ariaLabel="Logout" /></span>
                   Cerrar Sesión
                 </button>
               </>
@@ -136,7 +136,7 @@ function CitizenReportPage() {
                 className="btn-login-header"
                 aria-label="Iniciar Sesión"
               >
-                <span className="btn-icon">🔐</span>
+                <span className="btn-icon"><Icon name="lock" size="small" ariaLabel="Secure" /></span>
                 Iniciar Sesión
               </button>
             )}
@@ -149,7 +149,7 @@ function CitizenReportPage() {
         <div className="success-banner">
           <div>
             <div className="success-content">
-              <span className="success-icon">✓</span>
+              <span className="success-icon"><Icon name="check" size="small" /></span>
               <p>{successMessage}</p>
             </div>
             <button

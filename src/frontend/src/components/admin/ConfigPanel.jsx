@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { Icon } from '../common';
 import configService from '../../services/configService';
-import './ConfigPanel.css';
 
 /**
  * Configuration panel component for managing algorithm weights
@@ -208,7 +208,7 @@ function ConfigPanel({ onConfigUpdate }) {
       {/* Error Message */}
       {error && (
         <div className="error-banner">
-          <span className="error-icon">✕</span>
+          <span className="error-icon"><Icon name="close" size="small" /></span>
           <p>{error}</p>
           <button onClick={loadCurrentConfig} className="btn-retry">
             Reintentar
@@ -219,7 +219,7 @@ function ConfigPanel({ onConfigUpdate }) {
       {/* Success Message */}
       {success && (
         <div className="success-banner">
-          <span className="success-icon">✓</span>
+          <span className="success-icon"><Icon name="check" size="small" /></span>
           <p>{success}</p>
         </div>
       )}
@@ -322,7 +322,11 @@ function ConfigPanel({ onConfigUpdate }) {
               <span className="sum-label">Suma de pesos:</span>
               <span className="sum-value">{weightSum.toFixed(3)}</span>
               <span className="sum-status">
-                {isSumValid ? '✓ Válido' : '✕ Debe sumar 1.0'}
+                {isSumValid ? (
+                  <><Icon name="check" size="small" /> Válido</>
+                ) : (
+                  <><Icon name="close" size="small" /> Debe sumar 1.0</>
+                )}
               </span>
             </div>
 

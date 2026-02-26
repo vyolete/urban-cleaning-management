@@ -1,7 +1,7 @@
 import { useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+// Note: Leaflet CSS is imported globally in main.jsx
 
 // Fix for default marker icons in Leaflet with bundlers
 delete L.Icon.Default.prototype._getIconUrl;

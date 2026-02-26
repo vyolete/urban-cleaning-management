@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Icon } from '../components/common';
 import TaskList from '../components/operator/TaskList';
 import TaskMap from '../components/operator/TaskMap';
 import TaskDetail from '../components/operator/TaskDetail';
@@ -7,7 +8,6 @@ import AuditTimeline from '../components/operator/AuditTimeline';
 import UserInfo from '../components/common/UserInfo';
 import taskService from '../services/taskService';
 import urbixRobot from '../assets/urbix-robot.png';
-import './OperatorDashboard.css';
 
 /**
  * Operator dashboard page - main interface for operators to manage tasks
@@ -110,7 +110,7 @@ function OperatorDashboard() {
             onClick={() => handleViewModeChange('map')}
             title="Solo mapa"
           >
-            🗺 Mapa
+            <Icon name="map" size="medium" ariaLabel="Map view" /> Mapa
           </button>
         </div>
       </div>
@@ -118,7 +118,7 @@ function OperatorDashboard() {
       {/* Error Message */}
       {error && (
         <div className="error-banner">
-          <span className="error-icon">✕</span>
+          <span className="error-icon"><Icon name="close" size="small" /></span>
           <p>{error}</p>
           <button onClick={loadTasks} className="btn-retry">
             Reintentar

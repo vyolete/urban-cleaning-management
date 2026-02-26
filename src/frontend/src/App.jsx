@@ -6,7 +6,7 @@ import LoginPage from './pages/LoginPage';
 import CitizenReportPage from './pages/CitizenReportPage';
 import OperatorDashboard from './pages/OperatorDashboard';
 import AdminConfigPage from './pages/AdminConfigPage';
-import './App.css';
+import Icon from './components/common/Icon';
 
 /**
  * Main application component
@@ -63,7 +63,9 @@ function NotFoundPage() {
   return (
     <div className="not-found-container">
       <div className="not-found-card">
-        <span className="not-found-icon">🔍</span>
+        <span className="not-found-icon">
+          <Icon name="magnifying-glass" size="small" ariaLabel="Search" />
+        </span>
         <h1>404</h1>
         <h2>Página No Encontrada</h2>
         <p>La página que buscas no existe.</p>

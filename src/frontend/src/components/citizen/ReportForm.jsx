@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { Icon } from '../common';
 import reportService from '../../services/reportService';
-import './ReportForm.css';
 
 /**
  * Report form component for citizens to submit incident reports
@@ -227,7 +227,7 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
           ) : (
             <div className="manual-location">
               <div className="help-box">
-                <p><strong>📍 Coordenadas de prueba para Madrid:</strong></p>
+                <p><strong><Icon name="location" size="small" /> Coordenadas de prueba para Madrid:</strong></p>
                 <p>Latitud: <code>40.4168</code> | Longitud: <code>-3.7038</code></p>
                 <p className="small-text">Área válida: Lat 40.3-40.6, Lon -3.9 a -3.5</p>
               </div>
@@ -276,6 +276,7 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
           <div className="form-group">
             <label htmlFor="category">Categoría *</label>
             <select
+              className='form-control'
               id="category"
               name="category"
               value={formData.category}
@@ -356,7 +357,7 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
         <div className="form-actions">
           <button
             type="submit"
-            className="btn-primary"
+            className="toggle-btn"
             disabled={submitting || (!location && !useManualLocation)}
           >
             {submitting ? 'Enviando...' : 'Enviar Reporte'}

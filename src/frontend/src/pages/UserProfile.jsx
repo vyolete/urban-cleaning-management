@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ActiveSessions from '../components/user/ActiveSessions';
-import './UserProfile.css';
 
 /**
  * UserProfile page

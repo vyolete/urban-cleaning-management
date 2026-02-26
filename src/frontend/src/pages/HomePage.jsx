@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Icon } from '../components/common';
 import urbixRobot from '../assets/urbix-robot.png';
-import './HomePage.css';
 
 /**
  * Home page - Landing page with main actions
@@ -62,7 +62,7 @@ function HomePage() {
             {isAuthenticated() ? (
               <>
                 <div className="welcome-message">
-                  <span className="welcome-icon">👋</span>
+                  <span className="welcome-icon"><Icon name="wave" size="medium" ariaLabel="Welcome" /></span>
                   <p>Bienvenido, {user?.username || 'Usuario'}</p>
                 </div>
                 
@@ -71,7 +71,7 @@ function HomePage() {
                     onClick={handleDashboardClick}
                     className="btn-home btn-primary"
                   >
-                    <span className="btn-icon">📊</span>
+                    <span className="btn-icon"><Icon name="chart" size="small" /></span>
                     Ir al Dashboard
                   </button>
                 )}
@@ -80,7 +80,7 @@ function HomePage() {
                   onClick={handleReportClick}
                   className="btn-home btn-outline"
                 >
-                  <span className="btn-icon">⚠️</span>
+                  <span className="btn-icon"><Icon name="warning" size="small" ariaLabel="Report incident" /></span>
                   Reportar Incidencia
                 </button>
               </>
@@ -90,7 +90,7 @@ function HomePage() {
                   onClick={handleLoginClick}
                   className="btn-home btn-primary"
                 >
-                  <span className="btn-icon">🔐</span>
+                  <span className="btn-icon"><Icon name="lock" size="small" ariaLabel="Secure login" /></span>
                   Iniciar Sesión
                 </button>
 
@@ -98,7 +98,7 @@ function HomePage() {
                   onClick={handleReportClick}
                   className="btn-home btn-outline"
                 >
-                  <span className="btn-icon">⚠️</span>
+                  <span className="btn-icon"><Icon name="warning" size="small" ariaLabel="Report incident" /></span>
                   Reportar Incidencia
                 </button>
               </>
