@@ -111,6 +111,32 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
      */
     long countByState(TaskState state);
     
+    /**
+     * Find tasks by country
+     * @param countryId the country ID
+     * @return list of tasks from the country
+     */
+    @Query("SELECT t FROM Task t WHERE t.country.id = :countryId ORDER BY t.priorityScore DESC")
+    List<Task> findByCountryId(@Param("countryId") UUID countryId);
+    
+    /**
+     * Find tasks by country and state
+     * @param countryId the country ID
+     * @param state the task state
+     * @return list of tasks
+     */
+    @Query("SELECT t FROM Task t WHERE t.country.id = :countryId AND t.state = :state ORDER BY t.priorityScore DESC")
+    List<Task> findByCountryIdAndState(@Param("countryId") UUID countryId, @Param("state") TaskState state);
+    
+    /**
+     * Find tasks by country and category
+     * @param countryId the country ID
+     * @param category the category
+     * @return list of tasks
+     */
+    @Query("SELECT t FROM Task t WHERE t.country.id = :countryId AND t.category = :category ORDER BY t.priorityScore DESC")
+    List<Task> findByCountryIdAndCategory(@Param("countryId") UUID countryId, @Param("category") String category);
+    
     // ========== ANALYTICS METHODS ==========
     
     /**

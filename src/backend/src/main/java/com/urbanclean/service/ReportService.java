@@ -2,6 +2,7 @@ package com.urbanclean.service;
 
 import com.urbanclean.dto.request.ReportSubmissionRequest;
 import com.urbanclean.dto.response.ReportResponse;
+import com.urbanclean.entity.Country;
 import com.urbanclean.entity.Report;
 import com.urbanclean.entity.Task;
 import com.urbanclean.entity.User;
@@ -49,14 +50,20 @@ public class ReportService {
         // Validate required fields
         validateReportRequest(request);
 
-        // Validate coordinates using geofencing service
-        geofencingService.validateCoordinates(request.getLatitude(), request.getLongitude());
+        // Validate coordinates using geofencing service with country context
+        geofencingService.validateCoordinates(request.getLatitude(), request.getLongitude(), request.getCountryId());
 
         // Store photo
         String photoUrl = fileStorageService.storeFile(photo);
 
         // Get current authenticated user
         User submitter = getCurrentUser();
+
+        // Get country (use default if not provided)
+        Country country = null;
+        if (request.getCountryId() != null) {
+            country = geofencingService.getCountryById(request.getCountryId());
+        }
 
         // Create point geometry
         Point location = geofencingService.createPoint(request.getLatitude(), request.getLongitude());
@@ -69,6 +76,7 @@ public class ReportService {
                 .description(request.getDescription())
                 .photoUrl(photoUrl)
                 .isDuplicate(false)
+                .country(country)
                 .createdAt(LocalDateTime.now())  // Set explicitly for deduplication logic
                 .build();
 
@@ -121,6 +129,41 @@ public class ReportService {
     @Transactional(readOnly = true)
     public List<ReportResponse> getAllReports() {
         return reportRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all reports with filtering by country, administrative area, and municipality
+     */
+    @Transactional(readOnly = true)
+    public List<ReportResponse> getAllReports(UUID countryId, String administrativeArea, String municipality) {
+        List<Report> reports = reportRepository.findAll();
+
+        // Apply country filter
+        if (countryId != null) {
+            reports = reports.stream()
+                    .filter(r -> r.getCountry() != null && r.getCountry().getId().equals(countryId))
+                    .collect(Collectors.toList());
+        }
+
+        // Apply administrative area filter
+        if (administrativeArea != null && !administrativeArea.trim().isEmpty()) {
+            reports = reports.stream()
+                    .filter(r -> r.getCountry() != null && 
+                                administrativeArea.equals(r.getCountry().getAdministrativeArea()))
+                    .collect(Collectors.toList());
+        }
+
+        // Apply municipality filter
+        if (municipality != null && !municipality.trim().isEmpty()) {
+            reports = reports.stream()
+                    .filter(r -> r.getCountry() != null && 
+                                municipality.equals(r.getCountry().getMunicipality()))
+                    .collect(Collectors.toList());
+        }
+
+        return reports.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -186,6 +229,8 @@ public class ReportService {
                 .submitterUsername(report.getSubmitter() != null ? report.getSubmitter().getUsername() : "Anónimo")
                 .createdAt(report.getCreatedAt())
                 .isDuplicate(report.getIsDuplicate())
+                .countryId(report.getCountry() != null ? report.getCountry().getId() : null)
+                .countryName(report.getCountry() != null ? report.getCountry().getName() : null)
                 .build();
     }
 }

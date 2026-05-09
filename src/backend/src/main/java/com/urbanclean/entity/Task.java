@@ -84,4 +84,8 @@ public class Task {
     
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id")
+    private Country country;
 }

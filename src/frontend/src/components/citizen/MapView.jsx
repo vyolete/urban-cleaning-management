@@ -1,7 +1,8 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { countryService } from '../../services';
 
 // Fix for default marker icons in Leaflet with bundlers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -14,17 +15,40 @@ L.Icon.Default.mergeOptions({
 /**
  * Map view component for displaying location
  */
-function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }) {
+function MapView({ location, countryId = null, showGeofence = false, height = '400px', zoom = 15 }) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
   const geofenceRef = useRef(null);
+  const [countryData, setCountryData] = useState(null);
 
   // Get map center from env or use default - memoized to prevent re-renders
   const defaultCenter = useMemo(() => [
     parseFloat(import.meta.env.VITE_MAP_CENTER_LAT) || 40.416775,
     parseFloat(import.meta.env.VITE_MAP_CENTER_LON) || -3.703790,
   ], []);
+
+  // Load country data when countryId changes
+  useEffect(() => {
+    if (!countryId) {
+      setCountryData(null);
+      return;
+    }
+
+    const loadCountryData = async () => {
+      try {
+        console.log('[MapView] Loading country data for:', countryId);
+        const country = await countryService.getCountryById(countryId);
+        setCountryData(country);
+        console.log('[MapView] Country data loaded:', country);
+      } catch (error) {
+        console.error('[MapView] Error loading country data:', error);
+        setCountryData(null);
+      }
+    };
+
+    loadCountryData();
+  }, [countryId]);
 
   // Initialize map once when component mounts and location is available
   useEffect(() => {
@@ -40,14 +64,17 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
       return;
     }
 
-    // Wait for location before initializing
-    if (!location) {
-      console.log('[MapView] Waiting for location before initializing map');
-      return;
+    // Determine initial center: location > country center > default
+    let center;
+    if (location) {
+      center = [location.latitude, location.longitude];
+    } else if (countryData?.centerLatitude && countryData?.centerLongitude) {
+      center = [countryData.centerLatitude, countryData.centerLongitude];
+    } else {
+      center = defaultCenter;
     }
 
     try {
-      const center = [location.latitude, location.longitude];
       console.log('[MapView] Creating map with center:', center);
       
       mapInstanceRef.current = L.map(mapRef.current).setView(center, zoom);
@@ -62,7 +89,7 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
     } catch (error) {
       console.error('[MapView] Error initializing map:', error);
     }
-  }, [location, zoom]); // Initialize when location becomes available
+  }, [location, countryData, defaultCenter, zoom]); // Initialize when location or country becomes available
 
   // Update marker when location changes (after map is initialized)
   useEffect(() => {
@@ -97,30 +124,64 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
     }
   }, [location, zoom]);
 
-  // Update geofence when showGeofence changes
+  // Update geofence when showGeofence or countryData changes
   useEffect(() => {
-    if (!mapInstanceRef.current || !showGeofence) {
+    if (!mapInstanceRef.current) {
+      return;
+    }
+
+    // Remove existing geofence
+    if (geofenceRef.current) {
+      mapInstanceRef.current.removeLayer(geofenceRef.current);
+      geofenceRef.current = null;
+    }
+
+    if (!showGeofence) {
       return;
     }
 
     console.log('[MapView] Updating geofence...');
 
-    const minLat = parseFloat(import.meta.env.VITE_GEOFENCE_MIN_LAT);
-    const maxLat = parseFloat(import.meta.env.VITE_GEOFENCE_MAX_LAT);
-    const minLon = parseFloat(import.meta.env.VITE_GEOFENCE_MIN_LON);
-    const maxLon = parseFloat(import.meta.env.VITE_GEOFENCE_MAX_LON);
+    // Try to use country boundaries first, fall back to env variables
+    let minLat, maxLat, minLon, maxLon, boundaryName;
 
-    if (isNaN(minLat) || isNaN(maxLat) || isNaN(minLon) || isNaN(maxLon)) {
-      console.log('[MapView] Geofence coordinates not configured');
-      return;
+    if (countryData?.geofencingBoundary) {
+      try {
+        // Parse GeoJSON boundary
+        const boundary = JSON.parse(countryData.geofencingBoundary);
+        
+        if (boundary.type === 'Polygon' && boundary.coordinates && boundary.coordinates[0]) {
+          const coords = boundary.coordinates[0];
+          
+          // Calculate bounding box from polygon coordinates
+          minLat = Math.min(...coords.map(c => c[1]));
+          maxLat = Math.max(...coords.map(c => c[1]));
+          minLon = Math.min(...coords.map(c => c[0]));
+          maxLon = Math.max(...coords.map(c => c[0]));
+          boundaryName = countryData.name;
+
+          console.log('[MapView] Using country boundary:', { minLat, maxLat, minLon, maxLon });
+        }
+      } catch (error) {
+        console.error('[MapView] Error parsing country boundary:', error);
+      }
+    }
+
+    // Fall back to environment variables if country boundary not available
+    if (!minLat || !maxLat || !minLon || !maxLon) {
+      minLat = parseFloat(import.meta.env.VITE_GEOFENCE_MIN_LAT);
+      maxLat = parseFloat(import.meta.env.VITE_GEOFENCE_MAX_LAT);
+      minLon = parseFloat(import.meta.env.VITE_GEOFENCE_MIN_LON);
+      maxLon = parseFloat(import.meta.env.VITE_GEOFENCE_MAX_LON);
+      boundaryName = 'Área de servicio';
+
+      if (isNaN(minLat) || isNaN(maxLat) || isNaN(minLon) || isNaN(maxLon)) {
+        console.log('[MapView] Geofence coordinates not configured');
+        return;
+      }
     }
 
     try {
-      // Remove existing geofence
-      if (geofenceRef.current) {
-        mapInstanceRef.current.removeLayer(geofenceRef.current);
-      }
-
       // Add geofence rectangle
       const bounds = [
         [minLat, minLon],
@@ -133,13 +194,13 @@ function MapView({ location, showGeofence = false, height = '400px', zoom = 15 }
         fillOpacity: 0.1,
       })
         .addTo(mapInstanceRef.current)
-        .bindPopup('Área de servicio');
+        .bindPopup(boundaryName);
 
       console.log('[MapView] Geofence updated successfully');
     } catch (error) {
       console.error('[MapView] Error updating geofence:', error);
     }
-  }, [showGeofence]);
+  }, [showGeofence, countryData]);
 
   // Cleanup on unmount only
   useEffect(() => {
@@ -188,6 +249,7 @@ MapView.propTypes = {
     longitude: PropTypes.number.isRequired,
     accuracy: PropTypes.number,
   }),
+  countryId: PropTypes.string,
   showGeofence: PropTypes.bool,
   height: PropTypes.string,
   zoom: PropTypes.number,

@@ -51,10 +51,13 @@ public class TaskService {
                 .state(TaskState.PENDIENTE)
                 .priorityScore(priorityScore)
                 .duplicateCount(0)
+                .country(report.getCountry())  // Copy country from report
                 .build();
 
         Task savedTask = taskRepository.save(task);
-        log.info("Task created: {} with priority score: {}", savedTask.getId(), priorityScore);
+        log.info("Task created: {} with priority score: {} for country: {}", 
+                savedTask.getId(), priorityScore, 
+                report.getCountry() != null ? report.getCountry().getName() : "N/A");
 
         return savedTask;
     }

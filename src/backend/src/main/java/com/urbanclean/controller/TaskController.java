@@ -75,8 +75,12 @@ public class TaskController {
     @GetMapping
     @PreAuthorize("hasAnyRole('TECNICO', 'ADMIN')")
     public ResponseEntity<List<TaskResponse>> getTasks(
+            @Parameter(description = "Filter by country ID", example = "550e8400-e29b-41d4-a716-446655440000")
+            @RequestParam(required = false) UUID countryId,
             @Parameter(description = "Filter by task state", example = "PENDIENTE")
             @RequestParam(required = false) TaskState state,
+            @Parameter(description = "Filter by category", example = "BASURA_ACUMULADA")
+            @RequestParam(required = false) String category,
             @Parameter(description = "Minimum latitude for geographic filter", example = "40.4")
             @RequestParam(required = false) Double minLat,
             @Parameter(description = "Maximum latitude for geographic filter", example = "40.5")
@@ -86,13 +90,19 @@ public class TaskController {
             @Parameter(description = "Maximum longitude for geographic filter", example = "-3.6")
             @RequestParam(required = false) Double maxLon) {
         
-        log.info("Get tasks request: state={}, geographic filter={}", 
-                state, (minLat != null));
+        log.info("Get tasks request: countryId={}, state={}, category={}, geographic filter={}", 
+                countryId, state, category, (minLat != null));
 
         List<Task> tasks;
 
-        // Apply filters
-        if (state != null && minLat != null && maxLat != null && minLon != null && maxLon != null) {
+        // Apply country filter first if provided
+        if (countryId != null && state != null) {
+            tasks = taskRepository.findByCountryIdAndState(countryId, state);
+        } else if (countryId != null && category != null) {
+            tasks = taskRepository.findByCountryIdAndCategory(countryId, category);
+        } else if (countryId != null) {
+            tasks = taskRepository.findByCountryId(countryId);
+        } else if (state != null && minLat != null && maxLat != null && minLon != null && maxLon != null) {
             // Filter by state and geographic zone
             Polygon zone = createBoundingBox(minLat, maxLat, minLon, maxLon);
             tasks = taskRepository.findByStateInZone(state, zone);
@@ -348,6 +358,8 @@ public class TaskController {
                     task.getAssignedOperator() != null ? 
                     task.getAssignedOperator().getUsername() : null
                 )
+                .countryId(task.getCountry() != null ? task.getCountry().getId() : null)
+                .countryName(task.getCountry() != null ? task.getCountry().getName() : null)
                 .build();
     }
 

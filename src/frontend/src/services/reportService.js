@@ -89,6 +89,11 @@ const reportService = {
   validateReport(reportData, photo) {
     const errors = {};
 
+    // Validate country
+    if (!reportData.countryId) {
+      errors.countryId = 'Country is required';
+    }
+
     // Validate coordinates
     if (!reportData.latitude || !reportData.longitude) {
       errors.location = 'Location is required';

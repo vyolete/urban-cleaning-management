@@ -26,4 +26,6 @@ public class ReportResponse {
     private String submitterUsername;
     private LocalDateTime createdAt;
     private Boolean isDuplicate;
+    private UUID countryId;
+    private String countryName;
 }

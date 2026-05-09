@@ -55,4 +55,8 @@ public class Report {
     @Column(nullable = false, name = "is_duplicate")
     @Builder.Default
     private Boolean isDuplicate = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id")
+    private Country country;
 }
