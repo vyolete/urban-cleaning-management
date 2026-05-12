@@ -102,9 +102,12 @@ public class GeofencingService {
             countryId = defaultCountry.getId();
         }
 
+        // Capture effectively-final reference for use in lambda
+        final UUID resolvedCountryId = countryId;
+
         // Get country and validate boundaries
-        Country country = countryRepository.findById(countryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Country not found with id: " + countryId));
+        Country country = countryRepository.findById(resolvedCountryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Country not found with id: " + resolvedCountryId));
 
         if (!country.getEnabled()) {
             throw new ValidationException("Country " + country.getName() + " is not enabled");
