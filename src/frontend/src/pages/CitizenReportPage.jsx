@@ -16,6 +16,7 @@ function CitizenReportPage() {
   const { location, getCurrentLocation } = useGeolocation();
   const [successMessage, setSuccessMessage] = useState(null);
   const [showMap, setShowMap] = useState(true);
+  const [selectedCountryId, setSelectedCountryId] = useState(null);
 
   // Get location on component mount
   useEffect(() => {
@@ -28,6 +29,14 @@ function CitizenReportPage() {
     console.log('[CitizenReportPage] location state:', location);
     console.log('[CitizenReportPage] showMap state:', showMap);
   }, [location, showMap]);
+
+  /**
+   * Handle country selection
+   */
+  const handleCountrySelect = (countryId) => {
+    console.log('[CitizenReportPage] Country selected:', countryId);
+    setSelectedCountryId(countryId);
+  };
 
   /**
    * Navigate to login page
@@ -182,6 +191,7 @@ function CitizenReportPage() {
               {location ? (
                 <MapView
                   location={location}
+                  countryId={selectedCountryId}
                   showGeofence={true}
                   height="500px"
                   zoom={15}
@@ -204,6 +214,7 @@ function CitizenReportPage() {
             location={location}
             onSuccess={handleSuccess}
             onError={handleError}
+            onCountrySelect={handleCountrySelect}
           />
         </div>
       </div>

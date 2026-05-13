@@ -135,7 +135,7 @@ public class ReportController {
      */
     @Operation(
         summary = "Get all reports",
-        description = "Retrieve all incident reports in the system",
+        description = "Retrieve all incident reports in the system with optional filtering by country, administrative area, and municipality",
         security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses(value = {
@@ -154,9 +154,23 @@ public class ReportController {
     })
     @GetMapping
     @PreAuthorize("hasAnyRole('TECNICO', 'ADMIN')")
-    public ResponseEntity<List<ReportResponse>> getAllReports() {
-        log.info("Get all reports request");
-        List<ReportResponse> reports = reportService.getAllReports();
+    public ResponseEntity<List<ReportResponse>> getAllReports(
+            @Parameter(description = "Country ID filter", example = "550e8400-e29b-41d4-a716-446655440000")
+            @RequestParam(required = false) UUID countryId,
+            @Parameter(description = "Administrative area filter", example = "Comunidad de Madrid")
+            @RequestParam(required = false) String administrativeArea,
+            @Parameter(description = "Municipality filter", example = "Madrid")
+            @RequestParam(required = false) String municipality) {
+        log.info("Get all reports request: countryId={}, administrativeArea={}, municipality={}", 
+                countryId, administrativeArea, municipality);
+        
+        List<ReportResponse> reports;
+        if (countryId != null || administrativeArea != null || municipality != null) {
+            reports = reportService.getAllReports(countryId, administrativeArea, municipality);
+        } else {
+            reports = reportService.getAllReports();
+        }
+        
         return ResponseEntity.ok(reports);
     }
 

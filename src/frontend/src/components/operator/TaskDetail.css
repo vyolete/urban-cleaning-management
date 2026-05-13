@@ -1,10 +1,11 @@
 .task-detail {
   background-color: white;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  height: 100%;
-  overflow-y: auto;
+  flex: 1;          /* fill the flex slot from .detail-container */
+  min-height: 0;    /* allow flex child to shrink below content size */
+  overflow-y: auto; /* scroll when content overflows the panel height */
 }
 
 .task-detail.empty {

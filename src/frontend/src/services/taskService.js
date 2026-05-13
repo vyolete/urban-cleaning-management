@@ -22,6 +22,10 @@ const taskService = {
         params.append('state', filters.state);
       }
 
+      if (filters.countryId) {
+        params.append('countryId', filters.countryId);
+      }
+
       if (filters.minLat && filters.maxLat && filters.minLon && filters.maxLon) {
         params.append('minLat', filters.minLat);
         params.append('maxLat', filters.maxLat);

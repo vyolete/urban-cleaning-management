@@ -3,19 +3,15 @@ import PropTypes from 'prop-types';
 import taskService from '../../services/taskService';
 import './TaskList.css';
 
-/**
- * Task list component for operators to view and filter tasks
- */
-function TaskList({ onTaskSelect, selectedTaskId }) {
+const PAGE_SIZE = 10;
+
+function TaskList({ onTaskSelect, selectedTaskId, countryId }) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({
-    state: '',
-    zone: '',
-  });
+  const [filters, setFilters] = useState({ state: '', zone: '' });
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Task states
   const states = [
     { value: '', label: 'Todos los estados' },
     { value: 'PENDIENTE', label: 'Pendiente' },
@@ -24,7 +20,6 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
     { value: 'RESUELTO', label: 'Resuelto' },
   ];
 
-  // Geographic zones (example - should match backend configuration)
   const zones = [
     { value: '', label: 'Todas las zonas' },
     { value: 'CENTRO', label: 'Centro' },
@@ -34,16 +29,13 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
     { value: 'OESTE', label: 'Oeste' },
   ];
 
-  /**
-   * Load tasks from API
-   */
   const loadTasks = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      const data = await taskService.getTasks(filters);
+      const data = await taskService.getTasks({ ...filters, countryId });
       setTasks(data);
+      setCurrentPage(1);
     } catch (err) {
       setError(err.response?.data?.message || 'Error al cargar las tareas');
       console.error('Error loading tasks:', err);
@@ -52,47 +44,26 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
     }
   };
 
-  // Load tasks on mount and when filters change
   useEffect(() => {
     loadTasks();
-  }, [filters]);
+  }, [filters, countryId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /**
-   * Handle filter changes
-   */
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  /**
-   * Handle task selection
-   */
   const handleTaskClick = (task) => {
-    if (onTaskSelect) {
-      onTaskSelect(task);
-    }
+    if (onTaskSelect) onTaskSelect(task);
   };
 
-  /**
-   * Get state badge class
-   */
-  const getStateBadgeClass = (state) => {
-    const stateClasses = {
-      PENDIENTE: 'badge-pending',
-      ASIGNADO: 'badge-assigned',
-      EN_PROGRESO: 'badge-in-progress',
-      RESUELTO: 'badge-resolved',
-    };
-    return stateClasses[state] || 'badge-default';
-  };
+  const getStateBadgeClass = (state) => ({
+    PENDIENTE: 'badge-pending',
+    ASIGNADO: 'badge-assigned',
+    EN_PROGRESO: 'badge-in-progress',
+    RESUELTO: 'badge-resolved',
+  }[state] || 'badge-default');
 
-  /**
-   * Get priority badge class
-   */
   const getPriorityBadgeClass = (priority) => {
     if (priority >= 80) return 'priority-critical';
     if (priority >= 60) return 'priority-high';
@@ -100,30 +71,41 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
     return 'priority-low';
   };
 
-  /**
-   * Format date
-   */
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString('es-ES', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
+
+  // TaskResponse has flat latitude/longitude fields (not nested under location)
+  const formatCoordinates = (task) => {
+    const lat = parseFloat(task.latitude);
+    const lng = parseFloat(task.longitude);
+    if (isNaN(lat) || isNaN(lng)) return 'N/A';
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   };
 
-  /**
-   * Format coordinates
-   */
-  const formatCoordinates = (location) => {
-    if (!location) return 'N/A';
-    return `${location.latitude?.toFixed(4)}, ${location.longitude?.toFixed(4)}`;
-  };
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(tasks.length / PAGE_SIZE));
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageTasks = tasks.slice(pageStart, pageStart + PAGE_SIZE);
+
+  const goToPage = (p) => setCurrentPage(Math.min(Math.max(1, p), totalPages));
+
+  // Show at most 5 page number buttons centred around currentPage
+  const pageNumbers = (() => {
+    const half = 2;
+    let start = Math.max(1, currentPage - half);
+    let end = Math.min(totalPages, start + 4);
+    start = Math.max(1, end - 4);
+    const nums = [];
+    for (let i = start; i <= end; i++) nums.push(i);
+    return nums;
+  })();
 
   return (
     <div className="task-list">
+      {/* Header */}
       <div className="task-list-header">
         <h2>Lista de Tareas</h2>
         <button onClick={loadTasks} className="btn-refresh" title="Actualizar">
@@ -135,38 +117,19 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
       <div className="task-filters">
         <div className="filter-group">
           <label htmlFor="state-filter">Estado:</label>
-          <select
-            id="state-filter"
-            name="state"
-            value={filters.state}
-            onChange={handleFilterChange}
-          >
-            {states.map((state) => (
-              <option key={state.value} value={state.value}>
-                {state.label}
-              </option>
-            ))}
+          <select id="state-filter" name="state" value={filters.state} onChange={handleFilterChange}>
+            {states.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
         </div>
-
         <div className="filter-group">
           <label htmlFor="zone-filter">Zona:</label>
-          <select
-            id="zone-filter"
-            name="zone"
-            value={filters.zone}
-            onChange={handleFilterChange}
-          >
-            {zones.map((zone) => (
-              <option key={zone.value} value={zone.value}>
-                {zone.label}
-              </option>
-            ))}
+          <select id="zone-filter" name="zone" value={filters.zone} onChange={handleFilterChange}>
+            {zones.map((z) => <option key={z.value} value={z.value}>{z.label}</option>)}
           </select>
         </div>
       </div>
 
-      {/* Loading State */}
+      {/* Loading */}
       {loading && (
         <div className="loading-container">
           <div className="spinner"></div>
@@ -174,17 +137,15 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
         </div>
       )}
 
-      {/* Error State */}
+      {/* Error */}
       {error && (
         <div className="error-container">
           <p className="error">{error}</p>
-          <button onClick={loadTasks} className="btn-retry">
-            Reintentar
-          </button>
+          <button onClick={loadTasks} className="btn-retry">Reintentar</button>
         </div>
       )}
 
-      {/* Tasks Table */}
+      {/* Table */}
       {!loading && !error && (
         <>
           {tasks.length === 0 ? (
@@ -201,27 +162,23 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
                     <th>Categoría</th>
                     <th>Estado</th>
                     <th>Prioridad</th>
-                    <th>Duplicados</th>
+                    <th>Dupl.</th>
                     <th>Fecha</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tasks.map((task) => (
+                  {pageTasks.map((task) => (
                     <tr
                       key={task.id}
                       onClick={() => handleTaskClick(task)}
-                      className={`task-row ${
-                        selectedTaskId === task.id ? 'selected' : ''
-                      }`}
+                      className={`task-row ${selectedTaskId === task.id ? 'selected' : ''}`}
                     >
                       <td className="task-id">
                         <span className="id-short" title={task.id}>
-                          {task.id.substring(0, 8)}...
+                          {task.id.substring(0, 8)}…
                         </span>
                       </td>
-                      <td className="task-location">
-                        {formatCoordinates(task.location)}
-                      </td>
+                      <td className="task-location">{formatCoordinates(task)}</td>
                       <td className="task-category">{task.category}</td>
                       <td className="task-state">
                         <span className={`badge ${getStateBadgeClass(task.state)}`}>
@@ -229,26 +186,16 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
                         </span>
                       </td>
                       <td className="task-priority">
-                        <span
-                          className={`priority-badge ${getPriorityBadgeClass(
-                            task.priorityScore
-                          )}`}
-                        >
+                        <span className={`priority-badge ${getPriorityBadgeClass(task.priorityScore)}`}>
                           {task.priorityScore?.toFixed(1)}
                         </span>
                       </td>
                       <td className="task-duplicates">
-                        {task.duplicateCount > 0 ? (
-                          <span className="duplicate-badge">
-                            {task.duplicateCount}
-                          </span>
-                        ) : (
-                          '-'
-                        )}
+                        {task.duplicateCount > 0
+                          ? <span className="duplicate-badge">{task.duplicateCount}</span>
+                          : '-'}
                       </td>
-                      <td className="task-date">
-                        {formatDate(task.createdAt)}
-                      </td>
+                      <td className="task-date">{formatDate(task.createdAt)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -256,12 +203,67 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
             </div>
           )}
 
-          {/* Task Count */}
-          <div className="task-count">
-            <p>
-              Mostrando <strong>{tasks.length}</strong> tarea(s)
-            </p>
-          </div>
+          {/* Pagination */}
+          {tasks.length > PAGE_SIZE && (
+            <div className="pagination">
+              <button
+                className="page-btn"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                aria-label="Anterior"
+              >
+                ‹
+              </button>
+
+              {pageNumbers[0] > 1 && (
+                <>
+                  <button className="page-btn" onClick={() => goToPage(1)}>1</button>
+                  {pageNumbers[0] > 2 && <span className="page-ellipsis">…</span>}
+                </>
+              )}
+
+              {pageNumbers.map((n) => (
+                <button
+                  key={n}
+                  className={`page-btn ${n === currentPage ? 'active' : ''}`}
+                  onClick={() => goToPage(n)}
+                >
+                  {n}
+                </button>
+              ))}
+
+              {pageNumbers[pageNumbers.length - 1] < totalPages && (
+                <>
+                  {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
+                    <span className="page-ellipsis">…</span>
+                  )}
+                  <button className="page-btn" onClick={() => goToPage(totalPages)}>
+                    {totalPages}
+                  </button>
+                </>
+              )}
+
+              <button
+                className="page-btn"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                aria-label="Siguiente"
+              >
+                ›
+              </button>
+
+              <span className="page-info">
+                {pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, tasks.length)} de {tasks.length}
+              </span>
+            </div>
+          )}
+
+          {/* Count (when no pagination shown) */}
+          {tasks.length <= PAGE_SIZE && (
+            <div className="task-count">
+              <p>Mostrando <strong>{tasks.length}</strong> tarea(s)</p>
+            </div>
+          )}
         </>
       )}
     </div>
@@ -271,6 +273,7 @@ function TaskList({ onTaskSelect, selectedTaskId }) {
 TaskList.propTypes = {
   onTaskSelect: PropTypes.func,
   selectedTaskId: PropTypes.string,
+  countryId: PropTypes.string,
 };
 
 export default TaskList;

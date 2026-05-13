@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import reportService from '../../services/reportService';
+import CountrySelector from './CountrySelector';
 import './ReportForm.css';
 
 /**
  * Report form component for citizens to submit incident reports
  */
-function ReportForm({ location: externalLocation, onSuccess, onError }) {
+function ReportForm({ location: externalLocation, onSuccess, onError, onCountrySelect }) {
   const [formData, setFormData] = useState({
     category: '',
     description: '',
+    countryId: null,
   });
   
   const [photo, setPhoto] = useState(null);
@@ -39,6 +41,30 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
       setLocation(externalLocation);
     }
   }, [externalLocation, useManualLocation]);
+
+  /**
+   * Handle country selection
+   */
+  const handleCountrySelect = (countryId) => {
+    setFormData((prev) => ({
+      ...prev,
+      countryId: countryId,
+    }));
+    
+    // Notify parent component
+    if (onCountrySelect) {
+      onCountrySelect(countryId);
+    }
+    
+    // Clear country error
+    if (errors.countryId) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.countryId;
+        return newErrors;
+      });
+    }
+  };
 
   /**
    * Handle form field changes
@@ -143,6 +169,7 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
       description: formData.description,
       latitude: useManualLocation ? parseFloat(manualLocation.latitude) : location?.latitude,
       longitude: useManualLocation ? parseFloat(manualLocation.longitude) : location?.longitude,
+      countryId: formData.countryId,
     };
 
     // Validate
@@ -164,6 +191,7 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
       setFormData({
         category: '',
         description: '',
+        countryId: null,
       });
       setPhoto(null);
       setPhotoPreview(null);
@@ -191,6 +219,16 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
       <h2>Reportar Incidencia</h2>
       
       <form onSubmit={handleSubmit}>
+        {/* Country Section */}
+        <div className="form-section">
+          <CountrySelector
+            selectedCountryId={formData.countryId}
+            onSelectCountry={handleCountrySelect}
+            disabled={submitting}
+          />
+          {errors.countryId && <p className="error">{errors.countryId}</p>}
+        </div>
+
         {/* Location Section */}
         <div className="form-section">
           <h3>Ubicación</h3>
@@ -357,7 +395,7 @@ function ReportForm({ location: externalLocation, onSuccess, onError }) {
           <button
             type="submit"
             className="btn-primary"
-            disabled={submitting || (!location && !useManualLocation)}
+            disabled={submitting || (!location && !useManualLocation) || !formData.countryId}
           >
             {submitting ? 'Enviando...' : 'Enviar Reporte'}
           </button>
@@ -375,6 +413,7 @@ ReportForm.propTypes = {
   }),
   onSuccess: PropTypes.func,
   onError: PropTypes.func,
+  onCountrySelect: PropTypes.func,
 };
 
 export default ReportForm;

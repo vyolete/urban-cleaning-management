@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 /**
  * DTO for report submission requests
  */
@@ -56,4 +58,10 @@ public class ReportSubmissionRequest {
     )
     @NotBlank(message = "Description is required")
     private String description;
+
+    @Schema(
+        description = "Country ID for the report location",
+        example = "550e8400-e29b-41d4-a716-446655440000"
+    )
+    private UUID countryId;
 }

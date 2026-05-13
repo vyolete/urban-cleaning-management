@@ -3,8 +3,9 @@
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  height: 100%;
-  overflow-y: auto;
+  flex: 1;          /* fill the flex slot from .audit-container */
+  min-height: 0;    /* allow flex child to shrink below content size */
+  overflow-y: auto; /* scroll when timeline entries overflow */
 }
 
 .audit-timeline.empty {

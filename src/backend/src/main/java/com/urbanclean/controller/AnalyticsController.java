@@ -272,6 +272,8 @@ public class AnalyticsController {
     })
     @GetMapping("/heatmap")
     public ResponseEntity<HeatmapResponse> generateHeatmap(
+        @Parameter(description = "Country ID filter", example = "550e8400-e29b-41d4-a716-446655440000")
+        @RequestParam(required = false) UUID countryId,
         @Parameter(description = "Grid cell size in meters", example = "500")
         @RequestParam(required = false, defaultValue = "500") Double cellSize,
         @Parameter(description = "Start date (ISO 8601)")
@@ -281,7 +283,8 @@ public class AnalyticsController {
         @Parameter(description = "Category filter")
         @RequestParam(required = false) String category
     ) {
-        log.info("GET /api/analytics/heatmap - cellSize: {}, startDate: {}, endDate: {}", cellSize, startDate, endDate);
+        log.info("GET /api/analytics/heatmap - countryId: {}, cellSize: {}, startDate: {}, endDate: {}", 
+                countryId, cellSize, startDate, endDate);
         
         // Validate cell size
         if (cellSize < 10 || cellSize > 1000) {
@@ -289,7 +292,13 @@ public class AnalyticsController {
         }
         
         AnalyticsFilters filters = new AnalyticsFilters(startDate, endDate, null, category, 0, 20);
-        HeatmapResponse response = heatmapService.generateHeatmap(filters, cellSize);
+        
+        HeatmapResponse response;
+        if (countryId != null) {
+            response = heatmapService.generateHeatmapByCountry(countryId, filters, cellSize);
+        } else {
+            response = heatmapService.generateHeatmap(filters, cellSize);
+        }
         
         return ResponseEntity.ok(response);
     }

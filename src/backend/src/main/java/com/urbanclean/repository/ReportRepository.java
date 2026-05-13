@@ -121,6 +121,23 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
      */
     long countByCategory(String category);
     
+    /**
+     * Find reports by country
+     * @param countryId the country ID
+     * @return list of reports from the country
+     */
+    @Query("SELECT r FROM Report r WHERE r.country.id = :countryId")
+    List<Report> findByCountryId(@Param("countryId") UUID countryId);
+    
+    /**
+     * Find reports by country and category
+     * @param countryId the country ID
+     * @param category the category
+     * @return list of reports
+     */
+    @Query("SELECT r FROM Report r WHERE r.country.id = :countryId AND r.category = :category")
+    List<Report> findByCountryIdAndCategory(@Param("countryId") UUID countryId, @Param("category") String category);
+    
     // ========== ANALYTICS METHODS ==========
     
     /**
@@ -147,6 +164,39 @@ public interface ReportRepository extends JpaRepository<Report, UUID> {
            "LIMIT 1000",
            nativeQuery = true)
     List<Object[]> getHeatmapData(
+        @Param("cellSize") double cellSize,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate,
+        @Param("category") String category
+    );
+    
+    /**
+     * Generate heatmap data by country using PostGIS ST_SnapToGrid
+     * Returns array of [latitude, longitude, intensity]
+     * @param countryId optional country filter (can be null for all countries)
+     * @param cellSize the grid cell size in degrees (e.g., 0.005 for ~500m)
+     * @param startDate start of date range
+     * @param endDate end of date range
+     * @param category optional category filter (can be null)
+     * @return list of heatmap cells with coordinates and intensity
+     */
+    @Query(value = "SELECT " +
+           "ST_Y(ST_Centroid(grid)) as latitude, " +
+           "ST_X(ST_Centroid(grid)) as longitude, " +
+           "COUNT(*) as intensity " +
+           "FROM ( " +
+           "    SELECT ST_SnapToGrid(location, :cellSize) as grid, country_id " +
+           "    FROM reportes " +
+           "    WHERE (:countryId IS NULL OR country_id = CAST(:countryId AS uuid)) " +
+           "    AND created_at BETWEEN :startDate AND :endDate " +
+           "    AND (:category IS NULL OR category = :category) " +
+           ") grouped " +
+           "GROUP BY grid, country_id " +
+           "ORDER BY intensity DESC " +
+           "LIMIT 1000",
+           nativeQuery = true)
+    List<Object[]> getHeatmapDataByCountry(
+        @Param("countryId") String countryId,
         @Param("cellSize") double cellSize,
         @Param("startDate") LocalDateTime startDate,
         @Param("endDate") LocalDateTime endDate,

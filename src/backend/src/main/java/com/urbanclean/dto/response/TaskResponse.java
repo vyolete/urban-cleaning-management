@@ -76,4 +76,10 @@ public class TaskResponse {
     
     @Schema(description = "Username of the operator assigned to this task (null if unassigned)", example = "operator1")
     private String assignedOperatorUsername;
+    
+    @Schema(description = "Country ID where the task is located", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID countryId;
+    
+    @Schema(description = "Country name where the task is located", example = "España")
+    private String countryName;
 }
