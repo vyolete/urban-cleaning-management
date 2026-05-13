@@ -110,6 +110,67 @@ URBIX-TFM/
 **Programa**: Máster en Ingeniería del Software  
 **Fecha**: Febrero 2026  
 
+### 🌍 Soporte Multi-País
+
+URBIX soporta gestión de incidencias en múltiples países simultáneamente.
+
+#### Configuración de países
+
+Cada país define sus propios límites geográficos (geofencing), área administrativa y municipio. Se incluyen tres países por defecto: España, Colombia y Estados Unidos.
+
+**API de gestión de países** (requiere `ROLE_ADMIN`):
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/admin/countries` | Listar todos los países |
+| POST | `/api/admin/countries` | Crear nuevo país |
+| GET | `/api/admin/countries/{id}` | Obtener país por ID |
+| PUT | `/api/admin/countries/{id}` | Actualizar país |
+| DELETE | `/api/admin/countries/{id}` | Eliminar país |
+| GET | `/api/admin/countries/default` | Obtener país por defecto |
+
+**Filtrado de reportes por país y área:**
+
+```
+GET /api/reports?countryId={uuid}
+GET /api/reports?countryId={uuid}&administrativeArea=Comunidad+de+Madrid
+GET /api/reports?countryId={uuid}&municipality=Madrid
+GET /api/heatmap?countryId={uuid}
+```
+
+Si no se especifica `countryId`, se utiliza el país marcado como `default_country = TRUE`.
+
+#### Migración de base de datos
+
+La migración `V20__add_multi_country_support.sql` crea la tabla `countries`, añade `country_id` a las tablas `reportes` y `tareas`, y migra los datos existentes al país por defecto (España). Para revertir, ejecutar `src/docker/rollback-multi-country.sql`.
+
+### 🔒 Configuración HTTPS
+
+Ver la guía completa en [docs/SSL_CERTIFICATE_SETUP.md](docs/SSL_CERTIFICATE_SETUP.md).
+
+**Inicio rápido con HTTPS:**
+
+```bash
+# 1. Generar certificado autofirmado (desarrollo)
+cd src/backend/src/main/resources
+keytool -genkeypair -alias tomcat -keyalg RSA -keysize 2048 \
+  -storetype PKCS12 -keystore keystore.p12 -validity 365 -storepass changeit
+
+# 2. Copiar a directorio de certs de Docker
+cp keystore.p12 ../../docker/certs/
+
+# 3. Crear src/docker/.env con:
+# SSL_ENABLED=true
+# SSL_KEYSTORE_PASSWORD=changeit
+# BACKEND_HTTPS_PORT=8443
+# CORS_ALLOWED_ORIGINS=https://localhost:3000
+
+# 4. Arrancar
+cd src/docker && docker-compose up -d
+```
+
+En producción se recomienda Let's Encrypt con Certbot (ver guía) o un proxy inverso Nginx/Traefik.
+
 ### 📄 Licencia
 
 Este proyecto ha sido desarrollado con fines académicos como parte de un Trabajo de Fin de Máster.

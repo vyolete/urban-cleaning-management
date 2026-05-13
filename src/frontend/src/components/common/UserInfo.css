@@ -1,42 +1,230 @@
+/* ── Wrapper ─────────────────────────────────────────────────────────────── */
 .user-info {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--white);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--shadow-sm);
+  position: relative;
+  flex-shrink: 0;
 }
 
-.user-details {
+/* ── Trigger — same feel as .view-btn ───────────────────────────────────── */
+.user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.875rem;
+  background-color: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;            /* matches view-btn */
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.user-trigger:hover {
+  background-color: white;
+  border-color: #3498db;
+  color: #3498db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.user-trigger.active {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 3px 8px rgba(52, 152, 219, 0.25);
+}
+
+.user-trigger:focus-visible {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* ── Avatar initials circle ──────────────────────────────────────────────── */
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: rgba(52, 152, 219, 0.15);
+  color: #2980b9;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  user-select: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* Avatar inverts when trigger is active */
+.user-trigger.active .user-avatar {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* ── Name + role column ──────────────────────────────────────────────────── */
+.user-trigger-text {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  align-items: flex-start;
+  gap: 0.1rem;
+  min-width: 0;
 }
 
 .user-name {
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--secondary-color);
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 14ch;
+  line-height: 1.2;
 }
 
-.user-role {
-  font-size: 0.875rem;
-  color: var(--dark-gray);
+/* ── Role badge ──────────────────────────────────────────────────────────── */
+.user-role-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.4rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  line-height: 1.4;
 }
 
-.btn-sm {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: 0.875rem;
+.role-admin     { background: #fee2e2; color: #b91c1c; }
+.role-tecnico   { background: #dbeafe; color: #1d4ed8; }
+.role-ciudadano { background: #dcfce7; color: #15803d; }
+
+/* When trigger is active, lighten the badges */
+.user-trigger.active .user-role-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
 }
 
+/* ── Chevron ─────────────────────────────────────────────────────────────── */
+.user-chevron {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: inherit;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.user-chevron.open { transform: rotate(180deg); }
+
+/* ── Dropdown ────────────────────────────────────────────────────────────── */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  min-width: 190px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
+  z-index: 200;
+  overflow: hidden;
+  animation: dropdownIn 0.14s ease-out;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-5px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+/* ── Divider ─────────────────────────────────────────────────────────────── */
+.user-dropdown-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 0;
+}
+
+/* ── Menu items ──────────────────────────────────────────────────────────── */
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: left;
+  color: #374151;
+  transition: background 0.14s ease;
+}
+
+.user-dropdown-item:hover        { background: #f8fafc; }
+.user-dropdown-item.danger       { color: #dc2626; }
+.user-dropdown-item.danger:hover { background: #fef2f2; }
+
+/* ── Mobile: full-width bar ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* Wrapper stretches to fill the header column */
   .user-info {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--spacing-sm);
+    width: 100%;
   }
 
-  .user-details {
-    text-align: center;
+  /* Trigger spans full width — avatar left, chevron right */
+  .user-trigger {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    justify-content: flex-start;
+    white-space: normal;
+  }
+
+  /* Show name + role on mobile (hidden text was the problem) */
+  .user-trigger-text {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user-name {
+    max-width: none;   /* allow full width */
+    font-size: 0.875rem;
+  }
+
+  .user-role-badge {
+    font-size: 0.65rem;
+  }
+
+  /* Chevron visible, pushed to the right */
+  .user-chevron {
+    display: flex;
+    margin-left: auto;
+  }
+
+  /* Slightly larger avatar */
+  .user-avatar {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.75rem;
+  }
+
+  /* Dropdown fills the full width, not absolute — sits in flow below trigger */
+  .user-dropdown {
+    position: static;
+    width: 100%;
+    margin-top: 0.375rem;
+    border-radius: 8px;
+    /* remove the floating shadow on mobile, use a softer inset style */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    animation: none;   /* no scale animation needed when it's in-flow */
+  }
+
+  /* Menu items a little taller for touch targets */
+  .user-dropdown-item {
+    padding: 0.9rem 1rem;
+    font-size: 0.9rem;
   }
 }

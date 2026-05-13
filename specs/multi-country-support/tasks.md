@@ -216,25 +216,25 @@ This document contains the implementation tasks for adding multi-country support
 ### Phase 6: Deployment and Documentation
 
 #### 6.1 Create database migration script
-- [ ] Create migration.sql script
-- [ ] Include rollback script
+- [x] Create migration.sql script (V20__add_multi_country_support.sql)
+- [x] Include rollback script (src/docker/rollback-multi-country.sql)
 - [ ] Test migration in development environment
 
 #### 6.2 Create HTTPS certificate setup guide
-- [ ] Document SSL certificate generation
-- [ ] Document certificate configuration
-- [ ] Document Let's Encrypt integration
+- [x] Document SSL certificate generation (docs/SSL_CERTIFICATE_SETUP.md)
+- [x] Document certificate configuration
+- [x] Document Let's Encrypt integration
 
 #### 6.3 Update docker-compose.yml example
-- [ ] Add HTTPS configuration example
-- [ ] Add SSL certificate volume mount
-- [ ] Document environment variables
+- [x] Add HTTPS configuration example (SSL_ENABLED, SSL_KEYSTORE_* env vars)
+- [x] Add SSL certificate volume mount (src/docker/certs)
+- [x] Document environment variables (src/docker/.env example in SSL guide)
 
 #### 6.4 Update README.md
-- [ ] Document multi-country support feature
-- [ ] Document country management API
-- [ ] Document report filtering options
-- [ ] Document HTTPS configuration
+- [x] Document multi-country support feature
+- [x] Document country management API
+- [x] Document report filtering options
+- [x] Document HTTPS configuration
 
 #### 6.5 Test deployment
 - [ ] Deploy to development environment

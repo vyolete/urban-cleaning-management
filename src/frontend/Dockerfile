@@ -22,35 +22,37 @@ RUN npm run build
 FROM nginx:1.25-alpine
 WORKDIR /usr/share/nginx/html
 
+# Install openssl CLI for self-signed cert generation
+RUN apk add --no-cache openssl
+
 # Create non-root user for security
 RUN addgroup -S nginx-app && adduser -S nginx-app -G nginx-app
 
 # Remove default nginx static assets
 RUN rm -rf ./*
 
-# Copy build artifacts from build stage
+# Copy build artifacts and configuration
 COPY --from=build /app/dist .
-
-# Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx-ssl.conf /etc/nginx/nginx-ssl.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-# Copy nginx main config for non-root user
+# Set ownership and permissions (run as root before USER switch)
 RUN chown -R nginx-app:nginx-app /usr/share/nginx/html && \
     chown -R nginx-app:nginx-app /var/cache/nginx && \
     chown -R nginx-app:nginx-app /var/log/nginx && \
     chown -R nginx-app:nginx-app /etc/nginx/conf.d && \
+    mkdir -p /etc/nginx/ssl && \
+    chown nginx-app:nginx-app /etc/nginx/ssl /etc/nginx/nginx-ssl.conf && \
     touch /var/run/nginx.pid && \
-    chown -R nginx-app:nginx-app /var/run/nginx.pid
+    chown -R nginx-app:nginx-app /var/run/nginx.pid && \
+    chmod +x /docker-entrypoint.sh
 
 # Switch to non-root user
 USER nginx-app
 
-# Expose port
-EXPOSE 80
+# Expose HTTP and HTTPS ports
+EXPOSE 80 443
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Entrypoint generates SSL cert on first start (if SSL_ENABLED=true) then launches Nginx
+ENTRYPOINT ["/docker-entrypoint.sh"]

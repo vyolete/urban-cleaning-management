@@ -96,9 +96,16 @@ services:
       - urbanclean-network
     volumes:
       - backend_uploads:/uploads
-      - ${SSL_CERT_PATH:-./certs}:/etc/ssl/certs:ro
+      - ${SSL_CERT_PATH:-./certs}:/etc/ssl/certs
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      test:
+        - CMD-SHELL
+        - |
+            if [ "$SSL_ENABLED" = "true" ]; then
+              wget --no-verbose --tries=1 --spider --no-check-certificate https://localhost:8443/actuator/health || exit 1
+            else
+              wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+            fi
       interval: 30s
       timeout: 10s
       retries: 3
@@ -119,19 +126,27 @@ services:
     container_name: urbanclean-frontend
     restart: unless-stopped
     ports:
-      - "${FRONTEND_PORT:-3000}:80"
+      - "${FRONTEND_PORT:-3000}:${FRONTEND_NGINX_PORT:-80}"
     environment:
       VITE_API_URL: ${VITE_API_URL:-/api}
       VITE_MAP_CENTER_LAT: ${VITE_MAP_CENTER_LAT:-40.4168}
       VITE_MAP_CENTER_LON: ${VITE_MAP_CENTER_LON:--3.7038}
       VITE_MAP_ZOOM: ${VITE_MAP_ZOOM:-13}
+      SSL_ENABLED: ${SSL_ENABLED:-false}
     depends_on:
       backend:
         condition: service_healthy
     networks:
       - urbanclean-network
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:80/health || exit 1"]
+      test:
+        - CMD-SHELL
+        - |
+            if [ "$SSL_ENABLED" = "true" ]; then
+              wget --no-verbose --tries=1 --spider --no-check-certificate https://127.0.0.1:443/health || exit 1
+            else
+              wget --no-verbose --tries=1 --spider http://127.0.0.1:80/health || exit 1
+            fi
       interval: 30s
       timeout: 3s
       retries: 3

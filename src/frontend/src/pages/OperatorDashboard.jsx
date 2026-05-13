@@ -6,6 +6,7 @@ import TaskDetail from '../components/operator/TaskDetail';
 import AuditTimeline from '../components/operator/AuditTimeline';
 import UserInfo from '../components/common/UserInfo';
 import taskService from '../services/taskService';
+import countryService from '../services/countryService';
 import urbixRobot from '../assets/urbix-robot.png';
 import './OperatorDashboard.css';
 
@@ -19,16 +20,28 @@ function OperatorDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('split'); // 'split', 'list', 'map'
+  const [countries, setCountries] = useState([]);
+  const [selectedCountryId, setSelectedCountryId] = useState('');
+
+  // Full country object derived from the loaded list — no extra API call needed
+  const selectedCountry = countries.find((c) => c.id === selectedCountryId) || null;
+
+  // Load available countries for the filter
+  useEffect(() => {
+    countryService.getEnabledCountries()
+      .then(setCountries)
+      .catch(() => {}); // non-critical — filter just won't show
+  }, []);
 
   /**
-   * Load all tasks
+   * Load tasks for the map panel, filtered by selected country
    */
-  const loadTasks = async () => {
+  const loadTasks = async (countryId) => {
     setLoading(true);
     setError(null);
 
     try {
-      const data = await taskService.getTasks();
+      const data = await taskService.getTasks(countryId ? { countryId } : {});
       setTasks(data);
     } catch (err) {
       setError(err.response?.data?.message || 'Error al cargar las tareas');
@@ -38,10 +51,15 @@ function OperatorDashboard() {
     }
   };
 
-  // Load tasks on mount
+  // Reload map tasks whenever the country filter changes
   useEffect(() => {
-    loadTasks();
-  }, []);
+    loadTasks(selectedCountryId);
+  }, [selectedCountryId]);
+
+  const handleCountryChange = (e) => {
+    setSelectedCountryId(e.target.value);
+    setSelectedTask(null); // clear selection when scope changes
+  };
 
   /**
    * Handle task selection
@@ -86,6 +104,25 @@ function OperatorDashboard() {
           <p className="subtitle">Gestión de Tareas de Limpieza Urbana</p>
         </div>
 
+        {/* Country filter */}
+        {countries.length > 1 && (
+          <div className="country-filter">
+            <label htmlFor="country-filter">País:</label>
+            <select
+              id="country-filter"
+              value={selectedCountryId}
+              onChange={handleCountryChange}
+            >
+              <option value="">Todos los países</option>
+              {countries.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}{c.defaultCountry ? ' (predeterminado)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* User Info with Logout */}
         <UserInfo />
 
@@ -120,7 +157,7 @@ function OperatorDashboard() {
         <div className="error-banner">
           <span className="error-icon">✕</span>
           <p>{error}</p>
-          <button onClick={loadTasks} className="btn-retry">
+          <button onClick={() => loadTasks(selectedCountryId)} className="btn-retry">
             Reintentar
           </button>
         </div>
@@ -134,6 +171,7 @@ function OperatorDashboard() {
             <TaskList
               onTaskSelect={handleTaskSelect}
               selectedTaskId={selectedTask?.id}
+              countryId={selectedCountryId || undefined}
             />
           </div>
         )}
@@ -145,7 +183,7 @@ function OperatorDashboard() {
               tasks={tasks}
               selectedTask={selectedTask}
               onTaskSelect={handleTaskSelect}
-              height="100%"
+              country={selectedCountry}
             />
           </div>
         )}
