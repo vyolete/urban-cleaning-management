@@ -81,6 +81,29 @@
   box-shadow: 0 0 0 3px rgba(52,152,219,0.15);
 }
 
+/* ── Report shortcut button ──────────────────────────────────────────────── */
+.btn-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  background-color: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-report:hover {
+  background-color: #d35400;
+  transform: translateY(-1px);
+}
+
 /* ── View-mode buttons ───────────────────────────────────────────────────── */
 .view-mode-selector {
   display: flex;

@@ -5,6 +5,7 @@ import ReportForm from '../components/citizen/ReportForm';
 import MapView from '../components/citizen/MapView';
 import useGeolocation from '../hooks/useGeolocation';
 import urbixRobot from '../assets/urbix-robot.png';
+import { IconSparkle, IconBarChart, IconLock, IconLogout, IconCheck, IconX } from '../assets/icons';
 import './CitizenReportPage.css';
 
 /**
@@ -118,7 +119,7 @@ function CitizenReportPage() {
             {isAuthenticated() ? (
               <>
                 <span className="user-greeting">
-                  👋 {user?.username || 'Usuario'}
+                  <IconSparkle size={16} /> {user?.username || 'Usuario'}
                 </span>
                 {(user?.role === 'ROLE_ADMIN' || user?.role === 'ROLE_TECNICO') && (
                   <button
@@ -126,7 +127,7 @@ function CitizenReportPage() {
                     className="btn-dashboard"
                     aria-label="Ir al Dashboard"
                   >
-                    <span className="btn-icon">📊</span>
+                    <IconBarChart size={18} className="btn-icon" />
                     Dashboard
                   </button>
                 )}
@@ -135,7 +136,7 @@ function CitizenReportPage() {
                   className="btn-logout"
                   aria-label="Cerrar Sesión"
                 >
-                  <span className="btn-icon">🚪</span>
+                  <IconLogout size={16} className="btn-icon" />
                   Cerrar Sesión
                 </button>
               </>
@@ -145,7 +146,7 @@ function CitizenReportPage() {
                 className="btn-login-header"
                 aria-label="Iniciar Sesión"
               >
-                <span className="btn-icon">🔐</span>
+                <IconLock size={18} className="btn-icon" />
                 Iniciar Sesión
               </button>
             )}
@@ -158,7 +159,7 @@ function CitizenReportPage() {
         <div className="success-banner">
           <div>
             <div className="success-content">
-              <span className="success-icon">✓</span>
+              <IconCheck size={20} className="success-icon" />
               <p>{successMessage}</p>
             </div>
             <button
@@ -166,7 +167,7 @@ function CitizenReportPage() {
               className="close-btn"
               aria-label="Cerrar"
             >
-              ×
+              <IconX size={16} />
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useAuth } from '../../context/AuthContext';
+import { IconBan } from '../../assets/icons';
 import './ProtectedRoute.css';
 
 /**
@@ -33,7 +34,7 @@ function ProtectedRoute({ children, requiredRole, requiredRoles }) {
     return (
       <div className="access-denied-container">
         <div className="access-denied-card">
-          <span className="denied-icon">🚫</span>
+          <IconBan size={48} className="denied-icon" />
           <h2>Acceso Denegado</h2>
           <p>No tienes permisos para acceder a esta página.</p>
           <p className="required-role">Rol requerido: {requiredRole}</p>
@@ -48,7 +49,7 @@ function ProtectedRoute({ children, requiredRole, requiredRoles }) {
     return (
       <div className="access-denied-container">
         <div className="access-denied-card">
-          <span className="denied-icon">🚫</span>
+          <IconBan size={48} className="denied-icon" />
           <h2>Acceso Denegado</h2>
           <p>No tienes permisos para acceder a esta página.</p>
           <p className="required-role">

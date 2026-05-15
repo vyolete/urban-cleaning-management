@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import urbixRobot from '../assets/urbix-robot.png';
+import { IconSparkle, IconBarChart, IconWarning, IconLock } from '../assets/icons';
 import './HomePage.css';
 
 /**
@@ -62,7 +63,7 @@ function HomePage() {
             {isAuthenticated() ? (
               <>
                 <div className="welcome-message">
-                  <span className="welcome-icon">👋</span>
+                  <IconSparkle size={28} className="welcome-icon" />
                   <p>Bienvenido, {user?.username || 'Usuario'}</p>
                 </div>
                 
@@ -71,7 +72,7 @@ function HomePage() {
                     onClick={handleDashboardClick}
                     className="btn-home btn-primary"
                   >
-                    <span className="btn-icon">📊</span>
+                    <IconBarChart size={18} className="btn-icon" />
                     Ir al Dashboard
                   </button>
                 )}
@@ -80,7 +81,7 @@ function HomePage() {
                   onClick={handleReportClick}
                   className="btn-home btn-outline"
                 >
-                  <span className="btn-icon">⚠️</span>
+                  <IconWarning size={18} className="btn-icon" />
                   Reportar Incidencia
                 </button>
               </>
@@ -90,7 +91,7 @@ function HomePage() {
                   onClick={handleLoginClick}
                   className="btn-home btn-primary"
                 >
-                  <span className="btn-icon">🔐</span>
+                  <IconLock size={18} className="btn-icon" />
                   Iniciar Sesión
                 </button>
 
@@ -98,7 +99,7 @@ function HomePage() {
                   onClick={handleReportClick}
                   className="btn-home btn-outline"
                 >
-                  <span className="btn-icon">⚠️</span>
+                  <IconWarning size={18} className="btn-icon" />
                   Reportar Incidencia
                 </button>
               </>

@@ -97,6 +97,13 @@ public class ConfigService {
         log.info("Updating algorithm configuration: category={}, zone={}, time={}, dedupDist={}, dedupTime={}",
                 weightCategory, weightZone, weightTime, deduplicationDistance, deduplicationTimeWindow);
 
+        // Close the current active config so findCurrentConfig never returns multiple open records
+        LocalDateTime now = LocalDateTime.now();
+        configRepository.findCurrentConfig().ifPresent(prev -> {
+            prev.setEffectiveTo(now);
+            configRepository.save(prev);
+        });
+
         // Create new configuration
         AlgorithmConfig newConfig = AlgorithmConfig.builder()
                 .configType("ALGORITHM_WEIGHTS")
@@ -105,7 +112,7 @@ public class ConfigService {
                 .weightTime(weightTime)
                 .distanceThresholdMeters(deduplicationDistance.doubleValue())
                 .timeWindowHours(deduplicationTimeWindow)
-                .effectiveFrom(LocalDateTime.now())
+                .effectiveFrom(now)
                 .build();
 
         return configRepository.save(newConfig);

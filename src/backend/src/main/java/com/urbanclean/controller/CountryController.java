@@ -89,7 +89,6 @@ public class CountryController {
         )
     })
     @GetMapping("/enabled")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'CIUDADANO')")
     public ResponseEntity<List<CountryResponse>> getEnabledCountries() {
         log.info("Get enabled countries request");
         List<CountryResponse> countries = countryService.getEnabledCountries();
@@ -122,7 +121,6 @@ public class CountryController {
         )
     })
     @GetMapping("/default")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO', 'CIUDADANO')")
     public ResponseEntity<CountryResponse> getDefaultCountry() {
         log.info("Get default country request");
         CountryResponse country = countryService.getDefaultCountry();

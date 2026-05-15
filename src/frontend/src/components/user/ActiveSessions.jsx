@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import authService from '../../services/authService';
+import { IconPhone, IconLaptop, IconDesktop, IconMapPin, IconClock } from '../../assets/icons';
 import './ActiveSessions.css';
 
 /**
@@ -98,16 +99,12 @@ const ActiveSessions = () => {
    * Get device icon based on device type
    */
   const getDeviceIcon = (deviceType) => {
-    switch (deviceType) {
-      case 'MOBILE':
-        return '📱';
-      case 'TABLET':
-        return '📱';
-      case 'DESKTOP':
-        return '💻';
-      default:
-        return '🖥️';
-    }
+    if (!deviceType) return <IconPhone size={16} />;
+    const type = deviceType.toLowerCase();
+    if (type.includes('mobile') || type.includes('phone')) return <IconPhone size={16} />;
+    if (type.includes('tablet')) return <IconPhone size={16} />;
+    if (type.includes('laptop')) return <IconLaptop size={16} />;
+    return <IconDesktop size={16} />;
   };
 
   // Fetch sessions on mount
@@ -171,13 +168,13 @@ const ActiveSessions = () => {
                 
                 <div className="session-details">
                   <div className="session-location">
-                    📍 {session.city && session.country 
-                      ? `${session.city}, ${session.country}` 
+                    <IconMapPin size={14} /> {session.city && session.country
+                      ? `${session.city}, ${session.country}`
                       : session.ipAddress}
                   </div>
-                  
+
                   <div className="session-time">
-                    🕐 Last active: {formatDate(session.lastActivity)}
+                    <IconClock size={14} /> Last active: {formatDate(session.lastActivity)}
                   </div>
                   
                   <div className="session-created">

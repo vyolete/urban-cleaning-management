@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { countryService } from '../../services';
+import { IconWarning, IconInfo } from '../../assets/icons';
 import './CountrySelector.css';
 
 /**
@@ -81,7 +82,7 @@ const CountrySelector = ({ selectedCountryId, onSelectCountry, disabled = false 
       <div className="country-selector">
         <label htmlFor="country">País *</label>
         <div className="country-selector-error">
-          <span className="error-icon">⚠️</span>
+          <IconWarning size={16} className="error-icon" />
           <span>{error}</span>
           <button 
             type="button" 
@@ -141,7 +142,7 @@ const CountrySelector = ({ selectedCountryId, onSelectCountry, disabled = false 
       
       {selectedCountryId && (
         <div className="country-selector-info">
-          <span className="info-icon">ℹ️</span>
+          <IconInfo size={16} className="info-icon" />
           <span className="info-text">
             Los reportes se validarán dentro de los límites de {
               countries.find(c => c.id === selectedCountryId)?.name || 'este país'

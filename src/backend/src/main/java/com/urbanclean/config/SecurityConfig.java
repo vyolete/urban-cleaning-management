@@ -83,6 +83,8 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/reports").permitAll()  // Allow anonymous report submission
+                .requestMatchers("/api/admin/countries/enabled").permitAll()  // Allow unauthenticated country list
+                .requestMatchers("/api/admin/countries/default").permitAll()  // Allow unauthenticated default country
                 .requestMatchers("/actuator/**").permitAll()  // Allow actuator endpoints for monitoring
                 .requestMatchers("/error").permitAll()
                 // SpringDoc OpenAPI endpoints
