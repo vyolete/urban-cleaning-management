@@ -19,13 +19,16 @@ import java.util.UUID;
 public interface AlgorithmConfigRepository extends JpaRepository<AlgorithmConfig, UUID> {
 
     /**
-     * Find the current active configuration
-     * @return Optional containing the current configuration
+     * Find the current active algorithm-weights configuration.
+     * Uses LIMIT 1 via native SQL to avoid IncorrectResultSizeDataAccessException
+     * when multiple records have a null effective_to.
      */
-    @Query("SELECT c FROM AlgorithmConfig c WHERE " +
-           "c.effectiveFrom <= CURRENT_TIMESTAMP AND " +
-           "(c.effectiveTo IS NULL OR c.effectiveTo > CURRENT_TIMESTAMP) " +
-           "ORDER BY c.effectiveFrom DESC")
+    @Query(value = "SELECT * FROM configuracion_algoritmo " +
+           "WHERE config_type = 'ALGORITHM_WEIGHTS' " +
+           "AND effective_from <= NOW() " +
+           "AND (effective_to IS NULL OR effective_to > NOW()) " +
+           "ORDER BY effective_from DESC LIMIT 1",
+           nativeQuery = true)
     Optional<AlgorithmConfig> findCurrentConfig();
 
     /**

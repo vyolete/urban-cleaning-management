@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import taskService from '../../services/taskService';
+import { IconCheck, IconX } from '../../assets/icons';
 import './TaskDetail.css';
 
 /**
@@ -134,7 +135,7 @@ function TaskDetail({ task, onTaskUpdate }) {
       {/* Success Message */}
       {success && (
         <div className="success-message">
-          <span className="success-icon">✓</span>
+          <IconCheck size={20} className="success-icon" />
           {success}
         </div>
       )}
@@ -142,7 +143,7 @@ function TaskDetail({ task, onTaskUpdate }) {
       {/* Error Message */}
       {error && (
         <div className="error-message">
-          <span className="error-icon">✕</span>
+          <IconX size={20} className="error-icon" />
           {error}
         </div>
       )}
@@ -259,7 +260,7 @@ function TaskDetail({ task, onTaskUpdate }) {
       {availableTransitions.length === 0 && task.state === 'RESUELTO' && (
         <div className="detail-section">
           <div className="resolved-message">
-            <span className="resolved-icon">✓</span>
+            <IconCheck size={32} className="resolved-icon" />
             <p>Esta tarea ha sido resuelta</p>
           </div>
         </div>

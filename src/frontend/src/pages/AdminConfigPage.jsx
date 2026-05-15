@@ -1,12 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ConfigPanel from '../components/admin/ConfigPanel';
 import UserInfo from '../components/common/UserInfo';
+import { IconScale, IconRotate, IconMapPin, IconClock, IconWarning } from '../assets/icons';
 import './AdminConfigPage.css';
 
 /**
  * Admin configuration page - main interface for administrators to manage system configuration
  */
 function AdminConfigPage() {
+  const navigate = useNavigate();
   const [lastUpdate, setLastUpdate] = useState(null);
 
   /**
@@ -22,10 +25,26 @@ function AdminConfigPage() {
       {/* Header */}
       <div className="page-header">
         <div className="header-content">
+          <div className="header-nav-actions">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="btn-back"
+              title="Volver al dashboard"
+            >
+              ← Volver al Dashboard
+            </button>
+            <button
+              onClick={() => navigate('/report')}
+              className="btn-report"
+              title="Reportar incidencia"
+            >
+              <IconWarning size={15} /> Reportar Incidencia
+            </button>
+          </div>
           <h1>Panel de Administración</h1>
           <p className="subtitle">Configuración del Sistema de Priorización</p>
         </div>
-        
+
         {/* User Info with Logout */}
         <UserInfo />
         
@@ -53,7 +72,7 @@ function AdminConfigPage() {
         <h3>Información Importante</h3>
         <div className="info-grid">
           <div className="info-card">
-            <div className="info-icon">⚖️</div>
+            <div className="info-icon"><IconScale size={24} /></div>
             <h4>Pesos del Algoritmo</h4>
             <p>
               Los pesos determinan la importancia relativa de cada factor en el cálculo de prioridad.
@@ -62,7 +81,7 @@ function AdminConfigPage() {
           </div>
 
           <div className="info-card">
-            <div className="info-icon">🔄</div>
+            <div className="info-icon"><IconRotate size={24} /></div>
             <h4>Recalculación Automática</h4>
             <p>
               Al actualizar los pesos, todas las tareas pendientes serán recalculadas automáticamente
@@ -71,7 +90,7 @@ function AdminConfigPage() {
           </div>
 
           <div className="info-card">
-            <div className="info-icon">📍</div>
+            <div className="info-icon"><IconMapPin size={24} /></div>
             <h4>Deduplicación Espacial</h4>
             <p>
               La distancia define el radio en metros para considerar reportes como duplicados.
@@ -80,7 +99,7 @@ function AdminConfigPage() {
           </div>
 
           <div className="info-card">
-            <div className="info-icon">⏱️</div>
+            <div className="info-icon"><IconClock size={24} /></div>
             <h4>Deduplicación Temporal</h4>
             <p>
               La ventana de tiempo define cuántas horas deben transcurrir para considerar reportes

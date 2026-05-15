@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import taskService from '../../services/taskService';
+import { IconRefresh, IconUser, IconArrowRight } from '../../assets/icons';
 import './AuditTimeline.css';
 
 /**
@@ -125,7 +126,7 @@ function AuditTimeline({ taskId }) {
       <div className="timeline-header">
         <h3>Historial de Cambios</h3>
         <button onClick={loadAuditHistory} className="btn-refresh-small" title="Actualizar">
-          ↻
+          <IconRefresh size={16} />
         </button>
       </div>
 
@@ -189,7 +190,7 @@ function AuditTimeline({ taskId }) {
                               <span className="state-badge previous">
                                 {getStateLabel(log.previousState)}
                               </span>
-                              <span className="arrow">→</span>
+                              <IconArrowRight size={14} className="arrow" />
                             </>
                           )}
                           <span
@@ -210,7 +211,7 @@ function AuditTimeline({ taskId }) {
 
                       {log.user && (
                         <div className="timeline-user">
-                          <span className="user-icon">👤</span>
+                          <IconUser size={16} className="user-icon" />
                           <span className="user-name">
                             {log.user.username || log.user.email || 'Usuario'}
                           </span>

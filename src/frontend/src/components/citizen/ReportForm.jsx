@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import reportService from '../../services/reportService';
 import CountrySelector from './CountrySelector';
+import { IconMapPin } from '../../assets/icons';
 import './ReportForm.css';
 
 /**
@@ -265,7 +266,7 @@ function ReportForm({ location: externalLocation, onSuccess, onError, onCountryS
           ) : (
             <div className="manual-location">
               <div className="help-box">
-                <p><strong>📍 Coordenadas de prueba para Madrid:</strong></p>
+                <p><strong><IconMapPin size={14} /> Coordenadas de prueba para Madrid:</strong></p>
                 <p>Latitud: <code>40.4168</code> | Longitud: <code>-3.7038</code></p>
                 <p className="small-text">Área válida: Lat 40.3-40.6, Lon -3.9 a -3.5</p>
               </div>

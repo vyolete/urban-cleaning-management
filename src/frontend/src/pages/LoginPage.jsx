@@ -232,6 +232,9 @@ function LoginPage() {
                 Registrarse
               </Link>
             </p>
+            <Link to="/report" className="link-report">
+              Reportar incidencia sin iniciar sesión →
+            </Link>
           </div>
         </div>
 

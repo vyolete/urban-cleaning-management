@@ -8,6 +8,7 @@ import UserInfo from '../components/common/UserInfo';
 import taskService from '../services/taskService';
 import countryService from '../services/countryService';
 import urbixRobot from '../assets/urbix-robot.png';
+import { IconSplit, IconList, IconMap, IconX, IconWarning } from '../assets/icons';
 import './OperatorDashboard.css';
 
 /**
@@ -123,6 +124,15 @@ function OperatorDashboard() {
           </div>
         )}
 
+        {/* Quick report button */}
+        <button
+          onClick={() => navigate('/report')}
+          className="btn-report"
+          title="Reportar incidencia"
+        >
+          <IconWarning size={15} /> Reportar
+        </button>
+
         {/* User Info with Logout */}
         <UserInfo />
 
@@ -133,21 +143,21 @@ function OperatorDashboard() {
             onClick={() => handleViewModeChange('split')}
             title="Vista dividida"
           >
-            ⊞ Dividida
+            <IconSplit size={16} /> Dividida
           </button>
           <button
             className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
             onClick={() => handleViewModeChange('list')}
             title="Solo lista"
           >
-            ☰ Lista
+            <IconList size={16} /> Lista
           </button>
           <button
             className={`view-btn ${viewMode === 'map' ? 'active' : ''}`}
             onClick={() => handleViewModeChange('map')}
             title="Solo mapa"
           >
-            🗺 Mapa
+            <IconMap size={16} /> Mapa
           </button>
         </div>
       </div>
@@ -155,7 +165,7 @@ function OperatorDashboard() {
       {/* Error Message */}
       {error && (
         <div className="error-banner">
-          <span className="error-icon">✕</span>
+          <IconX size={18} />
           <p>{error}</p>
           <button onClick={() => loadTasks(selectedCountryId)} className="btn-retry">
             Reintentar
@@ -216,7 +226,7 @@ function OperatorDashboard() {
               onClick={() => setSelectedTask(null)}
               aria-label="Cerrar"
             >
-              ×
+              <IconX size={20} />
             </button>
             
             <div className="modal-content">

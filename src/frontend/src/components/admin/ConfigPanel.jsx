@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import configService from '../../services/configService';
+import { IconX, IconCheck } from '../../assets/icons';
 import './ConfigPanel.css';
 
 /**
@@ -208,7 +209,7 @@ function ConfigPanel({ onConfigUpdate }) {
       {/* Error Message */}
       {error && (
         <div className="error-banner">
-          <span className="error-icon">✕</span>
+          <IconX size={18} className="error-icon" />
           <p>{error}</p>
           <button onClick={loadCurrentConfig} className="btn-retry">
             Reintentar
@@ -219,7 +220,7 @@ function ConfigPanel({ onConfigUpdate }) {
       {/* Success Message */}
       {success && (
         <div className="success-banner">
-          <span className="success-icon">✓</span>
+          <IconCheck size={18} className="success-icon" />
           <p>{success}</p>
         </div>
       )}
@@ -322,7 +323,10 @@ function ConfigPanel({ onConfigUpdate }) {
               <span className="sum-label">Suma de pesos:</span>
               <span className="sum-value">{weightSum.toFixed(3)}</span>
               <span className="sum-status">
-                {isSumValid ? '✓ Válido' : '✕ Debe sumar 1.0'}
+                {isSumValid
+                  ? <><IconCheck size={14} /> Válido</>
+                  : <><IconX size={14} /> Debe sumar 1.0</>
+                }
               </span>
             </div>
 
